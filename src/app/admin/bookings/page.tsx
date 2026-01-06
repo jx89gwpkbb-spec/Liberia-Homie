@@ -1,4 +1,5 @@
-import { bookings } from "@/lib/data";
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -6,8 +7,21 @@ import { format } from "date-fns";
 import { MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection } from 'firebase/firestore';
+import type { Booking } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminBookingsPage() {
+  const firestore = useFirestore();
+
+  const bookingsCollectionRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'bookings');
+  }, [firestore]);
+
+  const { data: bookings, isLoading } = useCollection<Booking>(bookingsCollectionRef);
+  
   return (
     <div className="space-y-6">
        <div>
@@ -24,9 +38,8 @@ export default function AdminBookingsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Booking ID</TableHead>
                 <TableHead>Property</TableHead>
-                <TableHead>User</TableHead>
+                <TableHead>User ID</TableHead>
                 <TableHead>Dates</TableHead>
                 <TableHead>Total Price</TableHead>
                 <TableHead>Status</TableHead>
@@ -34,36 +47,52 @@ export default function AdminBookingsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {bookings.map((booking) => (
-                <TableRow key={booking.id}>
-                  <TableCell className="font-mono text-xs">{booking.id}</TableCell>
-                  <TableCell className="font-medium">{booking.property.name}</TableCell>
-                  <TableCell>{booking.user.name}</TableCell>
-                  <TableCell>{format(new Date(booking.checkInDate), 'MMM dd, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM dd, yyyy')}</TableCell>
-                  <TableCell>${booking.totalPrice.toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Badge variant={new Date(booking.checkOutDate) < new Date() ? 'secondary' : 'default'}>
-                      {new Date(booking.checkOutDate) < new Date() ? 'Completed' : 'Upcoming'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
-                        <DropdownMenuItem>Contact User</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">Cancel Booking</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                        <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                        <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                    </TableRow>
+                ))
+              ) : bookings && bookings.length > 0 ? (
+                bookings.map((booking) => (
+                  <TableRow key={booking.id}>
+                    <TableCell className="font-medium">{booking.propertyName}</TableCell>
+                    <TableCell className="font-mono text-xs">{booking.userId}</TableCell>
+                    <TableCell>{format(new Date(booking.checkInDate), 'MMM dd, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM dd, yyyy')}</TableCell>
+                    <TableCell>${booking.totalPrice.toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge variant={new Date(booking.checkOutDate) < new Date() ? 'secondary' : 'default'}>
+                        {new Date(booking.checkOutDate) < new Date() ? 'Completed' : 'Upcoming'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                       <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem>View Details</DropdownMenuItem>
+                          <DropdownMenuItem>Contact User</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive">Cancel Booking</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center">No bookings found.</TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
