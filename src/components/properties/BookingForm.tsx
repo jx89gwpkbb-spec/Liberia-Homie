@@ -11,14 +11,12 @@ import { cn } from "@/lib/utils";
 import type { Property } from "@/lib/types";
 import { DateRange } from "react-day-picker";
 import { DateSuggestionClient } from "./DateSuggestionClient";
-import { useUser, useFirestore, addDocumentNonBlocking } from "@/firebase";
-import { collection } from "firebase/firestore";
+import { useUser } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 
 export function BookingForm({ property }: { property: Property }) {
   const { user, isUserLoading } = useUser();
-  const firestore = useFirestore();
   const { toast } = useToast();
   const [date, setDate] = useState<DateRange | undefined>();
   const [guests, setGuests] = useState(1);
@@ -30,7 +28,7 @@ export function BookingForm({ property }: { property: Property }) {
   const total = nights * price + serviceFee;
 
   const handleReserve = async () => {
-    if (!user || !firestore || !date?.from || !date?.to) {
+    if (!user || !date?.from || !date?.to) {
         toast({
             title: "Reservation Failed",
             description: "You must be logged in and select valid dates to book a property.",
@@ -41,36 +39,16 @@ export function BookingForm({ property }: { property: Property }) {
 
     setIsBooking(true);
     
-    const bookingsCollectionRef = collection(firestore, 'bookings');
-    const bookingData = {
-        userId: user.uid,
-        propertyId: property.id,
-        checkInDate: date.from,
-        checkOutDate: date.to,
-        totalPrice: total,
-        guests: guests,
-        createdAt: new Date(),
-        propertyName: property.name,
-        propertyImage: property.images[0],
-        propertyLocation: property.location,
-    };
-
-    try {
-        await addDocumentNonBlocking(bookingsCollectionRef, bookingData);
+    // Mock booking
+    setTimeout(() => {
         toast({
-            title: "Booking Successful!",
+            title: "Booking Successful! (Mock)",
             description: `You have reserved ${property.name}.`,
         });
-        // Optionally, redirect or clear form
         setDate(undefined);
         setGuests(1);
-    } catch (error) {
-         // The non-blocking function will handle the error toast via the global emitter
-         // but we can log it here if needed.
-        console.error("Booking failed:", error);
-    } finally {
         setIsBooking(false);
-    }
+    }, 1000);
   };
 
 

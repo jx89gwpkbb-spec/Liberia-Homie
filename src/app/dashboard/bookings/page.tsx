@@ -1,25 +1,12 @@
 'use client';
-import { useFirestore, useCollection, useMemoFirebase, useUser } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
-import type { Booking } from '@/lib/types';
+import { bookings } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import Image from "next/image";
-import { Skeleton } from '@/components/ui/skeleton';
 
 export default function MyBookingsPage() {
-  const firestore = useFirestore();
-  const { user, isUserLoading } = useUser();
-
-  const bookingsQuery = useMemoFirebase(() => {
-    if (!firestore || !user?.uid) return null;
-    return query(collection(firestore, 'bookings'), where('userId', '==', user.uid));
-  }, [firestore, user?.uid]);
-
-  const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
-  const pageLoading = isUserLoading || areBookingsLoading;
 
   return (
     <div className="space-y-6">
@@ -44,42 +31,25 @@ export default function MyBookingsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {pageLoading ? (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="h-16 w-16 rounded-md" />
-                        <div className="space-y-1">
-                            <Skeleton className="h-4 w-40" />
-                            <Skeleton className="h-4 w-32" />
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                    <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
-                  </TableRow>
-                ))
-              ) : bookings && bookings.length > 0 ? (
+              {bookings && bookings.length > 0 ? (
                 bookings.map((booking) => (
                   <TableRow key={booking.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
-                        <Image src={booking.propertyImage} alt={booking.propertyName} width={64} height={64} className="rounded-md object-cover" />
+                        <Image src={booking.property.images[0]} alt={booking.property.name} width={64} height={64} className="rounded-md object-cover" />
                         <div>
-                          <p className="font-semibold">{booking.propertyName}</p>
-                          <p className="text-sm text-muted-foreground">{booking.propertyLocation}</p>
+                          <p className="font-semibold">{booking.property.name}</p>
+                          <p className="text-sm text-muted-foreground">{booking.property.location}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      {format(booking.checkInDate.toDate(), 'MMM dd, yyyy')} - {format(booking.checkOutDate.toDate(), 'MMM dd, yyyy')}
+                      {format(new Date(booking.checkInDate), 'MMM dd, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM dd, yyyy')}
                     </TableCell>
                     <TableCell>${booking.totalPrice.toLocaleString()}</TableCell>
                     <TableCell>
-                      <Badge variant={booking.checkOutDate.toDate() < new Date() ? 'secondary' : 'default'}>
-                        {booking.checkOutDate.toDate() < new Date() ? 'Completed' : 'Upcoming'}
+                      <Badge variant={new Date(booking.checkOutDate) < new Date() ? 'secondary' : 'default'}>
+                        {new Date(booking.checkOutDate) < new Date() ? 'Completed' : 'Upcoming'}
                       </Badge>
                     </TableCell>
                   </TableRow>
