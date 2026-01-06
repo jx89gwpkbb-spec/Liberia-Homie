@@ -5,7 +5,7 @@ import { suggestOptimalStayDates, SuggestOptimalStayDatesOutput } from '@/ai/flo
 import type { Property } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Wand2 } from 'lucide-radix';
+import { Loader2, Wand2 } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
