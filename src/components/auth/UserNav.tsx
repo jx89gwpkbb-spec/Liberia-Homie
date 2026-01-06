@@ -12,14 +12,32 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useAuth, useFirestore } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { doc, getDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { Shield } from 'lucide-react';
 
 export function UserNav() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const firestore = useFirestore();
   const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (user && firestore) {
+        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
+        const docSnap = await getDoc(adminRoleRef);
+        setIsAdmin(docSnap.exists());
+      } else {
+        setIsAdmin(false);
+      }
+    };
+    checkAdmin();
+  }, [user, firestore]);
 
   const handleLogout = () => {
     signOut(auth);
@@ -76,9 +94,14 @@ export function UserNav() {
           <Link href="/dashboard/properties" passHref>
             <DropdownMenuItem>My Properties</DropdownMenuItem>
           </Link>
-          <Link href="/admin/profile" passHref>
-            <DropdownMenuItem>Admin Profile</DropdownMenuItem>
-          </Link>
+           {isAdmin && (
+            <Link href="/admin" passHref>
+              <DropdownMenuItem className="text-primary font-semibold">
+                <Shield className="mr-2 h-4 w-4" />
+                Admin Panel
+              </DropdownMenuItem>
+            </Link>
+          )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
