@@ -1,3 +1,5 @@
+'use client';
+
 import { users, properties, bookings } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,6 +9,41 @@ import { format } from "date-fns";
 import { Users as UsersIcon, Home, BookOpenCheck } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "@/components/ui/chart";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart } from "recharts";
+
+const bookingsChartData = [
+  { month: "January", bookings: 186 },
+  { month: "February", bookings: 305 },
+  { month: "March", bookings: 237 },
+  { month: "April", bookings: 273 },
+  { month: "May", bookings: 209 },
+  { month: "June", bookings: 214 },
+];
+
+const usersChartData = [
+  { date: "2024-07-01", users: 12 },
+  { date: "2024-07-02", users: 15 },
+  { date: "2024-07-03", users: 10 },
+  { date: "2024-07-04", users: 22 },
+  { date: "2024-07-05", users: 18 },
+  { date: "2024-07-06", users: 25 },
+  { date: "2024-07-07", users: 30 },
+];
+
+const bookingsChartConfig: ChartConfig = {
+  bookings: {
+    label: "Bookings",
+    color: "hsl(var(--primary))",
+  },
+};
+
+const usersChartConfig: ChartConfig = {
+    users: {
+      label: "New Users",
+      color: "hsl(var(--primary))",
+    },
+  };
 
 export default function AdminDashboardPage() {
   const recentUsers = users.slice(0, 5);
@@ -49,6 +86,64 @@ export default function AdminDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{bookings.length}</div>
             <p className="text-xs text-muted-foreground">Completed and upcoming</p>
+          </CardContent>
+        </Card>
+      </div>
+
+       <div className="grid gap-8 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Bookings This Year</CardTitle>
+            <CardDescription>A summary of bookings per month.</CardDescription>
+          </CardHeader>
+          <CardContent>
+             <ChartContainer config={bookingsChartConfig} className="h-[250px] w-full">
+              <BarChart accessibilityLayer data={bookingsChartData}>
+                 <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="month"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  tickFormatter={(value) => value.slice(0, 3)}
+                />
+                 <YAxis />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent indicator="dashed" />}
+                />
+                <Bar dataKey="bookings" fill="var(--color-bookings)" radius={4} />
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+         <Card>
+          <CardHeader>
+            <CardTitle>New Users</CardTitle>
+            <CardDescription>New user sign-ups in the last 7 days.</CardDescription>
+          </CardHeader>
+          <CardContent>
+             <ChartContainer config={usersChartConfig} className="h-[250px] w-full">
+              <LineChart accessibilityLayer data={usersChartData}>
+                 <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tickFormatter={(value) => format(new Date(value), "MMM d")}
+                />
+                 <YAxis />
+                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                <Line
+                  dataKey="users"
+                  type="monotone"
+                  stroke="var(--color-users)"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </LineChart>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>
