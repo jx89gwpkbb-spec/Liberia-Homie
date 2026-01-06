@@ -13,13 +13,13 @@ export default function MyBookingsPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
 
-  const bookingsCollectionRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
+  const bookingsQuery = useMemoFirebase(() => {
+    if (!firestore || !user?.uid) return null;
     return query(collection(firestore, 'bookings'), where('userId', '==', user.uid));
-  }, [firestore, user]);
+  }, [firestore, user?.uid]);
 
-  const { data: bookings, isLoading } = useCollection<Booking>(bookingsCollectionRef);
-  const pageLoading = isUserLoading || isLoading;
+  const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
+  const pageLoading = isUserLoading || areBookingsLoading;
 
   return (
     <div className="space-y-6">
