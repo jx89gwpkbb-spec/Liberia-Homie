@@ -53,6 +53,11 @@ export function UserNav() {
               My Properties
             </DropdownMenuItem>
           </Link>
+           <Link href="/admin/profile" passHref>
+            <DropdownMenuItem>
+              Admin Profile
+            </DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
