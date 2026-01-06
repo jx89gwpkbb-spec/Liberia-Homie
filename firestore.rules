@@ -1,0 +1,95 @@
+/**
+ * Core Philosophy: This ruleset enforces a strict, two-tiered security model.
+ * 1. User Ownership: Administrator profiles in `/admin_profiles` are private and can
+ *    only be read or written by the owner of that profile.
+ * 2. Role-Based Access: A separate `/roles_admin` collection acts as a lookup
+ *    table. The existence of a document at `/roles_admin/{uid}` grants a user
+ *    admin privileges, which are required to view or manage the list of admins.
+ *
+ * Data Structure:
+ * - /admin_profiles/{adminId}: Contains the detailed profile data for a specific
+ *   administrator, where `{adminId}` is their Firebase Auth UID.
+ * - /roles_admin/{uid}: Contains simple "flag" documents. If a document exists at
+ *   this path, the user with the corresponding UID is considered an admin.
+ *
+ * Key Security Decisions:
+ * - Admin Listing Disabled for Non-Admins: Non-administrative users cannot list
+ *   or discover who the administrators are.
+ * - Privilege Escalation Prevention: A user cannot grant themselves admin status.
+ *   Only an existing admin can create or delete documents in the `/roles_admin`
+ *   collection.
+ * - Self-Service Profile Management: Admins are responsible for creating and
+ *   maintaining their own profile data.
+ *
+ * Denormalization for Authorization:
+ * The `/roles_admin` collection is a classic example of denormalization for
+ * authorization. Instead of embedding a role field in a user profile and requiring
+ * a slow `get()` call, we use a separate collection that allows for a fast and
+ * efficient `exists()` check to determine a user's admin status from any rule.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for readable and reusable logic
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the requesting user's UID matches the document's owner ID.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks if the requesting user owns the document and the document already exists.
+     * Crucial for preventing writes to non-existent paths on update/delete.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * Checks if the requesting user is an administrator by verifying the
+     * existence of a role document in the `/roles_admin` collection.
+     */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    /**
+     * @description Manages individual administrator profiles. Access is strictly limited to the profile owner.
+     * @path /admin_profiles/{adminId}
+     * @allow (get) A signed-in admin with UID 'admin123' reads their own profile at `/admin_profiles/admin123`.
+     * @deny (get) A different user, 'user456', tries to read the profile at `/admin_profiles/admin123`.
+     * @principle Restricts access to a user's own data tree, enforcing data privacy.
+     */
+    match /admin_profiles/{adminId} {
+      allow get: if isOwner(adminId);
+      allow list: if isOwner(adminId);
+      allow create: if isOwner(adminId) && request.resource.data.id == adminId;
+      allow update: if isExistingOwner(adminId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(adminId);
+    }
+
+    /**
+     * @description Manages admin role flags. The existence of a document grants admin privileges.
+     * @path /roles_admin/{uid}
+     * @allow (create) An existing admin creates a role document for a new user at `/roles_admin/newUser789`.
+     * @deny (create) A non-admin user attempts to create a role document for themselves at `/roles_admin/nonAdminUser`.
+     * @principle Enforces role-based access control, preventing unauthorized privilege escalation.
+     */
+    match /roles_admin/{uid} {
+      allow get: if isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if false;
+      allow delete: if isAdmin() && resource != null;
+    }
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "entities": {
+    "AdminProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AdminProfile",
+      "type": "object",
+      "description": "Represents an administrator profile within the Homie Stays application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the AdminProfile entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "First name of the administrator."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name of the administrator."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the administrator.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Phone number of the administrator."
+        },
+        "creationDate": {
+          "type": "string",
+          "description": "Date and time the admin profile was created.",
+          "format": "date-time"
+        },
+        "lastLogin": {
+          "type": "string",
+          "description": "Date and time of the administrator's last login.",
+          "format": "date-time"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role of the administrator (e.g., 'superadmin', 'property_manager')."
+        },
+        "permissions": {
+          "type": "array",
+          "description": "List of permissions granted to the administrator.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNumber",
+        "creationDate",
+        "role"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/admin_profiles/{adminId}",
+        "definition": {
+          "entityName": "AdminProfile",
+          "schema": {
+            "$ref": "#/backend/entities/AdminProfile"
+          },
+          "description": "Stores admin profile information. The `adminId` path parameter must match the authenticated user's UID. This path enables simple, secure read/write access controlled by the user's authentication status.",
+          "params": [
+            {
+              "name": "adminId",
+              "description": "The unique identifier of the admin user, matching the Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{uid}",
+        "definition": {
+          "entityName": "admin_role",
+          "schema": {
+            "$ref": "#/backend/entities/AdminProfile"
+          },
+          "description": "Indicates that a user is an admin.  This enables global admin role checks in security rules using `exists()` without reading profile data.",
+          "params": [
+            {
+              "name": "uid",
+              "description": "The unique identifier of the user (Firebase Authentication UID)."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to securely manage admin profiles using a path-based ownership model. This approach provides authorization independence and facilitates secure list operations.\n\n**Authorization Independence:** Admin profiles are stored under the `/admin_profiles/{adminId}` path. Authorization is based solely on the `adminId` matching the `request.auth.uid`. There's no reliance on data from other documents to determine access.\n\n**Structural Segregation:** Admin profiles are stored in a dedicated collection (`/admin_profiles`), ensuring a homogeneous security posture. All documents in this collection share the same security requirements (only the admin can access their profile).\n\n**Access Modeling:** Path-based ownership is used (`/admin_profiles/{adminId}`).\n\n**QAPs:**\n*   Secure `list` operations are supported because authorization is based on the `adminId`, preventing unauthorized access to profiles.\n*   The structure avoids using rules as filters, ensuring that list operations are secure and efficient."
+  }
+}
