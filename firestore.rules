@@ -13,6 +13,7 @@
  *   this path, the user with the corresponding UID is considered an admin.
  * - /users/{userId}: Contains public profile data for a specific user.
  * - /bookings/{bookingId}: Contains booking details.
+ * - /properties/{propertyId}: Contains property details.
  *
  * Key Security Decisions:
  * - Admin Listing Disabled for Non-Admins: Non-administrative users cannot list
@@ -105,7 +106,7 @@ service cloud.firestore {
     match /roles_admin/{uid} {
       allow get: if isOwner(uid) || isAdmin();
       allow list: if isAdmin();
-      allow create: if isOwner(uid) && !exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      allow create: if isOwner(uid) && (!exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) || isAdmin());
       allow update: if false;
       allow delete: if isAdmin() && resource != null;
     }
@@ -120,8 +121,22 @@ service cloud.firestore {
     match /bookings/{bookingId} {
       allow create: if request.auth.uid == request.resource.data.userId;
       allow read: if request.auth.uid == resource.data.userId || isAdmin();
-      allow list: if isAdmin() || (request.query.where.userId is string && request.query.where.userId == request.auth.uid);
+      allow list: if isAdmin() || (request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid);
       allow update, delete: if false;
+    }
+    
+    /**
+     * @description Manages property listings.
+     * @path /properties/{propertyId}
+     * @allow (read) Anyone can read property listings.
+     * @allow (list) Anyone can list property listings.
+     * @allow (write) Users can create/update/delete their own properties. Admins have full write access.
+     */
+    match /properties/{propertyId} {
+      allow read, list: if true;
+      allow create: if isOwner(request.resource.data.owner.id);
+      allow update: if isOwner(resource.data.owner.id) || isAdmin();
+      allow delete: if isOwner(resource.data.owner.id) || isAdmin();
     }
   }
 }

@@ -25,7 +25,7 @@ export const properties: Property[] = [
     rating: 4.9,
     reviewCount: 78,
     images: [findImage('prop1-1'), findImage('prop1-2'), findImage('prop3-2')],
-    owner: users[0],
+    owner: { id: users[0].id, name: users[0].name, avatar: users[0].avatar },
     propertyType: 'Villa',
   },
   {
@@ -42,7 +42,7 @@ export const properties: Property[] = [
     rating: 4.7,
     reviewCount: 124,
     images: [findImage('prop2-1'), findImage('prop2-2')],
-    owner: users[1],
+    owner: { id: users[1].id, name: users[1].name, avatar: users[1].avatar },
     propertyType: 'Apartment',
   },
   {
@@ -59,7 +59,7 @@ export const properties: Property[] = [
     rating: 4.8,
     reviewCount: 56,
     images: [findImage('prop3-1'), findImage('prop3-2'), findImage('prop1-2')],
-    owner: users[2],
+    owner: { id: users[2].id, name: users[2].name, avatar: users[2].avatar },
     propertyType: 'House',
   },
   {
@@ -76,7 +76,7 @@ export const properties: Property[] = [
     rating: 5.0,
     reviewCount: 32,
     images: [findImage('prop4-1'), findImage('prop4-2')],
-    owner: users[0],
+    owner: { id: users[0].id, name: users[0].name, avatar: users[0].avatar },
     propertyType: 'Condo',
   },
   {
@@ -93,7 +93,7 @@ export const properties: Property[] = [
     rating: 4.9,
     reviewCount: 91,
     images: [findImage('prop5-1'), findImage('prop5-2')],
-    owner: users[3],
+    owner: { id: users[3].id, name: users[3].name, avatar: users[3].avatar },
     propertyType: 'House',
   },
   {
@@ -110,7 +110,7 @@ export const properties: Property[] = [
     rating: 4.8,
     reviewCount: 65,
     images: [findImage('prop6-1'), findImage('prop6-2')],
-    owner: users[1],
+    owner: { id: users[1].id, name: users[1].name, avatar: users[1].avatar },
     propertyType: 'House',
   },
 ];
@@ -145,18 +145,28 @@ export const reviews: Review[] = [
 export const bookings: Booking[] = [
     {
         id: 'book-1',
-        property: properties[0],
-        user: users[3],
-        checkInDate: '2024-08-01',
-        checkOutDate: '2024-08-10',
-        totalPrice: 8500
+        propertyId: properties[0].id,
+        userId: users[3].id,
+        checkInDate: new Date('2024-08-01'),
+        checkOutDate: new Date('2024-08-10'),
+        totalPrice: 8500,
+        guests: 4,
+        createdAt: new Date(),
+        propertyName: properties[0].name,
+        propertyImage: properties[0].images[0],
+        propertyLocation: properties[0].location
     },
     {
         id: 'book-2',
-        property: properties[2],
-        user: users[3],
-        checkInDate: '2024-09-15',
-        checkOutDate: '2024-09-20',
-        totalPrice: 2000
+        propertyId: properties[2].id,
+        userId: users[3].id,
+        checkInDate: new Date('2024-09-15'),
+        checkOutDate: new Date('2024-09-20'),
+        totalPrice: 2000,
+        guests: 2,
+        createdAt: new Date(),
+        propertyName: properties[2].name,
+        propertyImage: properties[2].images[0],
+        propertyLocation: properties[2].location
     }
 ];

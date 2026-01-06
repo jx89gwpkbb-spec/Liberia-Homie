@@ -12,7 +12,11 @@ export type Property = {
   rating: number;
   reviewCount: number;
   images: string[];
-  owner: User;
+  owner: {
+    id: string;
+    name: string;
+    avatar: string;
+  };
   propertyType: 'House' | 'Apartment' | 'Condo' | 'Villa';
 };
 

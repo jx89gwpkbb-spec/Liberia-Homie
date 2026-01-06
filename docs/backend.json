@@ -1,5 +1,50 @@
 {
   "entities": {
+    "Property": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Property",
+      "description": "Represents a property listing in the Homie Stays application.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "location": { "type": "string" },
+        "pricePerNight": { "type": "number" },
+        "description": { "type": "string" },
+        "longStay": { "type": "boolean" },
+        "bedrooms": { "type": "number" },
+        "bathrooms": { "type": "number" },
+        "maxGuests": { "type": "number" },
+        "amenities": { "type": "array", "items": { "type": "string" } },
+        "rating": { "type": "number" },
+        "reviewCount": { "type": "number" },
+        "images": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "owner": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": "string" },
+            "avatar": { "type": "string", "format": "uri" }
+          },
+          "required": ["id", "name", "avatar"]
+        },
+        "propertyType": { "type": "string", "enum": ["House", "Apartment", "Condo", "Villa"] }
+      },
+      "required": [
+        "id",
+        "name",
+        "location",
+        "pricePerNight",
+        "description",
+        "bedrooms",
+        "bathrooms",
+        "maxGuests",
+        "amenities",
+        "images",
+        "owner",
+        "propertyType"
+      ]
+    },
     "AdminProfile": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "AdminProfile",
@@ -167,6 +212,22 @@
   },
   "firestore": {
     "structure": [
+      {
+        "path": "/properties/{propertyId}",
+        "definition": {
+          "entityName": "Property",
+          "schema": {
+            "$ref": "#/backend/entities/Property"
+          },
+          "description": "Stores property listings. Can be written by property owners and read by anyone. Admins have full access.",
+          "params": [
+            {
+              "name": "propertyId",
+              "description": "The unique identifier for the property."
+            }
+          ]
+        }
+      },
       {
         "path": "/admin_profiles/{adminId}",
         "definition": {
