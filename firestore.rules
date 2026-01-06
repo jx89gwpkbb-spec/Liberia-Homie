@@ -103,7 +103,7 @@ service cloud.firestore {
      * @principle Enforces role-based access control, preventing unauthorized privilege escalation.
      */
     match /roles_admin/{uid} {
-      allow get: if isSignedIn();
+      allow get: if isOwner(uid);
       allow list: if isAdmin();
       allow create: if isOwner(uid);
       allow update: if false;
@@ -121,7 +121,7 @@ service cloud.firestore {
       allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
       // A user can list their own bookings, an admin can list all bookings.
       // The query from the client MUST include a `where('userId', '==', request.auth.uid)` clause for non-admins.
-      allow list: if isAdmin() || (isSignedIn() && request.query.where.userId == request.auth.uid);
+      allow list: if isAdmin() || (isSignedIn() && request.query.get("where")[0][1] == "userId" && request.query.get("where")[0][2] == request.auth.uid);
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if false;
     }
