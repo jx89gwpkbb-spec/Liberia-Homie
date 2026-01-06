@@ -18,6 +18,7 @@ export type Property = {
     avatar: string;
   };
   propertyType: 'House' | 'Apartment' | 'Condo' | 'Villa';
+  petFriendly?: boolean;
 };
 
 export type User = {
@@ -41,11 +42,11 @@ export type Booking = {
   id?: string;
   userId: string;
   propertyId: string;
-  checkInDate: Date;
-  checkOutDate: Date;
+  checkInDate: any;
+  checkOutDate: any;
   totalPrice: number;
   guests: number;
-  createdAt: Date;
+  createdAt: any;
   propertyName: string;
   propertyImage: string;
   propertyLocation: string;

@@ -27,6 +27,7 @@ export const properties: Property[] = [
     images: [findImage('prop1-1'), findImage('prop1-2'), findImage('prop3-2')],
     owner: { id: users[0].id, name: users[0].name, avatar: users[0].avatar },
     propertyType: 'Villa',
+    petFriendly: false,
   },
   {
     id: 'prop-2',
@@ -44,6 +45,7 @@ export const properties: Property[] = [
     images: [findImage('prop2-1'), findImage('prop2-2')],
     owner: { id: users[1].id, name: users[1].name, avatar: users[1].avatar },
     propertyType: 'Apartment',
+    petFriendly: true,
   },
   {
     id: 'prop-3',
@@ -61,6 +63,7 @@ export const properties: Property[] = [
     images: [findImage('prop3-1'), findImage('prop3-2'), findImage('prop1-2')],
     owner: { id: users[2].id, name: users[2].name, avatar: users[2].avatar },
     propertyType: 'House',
+    petFriendly: true,
   },
   {
     id: 'prop-4',
@@ -78,6 +81,7 @@ export const properties: Property[] = [
     images: [findImage('prop4-1'), findImage('prop4-2')],
     owner: { id: users[0].id, name: users[0].name, avatar: users[0].avatar },
     propertyType: 'Condo',
+    petFriendly: false,
   },
   {
     id: 'prop-5',
@@ -95,6 +99,7 @@ export const properties: Property[] = [
     images: [findImage('prop5-1'), findImage('prop5-2')],
     owner: { id: users[3].id, name: users[3].name, avatar: users[3].avatar },
     propertyType: 'House',
+    petFriendly: true,
   },
   {
     id: 'prop-6',
@@ -112,6 +117,7 @@ export const properties: Property[] = [
     images: [findImage('prop6-1'), findImage('prop6-2')],
     owner: { id: users[1].id, name: users[1].name, avatar: users[1].avatar },
     propertyType: 'House',
+    petFriendly: false,
   },
 ];
 
@@ -169,4 +175,23 @@ export const bookings: Booking[] = [
         propertyImage: properties[2].images[0],
         propertyLocation: properties[2].location
     }
+];
+
+export const amenities: string[] = [
+    'Private Pool',
+    'WiFi',
+    'Kitchen',
+    'Air Conditioning',
+    'Free Parking',
+    'Gym',
+    'Hot Tub',
+    'Elevator',
+    'Backyard',
+    'Grill',
+    'Rooftop Terrace',
+    'Beach Access',
+    'Indoor Fireplace',
+    'Garden',
+    'City View',
+    'Ocean View',
 ];
