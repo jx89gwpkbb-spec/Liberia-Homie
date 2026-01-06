@@ -34,10 +34,15 @@ export type Review = {
 };
 
 export type Booking = {
-  id: string;
-  property: Property;
-  user: User;
-  checkInDate: string;
-  checkOutDate: string;
+  id?: string;
+  userId: string;
+  propertyId: string;
+  checkInDate: Date;
+  checkOutDate: Date;
   totalPrice: number;
+  guests: number;
+  createdAt: Date;
+  propertyName: string;
+  propertyImage: string;
+  propertyLocation: string;
 };

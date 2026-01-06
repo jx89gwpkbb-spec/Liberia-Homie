@@ -95,6 +95,68 @@
         "email",
         "createdAt"
       ]
+    },
+    "Booking": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Booking",
+      "type": "object",
+      "description": "Represents a booking made by a user for a property.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the booking."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who made the booking."
+        },
+        "propertyId": {
+          "type": "string",
+          "description": "The ID of the property being booked."
+        },
+        "checkInDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The check-in date for the booking."
+        },
+        "checkOutDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The check-out date for the booking."
+        },
+        "totalPrice": {
+          "type": "number",
+          "description": "The total price for the booking."
+        },
+        "guests": {
+          "type": "number",
+          "description": "The number of guests for the booking."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the booking was created."
+        },
+        "propertyName": {
+          "type": "string"
+        },
+        "propertyImage": {
+          "type": "string",
+          "format": "uri"
+        },
+        "propertyLocation": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "userId",
+        "propertyId",
+        "checkInDate",
+        "checkOutDate",
+        "totalPrice",
+        "guests",
+        "createdAt"
+      ]
     }
   },
   "auth": {
@@ -149,6 +211,22 @@
             {
               "name": "userId",
               "description": "The unique identifier of the user, matching the Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/bookings/{bookingId}",
+        "definition": {
+          "entityName": "Booking",
+          "schema": {
+            "$ref": "#/backend/entities/Booking"
+          },
+          "description": "Stores booking information. Users can create bookings and read their own. Admins can read all bookings.",
+          "params": [
+            {
+              "name": "bookingId",
+              "description": "The unique identifier for the booking."
             }
           ]
         }

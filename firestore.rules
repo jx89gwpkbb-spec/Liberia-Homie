@@ -12,6 +12,7 @@
  * - /roles_admin/{uid}: Contains simple "flag" documents. If a document exists at
  *   this path, the user with the corresponding UID is considered an admin.
  * - /users/{userId}: Contains public profile data for a specific user.
+ * - /bookings/{bookingId}: Contains booking details.
  *
  * Key Security Decisions:
  * - Admin Listing Disabled for Non-Admins: Non-administrative users cannot list
@@ -21,6 +22,7 @@
  *   collection (though initial creation is relaxed for the first admin).
  * - Self-Service Profile Management: Admins and Users are responsible for creating and
  *   maintaining their own profile data.
+ * - Booking Ownership: Users can only create and view their own bookings.
  *
  * Denormalization for Authorization:
  * The `/roles_admin` collection is a classic example of denormalization for
@@ -101,11 +103,25 @@ service cloud.firestore {
      * @principle Enforces role-based access control, preventing unauthorized privilege escalation.
      */
     match /roles_admin/{uid} {
-      allow get: if isOwner(uid);
+      allow get: if isSignedIn();
       allow list: if isAdmin();
       allow create: if isOwner(uid);
       allow update: if false;
       allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Manages property bookings.
+     * @path /bookings/{bookingId}
+     * @allow (create) A signed-in user can create a booking for themselves.
+     * @allow (read) A user can read their own bookings. Admins can read all bookings.
+     * @deny (update, delete) Bookings are immutable once created for this example.
+     */
+    match /bookings/{bookingId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
     }
   }
 }

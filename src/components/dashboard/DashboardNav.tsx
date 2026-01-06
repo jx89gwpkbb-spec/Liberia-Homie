@@ -18,7 +18,7 @@ export function DashboardNav() {
       {navItems.map((item) => (
         <SidebarMenuItem key={item.label}>
           <Link href={item.href} passHref>
-              <SidebarMenuButton isActive={pathname === item.href} tooltip={item.label}>
+              <SidebarMenuButton isActive={pathname.startsWith(item.href)} tooltip={item.label}>
                 <item.icon className="h-5 w-5" />
                 <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
               </SidebarMenuButton>
