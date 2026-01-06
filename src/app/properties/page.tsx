@@ -3,8 +3,9 @@ import { FilterSidebar } from "@/components/properties/FilterSidebar";
 import { properties } from "@/lib/data";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, Map } from "lucide-react";
 import { Suspense } from 'react';
+import Link from "next/link";
 
 function PropertiesList({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
   const location = typeof searchParams.location === 'string' ? searchParams.location : '';
@@ -27,14 +28,20 @@ function PropertiesList({ searchParams }: { searchParams: { [key: string]: strin
 
   return (
     <main className="lg:col-span-3">
-      <div className="mb-6 rounded-lg border bg-card p-4 shadow-sm">
-        <form className="flex items-center gap-4">
+      <div className="mb-6 flex items-center justify-between gap-4 rounded-lg border bg-card p-4 shadow-sm">
+        <form className="flex flex-grow items-center gap-4">
           <div className="relative flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input defaultValue={location} name="location" placeholder="Search by location, landmark..." className="pl-10" />
           </div>
           <Button type="submit">Search</Button>
         </form>
+        <Button variant="outline" asChild>
+          <Link href="/properties/map">
+            <Map className="mr-2 h-4 w-4" />
+            Map View
+          </Link>
+        </Button>
       </div>
 
       <h1 className="text-3xl font-bold tracking-tight">
