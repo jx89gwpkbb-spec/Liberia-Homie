@@ -85,7 +85,7 @@ service cloud.firestore {
      * @principle Enforces role-based access control, preventing unauthorized privilege escalation.
      */
     match /roles_admin/{uid} {
-      allow get: if isAdmin();
+      allow get: if isOwner(uid);
       allow list: if isAdmin();
       allow create: if isOwner(uid);
       allow update: if false;
