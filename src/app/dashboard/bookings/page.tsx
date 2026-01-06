@@ -14,12 +14,12 @@ export default function MyBookingsPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
 
-  const bookingsCollectionRef = useMemoFirebase(() => {
+  const bookingsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return query(collection(firestore, 'bookings'), where('userId', '==', user.uid));
   }, [firestore, user]);
 
-  const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsCollectionRef);
+  const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
 
   const isLoading = isUserLoading || areBookingsLoading;
 
@@ -76,12 +76,12 @@ export default function MyBookingsPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {format(booking.checkInDate, 'MMM dd, yyyy')} - {format(booking.checkOutDate, 'MMM dd, yyyy')}
+                      {format(booking.checkInDate.toDate(), 'MMM dd, yyyy')} - {format(booking.checkOutDate.toDate(), 'MMM dd, yyyy')}
                     </TableCell>
                     <TableCell>${booking.totalPrice.toLocaleString()}</TableCell>
                     <TableCell>
-                      <Badge variant={new Date(booking.checkOutDate) < new Date() ? 'secondary' : 'default'}>
-                        {new Date(booking.checkOutDate) < new Date() ? 'Completed' : 'Upcoming'}
+                      <Badge variant={booking.checkOutDate.toDate() < new Date() ? 'secondary' : 'default'}>
+                        {booking.checkOutDate.toDate() < new Date() ? 'Completed' : 'Upcoming'}
                       </Badge>
                     </TableCell>
                   </TableRow>
