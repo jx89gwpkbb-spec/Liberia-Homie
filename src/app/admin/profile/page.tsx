@@ -1,14 +1,16 @@
 'use client';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 
 export default function AdminProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
 
   const adminProfileRef = useMemoFirebase(() => {
     if (!user) return null;
@@ -16,6 +18,37 @@ export default function AdminProfilePage() {
   }, [firestore, user]);
 
   const { data: adminProfile, isLoading: isProfileLoading } = useDoc(adminProfileRef);
+
+  const handleCreateProfile = async () => {
+    if (!user || !firestore) return;
+    setIsCreatingProfile(true);
+    try {
+      const adminProfileData = {
+        id: user.uid,
+        firstName: user.displayName?.split(' ')[0] || 'Admin',
+        lastName: user.displayName?.split(' ')[1] || 'User',
+        email: user.email || 'No email',
+        phoneNumber: user.phoneNumber || 'No phone number',
+        creationDate: serverTimestamp(),
+        lastLogin: serverTimestamp(),
+        role: 'superadmin',
+        permissions: ['manage_properties', 'manage_users', 'view_analytics'],
+      };
+      
+      const roleRef = doc(firestore, 'roles_admin', user.uid);
+      
+      // Use non-blocking writes
+      setDoc(adminProfileRef, adminProfileData, { merge: true }).catch(err => console.error(err));
+      setDoc(roleRef, { admin: true }).catch(err => console.error(err));
+
+    } catch (error) {
+      console.error('Error creating admin profile:', error);
+    } finally {
+      // Optimistic UI, we don't wait for the write to complete
+      setIsCreatingProfile(false);
+    }
+  };
+  
   const isLoading = isUserLoading || isProfileLoading;
   
   const getInitials = (name: string) => {
@@ -47,9 +80,12 @@ export default function AdminProfilePage() {
     return (
       <div className="p-6 text-center">
         <h1 className="text-2xl font-bold">Access Denied</h1>
-        <p className="text-muted-foreground">
-          You do not have permission to view this page. If you believe this is an error, please contact support.
+        <p className="text-muted-foreground mb-4">
+          You do not have an admin profile. Create one to gain access.
         </p>
+        <Button onClick={handleCreateProfile} disabled={isCreatingProfile}>
+          {isCreatingProfile ? 'Creating Profile...' : 'Create Admin Profile'}
+        </Button>
       </div>
     );
   }
@@ -78,11 +114,11 @@ export default function AdminProfilePage() {
           </div>
           <div className="space-y-1">
             <p className="text-sm font-medium text-muted-foreground">Member Since</p>
-            <p className="font-semibold">{new Date(adminProfile.creationDate).toLocaleDateString()}</p>
+            <p className="font-semibold">{adminProfile.creationDate?.toDate().toLocaleDateString()}</p>
           </div>
            <div className="space-y-1">
             <p className="text-sm font-medium text-muted-foreground">Last Login</p>
-            <p className="font-semibold">{new Date(adminProfile.lastLogin).toLocaleString()}</p>
+            <p className="font-semibold">{adminProfile.lastLogin?.toDate().toLocaleString()}</p>
           </div>
            <div className="space-y-1 md:col-span-2">
             <p className="text-sm font-medium text-muted-foreground">Permissions</p>
