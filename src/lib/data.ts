@@ -1,0 +1,162 @@
+import type { Property, User, Review, Booking } from "./types";
+import placeholderImages from './placeholder-images.json';
+
+const findImage = (id: string) => placeholderImages.placeholderImages.find(p => p.id === id)?.imageUrl || '';
+
+export const users: User[] = [
+  { id: 'user-1', name: 'Alice Johnson', email: 'alice.j@example.com', avatar: findImage('user-1') },
+  { id: 'user-2', name: 'Bob Williams', email: 'bob.w@example.com', avatar: findImage('user-2') },
+  { id: 'user-3', name: 'Charlie Brown', email: 'charlie.b@example.com', avatar: findImage('user-3') },
+  { id: 'user-4', name: 'Diana Miller', email: 'diana.m@example.com', avatar: findImage('user-4') },
+];
+
+export const properties: Property[] = [
+  {
+    id: 'prop-1',
+    name: 'Modern Villa with Ocean View',
+    location: 'Malibu, California',
+    pricePerNight: 850,
+    description: 'Experience luxury in this stunning modern villa. With breathtaking ocean views, a private pool, and state-of-the-art amenities, it is the perfect getaway for families or groups of friends.',
+    longStay: true,
+    bedrooms: 4,
+    bathrooms: 4,
+    maxGuests: 8,
+    amenities: ['Private Pool', 'WiFi', 'Kitchen', 'Air Conditioning', 'Free Parking', 'Ocean View', 'Gym', 'Hot Tub'],
+    rating: 4.9,
+    reviewCount: 78,
+    images: [findImage('prop1-1'), findImage('prop1-2'), findImage('prop3-2')],
+    owner: users[0],
+    propertyType: 'Villa',
+  },
+  {
+    id: 'prop-2',
+    name: 'Cozy Downtown Apartment',
+    location: 'New York, New York',
+    pricePerNight: 250,
+    description: 'A charming and cozy apartment in the heart of the city. Perfect for solo travelers or couples looking to explore the city that never sleeps. Walking distance to major attractions.',
+    longStay: false,
+    bedrooms: 1,
+    bathrooms: 1,
+    maxGuests: 2,
+    amenities: ['WiFi', 'Kitchen', 'Air Conditioning', 'Elevator'],
+    rating: 4.7,
+    reviewCount: 124,
+    images: [findImage('prop2-1'), findImage('prop2-2')],
+    owner: users[1],
+    propertyType: 'Apartment',
+  },
+  {
+    id: 'prop-3',
+    name: 'Spacious Suburban Family Home',
+    location: 'Austin, Texas',
+    pricePerNight: 400,
+    description: 'A beautiful and spacious home in a quiet suburban neighborhood. Features a large backyard with a grill, perfect for family gatherings. Close to parks and local eateries.',
+    longStay: true,
+    bedrooms: 3,
+    bathrooms: 2,
+    maxGuests: 6,
+    amenities: ['WiFi', 'Kitchen', 'Free Parking', 'Backyard', 'Grill'],
+    rating: 4.8,
+    reviewCount: 56,
+    images: [findImage('prop3-1'), findImage('prop3-2'), findImage('prop1-2')],
+    owner: users[2],
+    propertyType: 'House',
+  },
+  {
+    id: 'prop-4',
+    name: 'Luxury Penthouse with Cityscape',
+    location: 'Chicago, Illinois',
+    pricePerNight: 1200,
+    description: 'Indulge in the ultimate urban luxury. This penthouse offers panoramic city views, a private rooftop terrace, and exquisite modern design. An unforgettable experience.',
+    longStay: false,
+    bedrooms: 2,
+    bathrooms: 3,
+    maxGuests: 4,
+    amenities: ['Rooftop Terrace', 'WiFi', 'Kitchen', 'Air Conditioning', 'Gym', 'City View'],
+    rating: 5.0,
+    reviewCount: 32,
+    images: [findImage('prop4-1'), findImage('prop4-2')],
+    owner: users[0],
+    propertyType: 'Condo',
+  },
+  {
+    id: 'prop-5',
+    name: 'Charming Beachfront Bungalow',
+    location: 'Key West, Florida',
+    pricePerNight: 600,
+    description: 'Wake up to the sound of waves in this charming bungalow right on the beach. Direct beach access and stunning sunsets await you. Ideal for a romantic escape.',
+    longStay: false,
+    bedrooms: 1,
+    bathrooms: 1,
+    maxGuests: 2,
+    amenities: ['Beach Access', 'WiFi', 'Kitchen', 'Air Conditioning', 'Patio'],
+    rating: 4.9,
+    reviewCount: 91,
+    images: [findImage('prop5-1'), findImage('prop5-2')],
+    owner: users[3],
+    propertyType: 'House',
+  },
+  {
+    id: 'prop-6',
+    name: 'Rustic Countryside Cottage',
+    location: 'Asheville, North Carolina',
+    pricePerNight: 220,
+    description: 'Escape to the peace and quiet of the countryside. This rustic cottage is surrounded by nature, offering a tranquil retreat with hiking trails and scenic beauty.',
+    longStay: true,
+    bedrooms: 2,
+    bathrooms: 1,
+    maxGuests: 4,
+    amenities: ['WiFi', 'Kitchen', 'Indoor Fireplace', 'Garden'],
+    rating: 4.8,
+    reviewCount: 65,
+    images: [findImage('prop6-1'), findImage('prop6-2')],
+    owner: users[1],
+    propertyType: 'House',
+  },
+];
+
+export const reviews: Review[] = [
+    {
+        id: 'rev-1',
+        propertyId: 'prop-1',
+        user: users[1],
+        rating: 5,
+        comment: "Absolutely stunning villa! The views were even better than the pictures. Everything was clean and the host was very responsive. Highly recommend!",
+        createdAt: "2023-10-20T14:48:00.000Z",
+    },
+    {
+        id: 'rev-2',
+        propertyId: 'prop-1',
+        user: users[2],
+        rating: 4,
+        comment: "Great location and beautiful house. We had a minor issue with the pool heater but the owner fixed it quickly. Overall, a fantastic stay.",
+        createdAt: "2023-09-15T10:30:00.000Z",
+    },
+    {
+        id: 'rev-3',
+        propertyId: 'prop-2',
+        user: users[3],
+        rating: 5,
+        comment: "The apartment was perfect for our city trip. It's small but has everything you need and the location is unbeatable. We would definitely stay here again.",
+        createdAt: "2023-11-05T18:00:00.000Z",
+    }
+];
+
+export const bookings: Booking[] = [
+    {
+        id: 'book-1',
+        property: properties[0],
+        user: users[3],
+        checkInDate: '2024-08-01',
+        checkOutDate: '2024-08-10',
+        totalPrice: 8500
+    },
+    {
+        id: 'book-2',
+        property: properties[2],
+        user: users[3],
+        checkInDate: '2024-09-15',
+        checkOutDate: '2024-09-20',
+        totalPrice: 2000
+    }
+];

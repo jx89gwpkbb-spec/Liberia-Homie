@@ -1,0 +1,30 @@
+"use client"
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { LayoutDashboard, Package, PlusCircle, BookOpenCheck } from 'lucide-react';
+import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+
+const navItems = [
+  { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
+  { href: '/dashboard/properties', label: 'My Properties', icon: Package },
+  { href: '/dashboard/properties/new', label: 'Add Property', icon: PlusCircle },
+  { href: '/dashboard/bookings', label: 'My Bookings', icon: BookOpenCheck },
+];
+
+export function DashboardNav() {
+  const pathname = usePathname();
+  return (
+    <SidebarMenu>
+      {navItems.map((item) => (
+        <SidebarMenuItem key={item.label}>
+          <Link href={item.href} passHref>
+              <SidebarMenuButton isActive={pathname === item.href} tooltip={item.label}>
+                <item.icon className="h-5 w-5" />
+                <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+              </SidebarMenuButton>
+          </Link>
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  );
+}
