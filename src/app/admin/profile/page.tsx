@@ -1,26 +1,28 @@
 'use client';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 export default function AdminProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const router = useRouter();
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
 
   const adminProfileRef = useMemoFirebase(() => {
-    if (!user) return null;
+    if (!user || !firestore) return null;
     return doc(firestore, 'admin_profiles', user.uid);
   }, [firestore, user]);
 
   const { data: adminProfile, isLoading: isProfileLoading } = useDoc(adminProfileRef);
 
   const handleCreateProfile = async () => {
-    if (!user || !firestore) return;
+    if (!user || !firestore || !adminProfileRef) return;
     setIsCreatingProfile(true);
     try {
       const adminProfileData = {
@@ -37,24 +39,21 @@ export default function AdminProfilePage() {
       
       const roleRef = doc(firestore, 'roles_admin', user.uid);
       
-      // Use non-blocking writes
-      setDoc(adminProfileRef, adminProfileData, { merge: true }).catch(err => console.error(err));
-      setDoc(roleRef, { admin: true }).catch(err => console.error(err));
+      // These writes can proceed without blocking the UI
+      setDoc(adminProfileRef, adminProfileData, { merge: true }).catch(err => console.error("Failed to create profile:", err));
+      setDoc(roleRef, { admin: true }).catch(err => console.error("Failed to set role:", err));
 
     } catch (error) {
       console.error('Error creating admin profile:', error);
     } finally {
-      // Optimistic UI, we don't wait for the write to complete
-      setIsCreatingProfile(false);
+      // The UI will optimistically update due to the real-time listener from useDoc
+      // so we don't need to force a reload or wait for the write to complete.
+       setIsCreatingProfile(false);
     }
   };
   
   const isLoading = isUserLoading || isProfileLoading;
   
-  const getInitials = (name: string) => {
-    return name.split(' ').map((n) => n[0]).join('');
-  }
-
   if (isLoading) {
     return (
         <div className="p-6">
@@ -76,18 +75,36 @@ export default function AdminProfilePage() {
     )
   }
 
-  if (!adminProfile) {
-    return (
+  if (!user) {
+     return (
       <div className="p-6 text-center">
         <h1 className="text-2xl font-bold">Access Denied</h1>
         <p className="text-muted-foreground mb-4">
-          You do not have an admin profile. Create one to gain access.
+          You must be logged in to view this page.
+        </p>
+        <Button onClick={() => router.push('/login')}>
+          Go to Login
+        </Button>
+      </div>
+    );
+  }
+
+  if (!adminProfile) {
+    return (
+      <div className="p-6 text-center">
+        <h1 className="text-2xl font-bold">Create Your Admin Profile</h1>
+        <p className="text-muted-foreground mb-4">
+          You do not have an admin profile yet. Create one to gain access.
         </p>
         <Button onClick={handleCreateProfile} disabled={isCreatingProfile}>
           {isCreatingProfile ? 'Creating Profile...' : 'Create Admin Profile'}
         </Button>
       </div>
     );
+  }
+  
+  const getInitials = (name: string) => {
+    return name.split(' ').map((n) => n[0]).join('');
   }
 
   return (

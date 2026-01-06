@@ -1,10 +1,12 @@
+'use client';
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { UserNav } from "../auth/UserNav";
+import { useUser } from "@/firebase";
 
 export function Header() {
-  const isLoggedIn = true; // Mock auth state
+  const { user, isUserLoading } = useUser();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -26,7 +28,9 @@ export function Header() {
             </Link>
           </nav>
           <div className="flex items-center gap-2">
-            {isLoggedIn ? (
+            {isUserLoading ? (
+              <div className="h-8 w-20 rounded-md bg-muted animate-pulse" />
+            ) : user ? (
               <UserNav />
             ) : (
               <>
