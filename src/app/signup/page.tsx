@@ -15,11 +15,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
-import { useAuth, initiateEmailSignUp } from '@/firebase';
+import { useAuth, initiateEmailSignUp, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { updateProfile } from 'firebase/auth';
+import { doc } from 'firebase/firestore';
 
 const signupSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
@@ -31,6 +32,7 @@ type SignupFormData = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
   const auth = useAuth();
+  const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -45,11 +47,30 @@ export default function SignupPage() {
 
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
+    if (!firestore) {
+        toast({ title: 'Error', description: 'Firestore not available.', variant: 'destructive' });
+        setIsLoading(false);
+        return;
+    }
     try {
       const userCredential = await initiateEmailSignUp(auth, data.email, data.password);
-      if (auth.currentUser) {
-        await updateProfile(auth.currentUser, { displayName: data.fullName });
+      const user = userCredential.user;
+      
+      if (user) {
+        await updateProfile(user, { displayName: data.fullName });
+
+        const userProfileRef = doc(firestore, 'users', user.uid);
+        const userProfileData = {
+          id: user.uid,
+          name: data.fullName,
+          email: user.email,
+          avatar: `https://picsum.photos/seed/${user.uid}/40/40`,
+          createdAt: new Date(),
+        };
+
+        setDocumentNonBlocking(userProfileRef, userProfileData, { merge: true });
       }
+
       toast({
         title: 'Account Created',
         description: "You've successfully signed up.",

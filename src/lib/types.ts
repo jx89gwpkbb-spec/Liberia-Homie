@@ -21,6 +21,7 @@ export type User = {
   name:string;
   email: string;
   avatar: string;
+  createdAt?: any;
 };
 
 export type Review = {

@@ -1,24 +1,25 @@
 /**
  * Core Philosophy: This ruleset enforces a strict, two-tiered security model.
- * 1. User Ownership: Administrator profiles in `/admin_profiles` are private and can
- *    only be read or written by the owner of that profile.
+ * 1. User Ownership: Administrator profiles in `/admin_profiles` and user profiles
+ *    in `/users` are private and can only be written by the owner of that profile.
  * 2. Role-Based Access: A separate `/roles_admin` collection acts as a lookup
  *    table. The existence of a document at `/roles_admin/{uid}` grants a user
- *    admin privileges, which are required to view or manage the list of admins.
+ *    admin privileges, which are required to view or manage the list of all users and admins.
  *
  * Data Structure:
  * - /admin_profiles/{adminId}: Contains the detailed profile data for a specific
  *   administrator, where `{adminId}` is their Firebase Auth UID.
  * - /roles_admin/{uid}: Contains simple "flag" documents. If a document exists at
  *   this path, the user with the corresponding UID is considered an admin.
+ * - /users/{userId}: Contains public profile data for a specific user.
  *
  * Key Security Decisions:
  * - Admin Listing Disabled for Non-Admins: Non-administrative users cannot list
- *   or discover who the administrators are.
+ *   or discover who the administrators or other users are.
  * - Privilege Escalation Prevention: A user cannot grant themselves admin status.
  *   Only an existing admin can create or delete documents in the `/roles_admin`
- *   collection.
- * - Self-Service Profile Management: Admins are responsible for creating and
+ *   collection (though initial creation is relaxed for the first admin).
+ * - Self-Service Profile Management: Admins and Users are responsible for creating and
  *   maintaining their own profile data.
  *
  * Denormalization for Authorization:
@@ -63,6 +64,21 @@ service cloud.firestore {
     }
 
     /**
+     * @description Manages individual user profiles.
+     * @path /users/{userId}
+     * @allow (get) A signed-in user 'user123' can read their own profile at `/users/user123`. Admins can read any profile.
+     * @deny (list) A non-admin user cannot list all users.
+     * @principle Enforces data privacy while allowing admin oversight.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
      * @description Manages individual administrator profiles. Access is strictly limited to the profile owner.
      * @path /admin_profiles/{adminId}
      * @allow (get) A signed-in admin with UID 'admin123' reads their own profile at `/admin_profiles/admin123`.
@@ -80,7 +96,7 @@ service cloud.firestore {
     /**
      * @description Manages admin role flags. The existence of a document grants admin privileges.
      * @path /roles_admin/{uid}
-     * @allow (create) An existing admin creates a role document for a new user at `/roles_admin/newUser789`.
+     * @allow (create) An existing admin creates a role document for a new user at `/roles_admin/newUser789`. The first admin can self-assign.
      * @deny (create) A non-admin user attempts to create a role document for themselves at `/roles_admin/nonAdminUser`.
      * @principle Enforces role-based access control, preventing unauthorized privilege escalation.
      */
