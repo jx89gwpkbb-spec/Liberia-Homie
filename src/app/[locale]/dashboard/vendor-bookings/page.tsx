@@ -1,69 +1,28 @@
 'use client';
 
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import type { Booking, Property } from '@/lib/types';
+import { collection, query, where } from 'firebase/firestore';
+import type { Booking } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Skeleton } from '@/components/ui/skeleton';
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 export default function VendorBookingsPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
-  const [vendorBookings, setVendorBookings] = useState<Booking[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const propertiesQuery = useMemoFirebase(() => {
+  const vendorBookingsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
-    return query(collection(firestore, 'properties'), where('owner.id', '==', user.uid));
+    // Query bookings directly where the vendorId matches the current user's UID
+    return query(collection(firestore, 'bookings'), where('vendorId', '==', user.uid));
   }, [user, firestore]);
 
-  const { data: vendorProperties, isLoading: arePropertiesLoading } = useCollection<Property>(propertiesQuery);
-
-  useEffect(() => {
-    const fetchBookings = async () => {
-      if (!vendorProperties || arePropertiesLoading || !firestore) {
-        setIsLoading(false);
-        return;
-      }
-
-      if (vendorProperties.length === 0) {
-        setVendorBookings([]);
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      const propertyIds = vendorProperties.map(p => p.id);
-      
-      // Firestore 'in' query is limited to 10 items. For more, you'd need multiple queries.
-      // We will only query the first 10 for this demo.
-      const bookingsRef = collection(firestore, 'bookings');
-      if (propertyIds.length > 0) {
-        const q = query(bookingsRef, where('propertyId', 'in', propertyIds.slice(0, 10)));
-        
-        const querySnapshot = await getDocs(q);
-        const bookings: Booking[] = [];
-        querySnapshot.forEach(doc => {
-          bookings.push({ id: doc.id, ...doc.data() } as Booking);
-        });
-
-        setVendorBookings(bookings);
-      } else {
-        setVendorBookings([]);
-      }
-
-      setIsLoading(false);
-    };
-
-    fetchBookings();
-  }, [vendorProperties, firestore, arePropertiesLoading]);
-
-  const finalLoadingState = isLoading || isUserLoading || arePropertiesLoading;
+  const { data: vendorBookings, isLoading: areBookingsLoading } = useCollection<Booking>(vendorBookingsQuery);
+  
+  const isLoading = isUserLoading || areBookingsLoading;
 
   return (
     <div className="space-y-6">
@@ -89,7 +48,7 @@ export default function VendorBookingsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {finalLoadingState ? (
+              {isLoading ? (
                 Array.from({length: 3}).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-4 w-40" /></TableCell>

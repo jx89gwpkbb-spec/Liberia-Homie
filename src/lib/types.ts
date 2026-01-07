@@ -86,6 +86,7 @@ export type Review = {
 export type Booking = {
   id?: string;
   userId: string;
+  vendorId: string;
   propertyId: string;
   checkInDate: any;
   checkOutDate: any;
@@ -177,5 +178,6 @@ export type SupportTicket = {
     
 
     
+
 
 

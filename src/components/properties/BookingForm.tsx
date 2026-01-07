@@ -152,6 +152,7 @@ export function BookingForm({ property }: { property: Property }) {
     const bookingsCollection = collection(firestore, 'bookings');
     const newBooking = {
         userId: user.uid,
+        vendorId: property.owner.id,
         propertyId: property.id,
         checkInDate: date.from,
         checkOutDate: date.to,
