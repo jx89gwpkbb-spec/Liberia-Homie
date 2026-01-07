@@ -23,14 +23,20 @@ export default function VendorBookingsPage() {
     return query(collection(firestore, 'properties'), where('owner.id', '==', user.uid));
   }, [user, firestore]);
 
-  const { data: vendorProperties } = useCollection<Property>(propertiesQuery);
+  const { data: vendorProperties, isLoading: arePropertiesLoading } = useCollection<Property>(propertiesQuery);
 
   useEffect(() => {
     const fetchBookings = async () => {
-      if (!vendorProperties || !firestore) {
-         if(!isUserLoading) setIsLoading(false);
-         return;
+      if (arePropertiesLoading || !firestore) {
+        return;
       }
+      
+      // This is the critical fix: we must wait until vendorProperties is loaded and not null.
+      if (!vendorProperties) {
+        setIsLoading(false);
+        return;
+      }
+
       if (vendorProperties.length === 0) {
         setVendorBookings([]);
         setIsLoading(false);
@@ -39,25 +45,31 @@ export default function VendorBookingsPage() {
 
       setIsLoading(true);
       const propertyIds = vendorProperties.map(p => p.id);
-      const bookingsRef = collection(firestore, 'bookings');
-      // Firestore 'in' query is limited to 10 items. For more, you'd need multiple queries.
-      const q = query(bookingsRef, where('propertyId', 'in', propertyIds.slice(0, 10)));
       
-      const querySnapshot = await getDocs(q);
-      const bookings: Booking[] = [];
-      querySnapshot.forEach(doc => {
-        bookings.push({ id: doc.id, ...doc.data() } as Booking);
-      });
+      // Firestore 'in' query is limited to 10 items. For more, you'd need multiple queries.
+      // We will only query the first 10 for this demo.
+      const bookingsRef = collection(firestore, 'bookings');
+      if (propertyIds.length > 0) {
+        const q = query(bookingsRef, where('propertyId', 'in', propertyIds.slice(0, 10)));
+        
+        const querySnapshot = await getDocs(q);
+        const bookings: Booking[] = [];
+        querySnapshot.forEach(doc => {
+          bookings.push({ id: doc.id, ...doc.data() } as Booking);
+        });
 
-      // You might want to fetch user details for each booking to show renter info
-      // This is omitted for simplicity for now.
+        setVendorBookings(bookings);
+      } else {
+        setVendorBookings([]);
+      }
 
-      setVendorBookings(bookings);
       setIsLoading(false);
     };
 
     fetchBookings();
-  }, [vendorProperties, firestore, isUserLoading]);
+  }, [vendorProperties, firestore, arePropertiesLoading]);
+
+  const finalLoadingState = isLoading || isUserLoading || arePropertiesLoading;
 
   return (
     <div className="space-y-6">
@@ -83,7 +95,7 @@ export default function VendorBookingsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading || isUserLoading ? (
+              {finalLoadingState ? (
                 Array.from({length: 3}).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-4 w-40" /></TableCell>
@@ -105,12 +117,12 @@ export default function VendorBookingsPage() {
                         </div>
                     </TableCell>
                     <TableCell>
-                      {format(booking.checkInDate.toDate(), 'MMM dd')} - {format(booking.checkOutDate.toDate(), 'MMM dd, yyyy')}
+                      {booking.checkInDate?.toDate && booking.checkOutDate?.toDate ? `${format(booking.checkInDate.toDate(), 'MMM dd')} - ${format(booking.checkOutDate.toDate(), 'MMM dd, yyyy')}` : 'Date not available'}
                     </TableCell>
                     <TableCell>${booking.totalPrice.toLocaleString()}</TableCell>
                     <TableCell>
-                      <Badge variant={booking.checkOutDate.toDate() < new Date() ? 'secondary' : 'default'}>
-                        {booking.checkOutDate.toDate() < new Date() ? 'Completed' : 'Upcoming'}
+                      <Badge variant={booking.checkOutDate?.toDate() < new Date() ? 'secondary' : 'default'}>
+                        {booking.checkOutDate?.toDate() < new Date() ? 'Completed' : 'Upcoming'}
                       </Badge>
                     </TableCell>
                   </TableRow>
