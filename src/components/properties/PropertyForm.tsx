@@ -16,9 +16,10 @@ import { useUser, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking }
 import { collection, doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, X, Image as ImageIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { Property } from "@/lib/types";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const propertySchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -31,9 +32,7 @@ const propertySchema = z.object({
     bedrooms: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
     bathrooms: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
     maxGuests: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
-    image1: z.string().url("Must be a valid URL"),
-    image2: z.string().url("Must be a valid URL").optional().or(z.literal('')),
-    image3: z.string().url("Must be a valid URL").optional().or(z.literal('')),
+    // Images are not part of the Zod schema as we handle them separately
 });
 
 type PropertyFormData = z.infer<typeof propertySchema>;
@@ -41,6 +40,22 @@ type PropertyFormData = z.infer<typeof propertySchema>;
 type PropertyFormProps = {
     property?: Property;
 };
+
+// Helper function to upload files and get URLs
+async function uploadImages(userId: string, propertyId: string, files: File[]): Promise<string[]> {
+    const storage = getStorage();
+    const urls: string[] = [];
+
+    for (const file of files) {
+        const filePath = `properties/${userId}/${propertyId}/${file.name}`;
+        const storageRef = ref(storage, filePath);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        urls.push(url);
+    }
+    return urls;
+}
+
 
 export function PropertyForm({ property }: PropertyFormProps) {
     const { user } = useUser();
@@ -50,6 +65,9 @@ export function PropertyForm({ property }: PropertyFormProps) {
     const [isSaving, setIsSaving] = useState(false);
     
     const isEditMode = !!property;
+    const [imageFiles, setImageFiles] = useState<File[]>([]);
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
 
     const { register, handleSubmit, control, formState: { errors }, getValues, setValue, reset } = useForm<PropertyFormData>({
         resolver: zodResolver(propertySchema),
@@ -64,9 +82,6 @@ export function PropertyForm({ property }: PropertyFormProps) {
             bedrooms: '',
             bathrooms: '',
             maxGuests: '',
-            image1: '',
-            image2: '',
-            image3: '',
         }
     });
 
@@ -75,7 +90,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
             reset({
                 name: property.name,
                 location: property.location,
-                price: property.pricePerNight.toString(),
+                pricePerNight: property.pricePerNight.toString(),
                 propertyType: property.propertyType,
                 stayDuration: property.longStay ? 'long' : 'short',
                 keyFeatures: property.amenities.join(', '),
@@ -83,12 +98,30 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 bedrooms: property.bedrooms.toString(),
                 bathrooms: property.bathrooms.toString(),
                 maxGuests: property.maxGuests.toString(),
-                image1: property.images[0] || '',
-                image2: property.images[1] || '',
-                image3: property.images[2] || '',
             });
+            setImagePreviews(property.images || []);
         }
     }, [property, isEditMode, reset]);
+
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const files = Array.from(e.target.files);
+            setImageFiles(prev => [...prev, ...files]);
+
+            const newPreviews = files.map(file => URL.createObjectURL(file));
+            setImagePreviews(prev => [...prev, ...newPreviews]);
+        }
+    };
+    
+    const removeImage = (index: number, isPreview: boolean) => {
+        if (isPreview) {
+            setImagePreviews(prev => prev.filter((_, i) => i !== index));
+            setImageFiles(prev => prev.filter((_, i) => i !== (index - (imagePreviews.length - imageFiles.length))));
+        } else {
+             setImagePreviews(prev => prev.filter((_, i) => i !== index));
+        }
+    };
 
 
     const onSubmit = async (data: PropertyFormData) => {
@@ -96,9 +129,36 @@ export function PropertyForm({ property }: PropertyFormProps) {
             toast({ title: "Error", description: "You must be logged in to modify a property.", variant: "destructive" });
             return;
         }
+        if (imagePreviews.length === 0) {
+            toast({ title: "Error", description: "You must upload at least one image.", variant: "destructive" });
+            return;
+        }
+
         setIsSaving(true);
         try {
-            const images = [data.image1, data.image2, data.image3].filter(Boolean) as string[];
+            const propertyId = property?.id || doc(collection(firestore, '_')).id;
+            let finalImageUrls = property?.images || [];
+
+            if (imageFiles.length > 0) {
+                const uploadedUrls = await uploadImages(user.uid, propertyId, imageFiles);
+                // In edit mode, we replace old images with new ones. A more complex UI could allow re-ordering/selective deletion.
+                // For now, new uploads replace existing images.
+                finalImageUrls = isEditMode ? uploadedUrls : [...(property?.images || []), ...uploadedUrls];
+            }
+             
+            if (isEditMode) {
+                // Filter out removed previews if they were existing images
+                finalImageUrls = property.images.filter(url => imagePreviews.includes(url));
+                 if (imageFiles.length > 0) {
+                    const uploadedUrls = await uploadImages(user.uid, property.id, imageFiles);
+                    finalImageUrls = [...finalImageUrls, ...uploadedUrls];
+                }
+            } else {
+                 if (imageFiles.length > 0) {
+                    finalImageUrls = await uploadImages(user.uid, propertyId, imageFiles);
+                }
+            }
+
 
             const propertyData = {
                 name: data.name,
@@ -111,7 +171,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 amenities: data.keyFeatures.split(',').map(s => s.trim()),
                 description: data.description,
                 propertyType: data.propertyType,
-                images: images,
+                images: finalImageUrls,
                 owner: property?.owner || {
                     id: user.uid,
                     name: user.displayName || 'Anonymous',
@@ -238,14 +298,32 @@ export function PropertyForm({ property }: PropertyFormProps) {
                     </div>
                     
                     <div className="md:col-span-2 space-y-2">
-                        <Label>Image URLs</Label>
-                        <Input id="image1" {...register("image1")} placeholder="Main image URL"/>
-                        {errors.image1 && <p className="text-destructive text-sm">{errors.image1.message}</p>}
-                         <Input id="image2" {...register("image2")} placeholder="Optional: Second image URL"/>
-                        {errors.image2 && <p className="text-destructive text-sm">{errors.image2.message}</p>}
-                         <Input id="image3" {...register("image3")} placeholder="Optional: Third image URL"/>
-                        {errors.image3 && <p className="text-destructive text-sm">{errors.image3.message}</p>}
+                        <Label>Images</Label>
+                        <div className="grid grid-cols-3 gap-4">
+                            {imagePreviews.map((src, index) => (
+                                <div key={index} className="relative group aspect-video">
+                                    <img src={src} alt={`Preview ${index + 1}`} className="w-full h-full object-cover rounded-md" />
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100"
+                                        onClick={() => removeImage(index, true)}
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
+                            {imagePreviews.length < 5 && (
+                                <Label htmlFor="image-upload" className="cursor-pointer aspect-video flex flex-col items-center justify-center rounded-md border-2 border-dashed border-muted-foreground/50 hover:bg-muted/50">
+                                    <Upload className="h-8 w-8 text-muted-foreground" />
+                                    <span className="mt-2 text-sm text-muted-foreground">Upload</span>
+                                    <Input id="image-upload" type="file" multiple accept="image/*" className="sr-only" onChange={handleImageChange} />
+                                </Label>
+                            )}
+                        </div>
                     </div>
+
 
                     <div className="md:col-span-2 space-y-2">
                         <div className="flex justify-between items-center">
@@ -266,5 +344,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
         </form>
     );
 }
+
+    
 
     
