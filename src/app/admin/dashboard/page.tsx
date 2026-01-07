@@ -30,6 +30,8 @@ export default function AdminDashboardPage() {
   const { user: adminUser } = useUser();
   const { toast } = useToast();
 
+  const isSuperAdmin = adminUser?.email === 'samuelknimelyjr@gmail.com';
+
   const usersCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
   const propertiesCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'properties') : null, [firestore]);
   const bookingsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'bookings') : null, [firestore]);
@@ -125,7 +127,7 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
       
-      {adminUser?.email === 'samuelknimelyjr@gmail.com' && (
+      {isSuperAdmin && (
         <Card>
             <CardHeader>
                 <CardTitle>Pending Property Approvals</CardTitle>

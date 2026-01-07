@@ -25,7 +25,9 @@ export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
             const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
             try {
                 const docSnap = await getDoc(adminRoleRef);
-                setIsAdmin(docSnap.exists());
+                // Also check if the user is the hardcoded super-admin
+                const isSuperAdmin = user.email === 'samuelknimelyjr@gmail.com';
+                setIsAdmin(docSnap.exists() || isSuperAdmin);
             } catch (error) {
                 console.error("Error checking admin status:", error);
                 setIsAdmin(false);

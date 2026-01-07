@@ -84,6 +84,13 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
+
+    /**
+     * Checks if the user is the designated super-admin.
+     */
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.token.email == 'samuelknimelyjr@gmail.com';
+    }
     
     /**
      * Checks if the user is the owner of a given property.
@@ -199,8 +206,8 @@ service cloud.firestore {
       // Owners can update their own properties, but cannot change the status.
       allow update: if isVerified() && isOwner(resource.data.owner.id) && request.resource.data.status == resource.data.status;
       
-      // Admins can update any field, including changing the status.
-      allow update: if isAdmin();
+      // Admins can update any field, but only the Super Admin can change the status.
+      allow update: if isAdmin() && (request.resource.data.status == resource.data.status || isSuperAdmin());
       
       // Owners or Admins can delete.
       allow delete: if (isVerified() && isOwner(resource.data.owner.id)) || isAdmin();
