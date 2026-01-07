@@ -22,7 +22,7 @@ export function NotificationManager() {
   const firestore = useFirestore();
 
   const upcomingBookingsQuery = useMemoFirebase(() => {
-    if (!firestore || !user || !user.emailVerified) return null; // Add email verification check
+    if (!firestore || !user || !user.emailVerified) return null;
     return query(
       collection(firestore, 'bookings'),
       where('userId', '==', user.uid),
