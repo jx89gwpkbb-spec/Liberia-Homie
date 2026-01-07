@@ -6,3 +6,4 @@ import '@/ai/flows/generate-property-description.ts';
 import '@/ai/flows/suggest-optimal-stay-dates.ts';
 import '@/ai/flows/faq-chatbot.ts';
 import '@/ai/flows/homie-stays-agent.ts';
+import '@/ai/flows/neighborhood-insights.ts';

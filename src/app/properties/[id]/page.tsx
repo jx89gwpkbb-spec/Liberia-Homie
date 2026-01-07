@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Button } from "@/components/ui/button";
 import placeholderImages from '@/lib/placeholder-images.json';
 import { FavoriteButton } from "@/components/properties/FavoriteButton";
+import { NeighborhoodInsights } from "@/components/properties/NeighborhoodInsights";
 
 const amenityIcons: { [key: string]: React.ElementType } = {
   'WiFi': Wifi,
@@ -186,6 +187,8 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
               })}
             </div>
           </div>
+
+          <NeighborhoodInsights location={property.location} />
           
           <ReviewSection propertyId={property.id} />
         </div>
