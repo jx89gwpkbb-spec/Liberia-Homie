@@ -1,0 +1,26 @@
+{
+  "Header": {
+    "properties": "Propiedades",
+    "about": "Sobre Nosotros",
+    "contact": "Contacto",
+    "login": "Iniciar Sesión",
+    "signup": "Registrarse"
+  },
+  "Hero": {
+    "title": "Encuentra Tu Próxima Estancia",
+    "subtitle": "Descubre los mejores lugares para cualquier duración. Te esperan experiencias inolvidables.",
+    "locationPlaceholder": "¿A dónde vas?",
+    "datesPlaceholder": "Fechas",
+    "guestsPlaceholder": "Huéspedes",
+    "search": "Buscar"
+  },
+  "FeaturedProperties": {
+    "title": "Propiedades Destacadas",
+    "subtitle": "Explora nuestra selección de propiedades mejor valoradas.",
+    "viewAll": "Ver Todas las Propiedades"
+  },
+  "RootLayout": {
+    "title": "Homie Stays",
+    "description": "Encuentra tu próximo hogar, para una estancia corta o larga."
+  }
+}
