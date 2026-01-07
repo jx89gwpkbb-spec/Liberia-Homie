@@ -49,7 +49,7 @@ export default function MyFavoritesPage() {
                 ))}
             </div>
           ) : favorites && firestore ? (
-            <FavoritesGrid favorites={favorites} firestore={firestore} />
+            <FavoritesGrid favorites={favorites} />
           ) : (
             <div className="text-center py-16 border-2 border-dashed rounded-lg">
                 <Heart className="mx-auto h-12 w-12 text-muted-foreground" />

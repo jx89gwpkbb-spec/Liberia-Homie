@@ -3,7 +3,7 @@
     {
       "id": "hero-1",
       "description": "A modern living room with a beautiful view",
-      "imageUrl": "https://images.unsplash.com/photo-1680209667207-cae0f6cd8fa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bW9kZXJuJTIwbGl2aW5nLXJvb218ZW58MHx8fHwxNzY3NzEwNzE4fDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1680209667207-cae0f6cd8fa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bW9kZXJuJTIwbGl2aW5nLXJvb218ZW58MHx8fHwxNzY3NzEwNzE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "modern living-room"
     },
     {
@@ -15,7 +15,7 @@
     {
       "id": "prop1-2",
       "description": "Living room of a modern villa",
-      "imageUrl": "https://images.unsplash.com/photo-1668277155898-704a26a5cfa3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx2aWxsYSUyMGxpdmluZy1yb29tfGVufDB8fHx8MTc2Nzc0MDM4OXww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1668277155898-704a26a5cfa3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx2aWxsYSUyMGxpdmluZy1yb29tfGVufDB8fHx8MTc2Nzc0MDM4OXww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "villa living-room"
     },
     {
@@ -33,7 +33,7 @@
     {
       "id": "prop3-1",
       "description": "Spacious suburban house",
-      "imageUrl": "https://images.unsplash.com/photo-1625603736199-775425d2890a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdWJ1cmJhbiUyMGhvdXNlfGVufDB8fHx8MTc2NzY2Nzg1Mnww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1625603736199-775425d2890a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdWJ1cmJhbiUyMGhvdXNlfGVufDB8fHx8MTc2NzY2Nzg1Mnww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "suburban house"
     },
     {
@@ -105,7 +105,7 @@
     {
       "id": "map-placeholder",
       "description": "A map of Liberia",
-      "imageUrl": "https://images.unsplash.com/photo-1622030997143-c6031b212f8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxMaWJlcmlhJTIwbWFwfGVufDB8fHx8MTc2ODYwMzAwNHww&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1622030997143-c6031b212f8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxMaWJlcmlhJTIwbWFwfGVufDB8fHx8MTc2ODYwMzAwNHww&ixlib-rb-4.0.3&q=80&w=1080",
       "imageHint": "Liberia map"
     },
     {
