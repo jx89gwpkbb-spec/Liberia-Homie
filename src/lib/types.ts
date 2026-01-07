@@ -86,7 +86,7 @@ export type Document = {
 };
 
 export type SavedSearch = {
-    id?: string;
+    id: string;
     name: string;
     createdAt: any;
     filters: {
