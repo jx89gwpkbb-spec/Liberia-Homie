@@ -5,7 +5,7 @@ import { LayoutDashboard, Package, PlusCircle, BookOpenCheck, Heart, FileText, U
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 
 const userNavItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'My Trips', icon: LayoutDashboard },
   { href: '/dashboard/bookings', label: 'My Bookings', icon: BookOpenCheck },
   { href: '/dashboard/visits', label: 'My Visits', icon: CalendarCheck },
   { href: '/dashboard/favorites', label: 'My Favorites', icon: Heart },
@@ -34,7 +34,7 @@ export function DashboardNav() {
       {userNavItems.map((item) => (
         <SidebarMenuItem key={item.label}>
           <Link href={item.href} passHref>
-              <SidebarMenuButton isActive={pathname.startsWith(item.href)} tooltip={item.label}>
+              <SidebarMenuButton isActive={pathname === item.href} tooltip={item.label}>
                 <item.icon className="h-5 w-5" />
                 <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
               </SidebarMenuButton>

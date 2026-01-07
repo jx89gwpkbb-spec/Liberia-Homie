@@ -9,6 +9,46 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import Image from "next/image";
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { QrCode, Ticket } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+function DigitalKeyDialog({ booking }: { booking: Booking }) {
+    if (!booking.id) return null;
+    
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(booking.id)}`;
+
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                    <QrCode className="mr-2 h-4 w-4" />
+                    Digital Key
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Your Digital Key</DialogTitle>
+                    <DialogDescription>
+                        Scan this QR code at the property for check-in. Valid for your stay from {format(booking.checkInDate.toDate(), 'MMM dd')} to {format(booking.checkOutDate.toDate(), 'MMM dd, yyyy')}.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="flex items-center justify-center p-4 bg-white rounded-lg">
+                    <Image src={qrCodeUrl} alt="Digital Key QR Code" width={256} height={256} />
+                </div>
+                <div className="text-center text-xs text-muted-foreground">Booking ID: {booking.id}</div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 
 export default function MyBookingsPage() {
   const { user, isUserLoading } = useUser();
@@ -26,7 +66,7 @@ export default function MyBookingsPage() {
   return (
     <div className="space-y-6">
        <div>
-        <h1 className="text-3xl font-bold font-headline">My Bookings</h1>
+        <h1 className="text-3xl font-bold font-headline flex items-center gap-2"><Ticket /> My Bookings</h1>
         <p className="text-muted-foreground">An overview of your upcoming and past stays.</p>
       </div>
 
@@ -43,6 +83,7 @@ export default function MyBookingsPage() {
                 <TableHead>Dates</TableHead>
                 <TableHead>Total Price</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -61,10 +102,13 @@ export default function MyBookingsPage() {
                     <TableCell><Skeleton className="h-4 w-48" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-8 w-24" /></TableCell>
                   </TableRow>
                 ))
               ) : bookings && bookings.length > 0 ? (
-                bookings.map((booking) => (
+                bookings.map((booking) => {
+                  const isUpcoming = booking.checkOutDate.toDate() >= new Date();
+                  return (
                   <TableRow key={booking.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
@@ -80,15 +124,19 @@ export default function MyBookingsPage() {
                     </TableCell>
                     <TableCell>${booking.totalPrice.toLocaleString()}</TableCell>
                     <TableCell>
-                      <Badge variant={booking.checkOutDate.toDate() < new Date() ? 'secondary' : 'default'}>
-                        {booking.checkOutDate.toDate() < new Date() ? 'Completed' : 'Upcoming'}
+                      <Badge variant={isUpcoming ? 'default' : 'secondary'}>
+                        {isUpcoming ? 'Upcoming' : 'Completed'}
                       </Badge>
                     </TableCell>
+                    <TableCell className="text-right">
+                        {isUpcoming && <DigitalKeyDialog booking={booking} />}
+                    </TableCell>
                   </TableRow>
-                ))
+                  );
+                })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
+                  <TableCell colSpan={5} className="h-24 text-center">
                     You haven't made any bookings yet.
                   </TableCell>
                 </TableRow>

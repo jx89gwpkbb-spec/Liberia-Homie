@@ -85,6 +85,10 @@ export type Booking = {
   user?: {
     name: string;
     avatar: string;
+  },
+  reminders?: {
+    checkInReminderSent?: boolean;
+    checkOutReminderSent?: boolean;
   }
 };
 

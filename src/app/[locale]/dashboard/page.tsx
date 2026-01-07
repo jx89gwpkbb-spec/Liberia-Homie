@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useState, useEffect } from 'react';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import type { Booking } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,44 @@ import { format, isPast } from "date-fns";
 import Image from "next/image";
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plane, Calendar, Users, MapPin } from 'lucide-react';
+import { Plane, Calendar, Users, MapPin, QrCode } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+function DigitalKeyDialog({ booking }: { booking: Booking }) {
+    if (!booking.id) return null;
+    
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(booking.id)}`;
+
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="secondary" size="sm" className="w-full mt-2">
+                    <QrCode className="mr-2 h-4 w-4" />
+                    Digital Key
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Your Digital Key</DialogTitle>
+                    <DialogDescription>
+                        Scan this QR code at the property for check-in. Valid for your stay from {format(booking.checkInDate.toDate(), 'MMM dd')} to {format(booking.checkOutDate.toDate(), 'MMM dd, yyyy')}.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="flex items-center justify-center p-4 bg-white rounded-lg">
+                    <Image src={qrCodeUrl} alt="Digital Key QR Code" width={256} height={256} />
+                </div>
+                <div className="text-center text-xs text-muted-foreground">Booking ID: {booking.id}</div>
+            </DialogContent>
+        </Dialog>
+    );
+}
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -76,7 +113,7 @@ export default function DashboardPage() {
           </div>
         ) : pastTrips.length > 0 ? (
           <div className="grid md:grid-cols-2 gap-6">
-            {pastTrips.map(trip => <TripCard key={trip.id} trip={trip} />)}
+            {pastTrips.map(trip => <TripCard key={trip.id} trip={trip} isPast />)}
           </div>
         ) : (
           <div className="text-center py-16 border-2 border-dashed rounded-lg">
@@ -89,7 +126,7 @@ export default function DashboardPage() {
   );
 }
 
-function TripCard({ trip }: { trip: Booking }) {
+function TripCard({ trip, isPast = false }: { trip: Booking, isPast?: boolean }) {
     return (
         <Card className="overflow-hidden">
             <CardHeader className="p-0 relative">
@@ -119,10 +156,11 @@ function TripCard({ trip }: { trip: Booking }) {
                     </div>
                 </div>
             </CardContent>
-            <CardFooter className="p-4 pt-0">
+            <CardFooter className="p-4 pt-0 flex-col items-stretch gap-2">
                 <Button asChild variant="outline" className="w-full">
                     <Link href={`/properties/${trip.propertyId}`}>View Property</Link>
                 </Button>
+                {!isPast && <DigitalKeyDialog booking={trip} />}
             </CardFooter>
         </Card>
     );
