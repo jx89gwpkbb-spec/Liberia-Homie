@@ -18,6 +18,8 @@ export const properties: Property[] = [
     name: 'Modern Villa with Ocean View',
     location: 'Monrovia, Liberia',
     pricePerNight: 850,
+    weekendPrice: 950,
+    weeklyDiscount: 15,
     description: 'Experience luxury in this stunning modern villa. With breathtaking ocean views, a private pool, and state-of-the-art amenities, it is the perfect getaway for families or groups of friends.',
     longStay: true,
     bedrooms: 4,
@@ -38,6 +40,7 @@ export const properties: Property[] = [
     name: 'Cozy Downtown Apartment',
     location: 'Paynesville, Liberia',
     pricePerNight: 250,
+    weekendPrice: 275,
     description: 'A charming and cozy apartment in the heart of the city. Perfect for solo travelers or couples looking to explore. Walking distance to major attractions.',
     longStay: false,
     bedrooms: 1,
@@ -58,6 +61,7 @@ export const properties: Property[] = [
     name: 'Spacious Suburban Family Home',
     location: 'Ganta, Liberia',
     pricePerNight: 400,
+    weeklyDiscount: 10,
     description: 'A beautiful and spacious home in a quiet suburban neighborhood. Features a large backyard with a grill, perfect for family gatherings. Close to parks and local eateries.',
     longStay: true,
     bedrooms: 3,
@@ -78,6 +82,7 @@ export const properties: Property[] = [
     name: 'Luxury Penthouse with Cityscape',
     location: 'Buchanan, Liberia',
     pricePerNight: 1200,
+    weekendPrice: 1500,
     description: 'Indulge in the ultimate urban luxury. This penthouse offers panoramic city views, a private rooftop terrace, and exquisite modern design. An unforgettable experience.',
     longStay: false,
     bedrooms: 2,
@@ -98,6 +103,8 @@ export const properties: Property[] = [
     name: 'Charming Beachfront Bungalow',
     location: 'Harper, Liberia',
     pricePerNight: 600,
+    weekendPrice: 700,
+    weeklyDiscount: 5,
     description: 'Wake up to the sound of waves in this charming bungalow right on the beach. Direct beach access and stunning sunsets await you. Ideal for a romantic escape.',
     longStay: false,
     bedrooms: 1,
@@ -212,3 +219,6 @@ export const amenities: string[] = [
 
 
 
+
+
+    

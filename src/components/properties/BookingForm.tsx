@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarIcon, Minus, Plus, Loader2 } from "lucide-react";
-import { format, addDays } from "date-fns";
+import { format, addDays, differenceInDays, eachDayOfInterval } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { Property, Booking } from "@/lib/types";
 import { DateRange } from "react-day-picker";
@@ -29,21 +29,58 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 
-function calculateTotalPrice(dateRange: DateRange, pricePerNight: number, isLongStay?: boolean) {
-  if (!dateRange.from || !dateRange.to) {
-    return { total: 0, nights: 0 };
-  }
-  const nights = Math.round((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24));
-  if (nights <= 0) return { total: 0, nights: 0 };
+type PriceDetails = {
+  nights: number;
+  basePrice: number;
+  discount: number;
+  serviceFee: number;
+  total: number;
+  weekendDays: number;
+  weekdayDays: number;
+};
 
-  if (isLongStay) {
-      const months = nights / 30;
-      return { total: months * pricePerNight, nights };
+function calculateTotalPrice(
+  dateRange: DateRange | undefined,
+  property: Property
+): PriceDetails {
+  const { from, to } = dateRange || {};
+  if (!from || !to) {
+    return { nights: 0, basePrice: 0, discount: 0, serviceFee: 0, total: 0, weekdayDays: 0, weekendDays: 0 };
+  }
+
+  const nights = differenceInDays(to, from);
+  if (nights <= 0) {
+    return { nights: 0, basePrice: 0, discount: 0, serviceFee: 0, total: 0, weekdayDays: 0, weekendDays: 0 };
+  }
+
+  const days = eachDayOfInterval({ start: from, end: addDays(to, -1) });
+  let weekdayDays = 0;
+  let weekendDays = 0;
+
+  days.forEach(day => {
+    const dayOfWeek = day.getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) { // 0 = Sunday, 6 = Saturday
+      weekendDays++;
+    } else {
+      weekdayDays++;
+    }
+  });
+
+  const weekdayPrice = weekdayDays * property.pricePerNight;
+  const weekendPrice = weekendDays * (property.weekendPrice || property.pricePerNight);
+  const basePrice = weekdayPrice + weekendPrice;
+  
+  let discount = 0;
+  if (property.weeklyDiscount && nights >= 7) {
+      discount = basePrice * (property.weeklyDiscount / 100);
   }
 
   const serviceFee = nights > 0 ? 50 : 0;
-  return { total: nights * pricePerNight + serviceFee, nights };
+  const total = basePrice - discount + serviceFee;
+
+  return { nights, basePrice, discount, serviceFee, total, weekdayDays, weekendDays };
 }
+
 
 
 export function BookingForm({ property }: { property: Property }) {
@@ -74,10 +111,9 @@ export function BookingForm({ property }: { property: Property }) {
     return dates;
   }, [bookings]);
 
-  const { total, nights } = calculateTotalPrice(date || {}, property.pricePerNight, property.longStay);
-  const serviceFee = nights > 0 && !property.longStay ? 50 : 0;
-  const pricePerNight = property.pricePerNight;
-  const priceCalc = property.longStay ? (total / (nights/30)) : (nights * pricePerNight);
+  const priceDetails = calculateTotalPrice(date, property);
+  const { total, nights, basePrice, discount, serviceFee, weekdayDays, weekendDays } = priceDetails;
+
 
   const showNotification = (title: string, body: string) => {
     if ('Notification' in window && Notification.permission === 'granted') {
@@ -199,18 +235,26 @@ export function BookingForm({ property }: { property: Property }) {
         
         {nights > 0 && (
           <div className="space-y-2 text-sm">
-             {!property.longStay && (
-                <>
-                    <div className="flex justify-between">
-                        <span>${pricePerNight.toFixed(0)} x {nights} nights</span>
-                        <span>${priceCalc.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Service fee</span>
-                        <span>${serviceFee.toLocaleString()}</span>
-                    </div>
-                </>
-             )}
+             <div className="flex justify-between">
+                <span>{weekdayDays} weekday nights</span>
+                <span>${(weekdayDays * property.pricePerNight).toLocaleString()}</span>
+            </div>
+            {weekendDays > 0 && (
+                <div className="flex justify-between">
+                    <span>{weekendDays} weekend nights</span>
+                    <span>${(weekendDays * (property.weekendPrice || property.pricePerNight)).toLocaleString()}</span>
+                </div>
+            )}
+            <div className="flex justify-between">
+                <span>Service fee</span>
+                <span>${serviceFee.toLocaleString()}</span>
+            </div>
+            {discount > 0 && (
+                 <div className="flex justify-between text-green-600">
+                    <span>Weekly discount ({property.weeklyDiscount}%)</span>
+                    <span>-${discount.toLocaleString()}</span>
+                </div>
+            )}
             <div className="flex justify-between font-bold text-base border-t pt-2 mt-2">
               <span>Total</span>
               <span>${total.toLocaleString()}</span>
@@ -262,3 +306,5 @@ export function BookingForm({ property }: { property: Property }) {
     </Card>
   );
 }
+
+    

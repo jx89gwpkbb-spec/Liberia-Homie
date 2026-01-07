@@ -5,6 +5,8 @@ export type Property = {
   name: string;
   location: string;
   pricePerNight: number;
+  weekendPrice?: number;
+  weeklyDiscount?: number;
   description: string;
   longStay: boolean;
   bedrooms: number;
@@ -156,3 +158,4 @@ export type SupportTicket = {
     
     
 
+    
