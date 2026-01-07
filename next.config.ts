@@ -6,15 +6,6 @@ import withPWA from 'next-pwa';
 const withIntl = withNextIntl('./i18n.ts');
 
 const nextConfig: NextConfig = {
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/en',
-        permanent: true,
-      },
-    ];
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
