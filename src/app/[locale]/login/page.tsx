@@ -21,7 +21,15 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <LoginForm />
-        <div className="mt-4 p-6 pt-0 text-center text-sm">
+        <div className="mt-4 px-6 pt-0 text-center text-sm">
+          <div className="mb-2">
+            <Link
+              href="/forgot-password"
+              className="text-xs underline text-muted-foreground"
+            >
+              Forgot your password?
+            </Link>
+          </div>
           Don&apos;t have an account?{' '}
           <Link href="/signup" className="underline">
             Sign up
