@@ -43,7 +43,7 @@ const pwaConfig = {
   disable: process.env.NODE_ENV === 'development',
   runtimeCaching: [
     {
-      urlPattern: /\.(?:png|jpg|jpeg|svg|gif)$/,
+      urlPattern: new RegExp('\\.(?:png|jpg|jpeg|svg|gif)$'),
       handler: 'CacheFirst',
       options: {
         cacheName: 'images',
@@ -54,14 +54,14 @@ const pwaConfig = {
       },
     },
     {
-      urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/,
+      urlPattern: new RegExp('^https://fonts\\.googleapis\\.com/.*'),
       handler: 'StaleWhileRevalidate',
       options: {
         cacheName: 'google-fonts-stylesheets',
       },
     },
     {
-      urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/,
+      urlPattern: new RegExp('^https://fonts\\.gstatic\\.com/.*'),
       handler: 'CacheFirst',
       options: {
         cacheName: 'google-fonts-webfonts',
@@ -80,4 +80,3 @@ const pwaConfig = {
 const withPwaPlugin = withPWA(pwaConfig);
 
 export default withIntl(withPwaPlugin(nextConfig));
-
