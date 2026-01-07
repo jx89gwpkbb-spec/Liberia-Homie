@@ -102,3 +102,5 @@ export type SavedSearch = {
         petFriendly?: boolean;
     }
 };
+
+export type User = UserProfile;
