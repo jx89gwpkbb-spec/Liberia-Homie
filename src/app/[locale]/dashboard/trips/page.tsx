@@ -1,7 +1,7 @@
 'use client';
 import { useMemo } from 'react';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import type { Booking } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -18,17 +18,19 @@ export default function MyTripsPage() {
 
   const bookingsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
-    return query(collection(firestore, 'bookings'), where('userId', '==', user.uid), orderBy('checkInDate', 'desc'));
+    return query(collection(firestore, 'bookings'), where('userId', '==', user.uid));
   }, [firestore, user]);
 
   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
   
   const { upcomingTrips, pastTrips } = useMemo(() => {
     if (!bookings) return { upcomingTrips: [], pastTrips: [] };
+    // Sort bookings by check-in date descending on the client
+    const sortedBookings = [...bookings].sort((a, b) => b.checkInDate.toDate().getTime() - a.checkInDate.toDate().getTime());
     const now = new Date();
     return {
-      upcomingTrips: bookings.filter(b => !isPast(b.checkInDate.toDate())),
-      pastTrips: bookings.filter(b => isPast(b.checkInDate.toDate())),
+      upcomingTrips: sortedBookings.filter(b => !isPast(b.checkInDate.toDate())),
+      pastTrips: sortedBookings.filter(b => isPast(b.checkInDate.toDate())),
     };
   }, [bookings]);
 
