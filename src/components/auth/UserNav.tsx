@@ -14,7 +14,7 @@ import {
 import Link from 'next/link';
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { signOut } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { doc } from 'firebase/firestore';
 import { Shield } from 'lucide-react';
 
@@ -23,23 +23,27 @@ export function UserNav() {
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
+  const pathname = usePathname();
   
+  const locale = pathname.split('/')[1] || 'en';
+
   const adminRoleRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return doc(firestore, 'roles_admin', user.uid);
   }, [user, firestore]);
   
   const { data: adminRole } = useDoc(adminRoleRef);
-  const isAdmin = !!adminRole;
+  const isAdmin = !!adminRole || user?.email === 'samuelknimelyjr@gmail.com';
 
   const handleLogout = () => {
     if (auth) {
         signOut(auth);
     }
-    router.push('/');
+    router.push(`/${locale}`);
   };
 
   const getInitials = (name: string) => {
+    if (!name) return '';
     return name
       .split(' ')
       .map((n) => n[0])

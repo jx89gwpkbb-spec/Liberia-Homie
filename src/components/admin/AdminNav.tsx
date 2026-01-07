@@ -19,20 +19,25 @@ const navItems = [
 
 export function AdminNav() {
   const pathname = usePathname();
+  // Remove locale from pathname for comparison
+  const basePath = pathname.split('/').slice(2).join('/');
+  
   return (
     <SidebarMenu>
-      {navItems.map((item) => (
-        <SidebarMenuItem key={item.label}>
-          <Link href={item.href} passHref>
-              <SidebarMenuButton isActive={pathname === item.href} tooltip={item.label}>
-                <item.icon className="h-5 w-5" />
-                <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-              </SidebarMenuButton>
-          </Link>
-        </SidebarMenuItem>
-      ))}
+      {navItems.map((item) => {
+        const itemPath = item.href.startsWith('/') ? item.href.substring(1) : item.href;
+        const isActive = basePath === itemPath;
+        return (
+          <SidebarMenuItem key={item.label}>
+            <Link href={item.href} passHref>
+                <SidebarMenuButton isActive={isActive} tooltip={item.label}>
+                  <item.icon className="h-5 w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+        )
+      })}
     </SidebarMenu>
   );
 }
-
-    
