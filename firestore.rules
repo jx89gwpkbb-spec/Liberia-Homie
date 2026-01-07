@@ -106,11 +106,11 @@ service cloud.firestore {
      * @path /users/{userId}
      */
     match /users/{userId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isAdmin();
+      allow get: if isOwner(userId) || isAdmin() || isSuperAdmin();
+      allow list: if isAdmin() || isSuperAdmin();
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isOwner(userId) && request.resource.data.id == userId;
-      allow delete: if isExistingOwner(userId);
+      allow update: if (isOwner(userId) || isAdmin() || isSuperAdmin()) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId) || isAdmin() || isSuperAdmin();
       
       /**
        * @description Manages a user's favorite properties.
@@ -151,11 +151,11 @@ service cloud.firestore {
      * @principle Restricts access to a user's own data tree, enforcing data privacy.
      */
     match /admin_profiles/{adminId} {
-      allow get: if isOwner(adminId);
-      allow list: if isAdmin();
+      allow get: if isOwner(adminId) || isSuperAdmin();
+      allow list: if isAdmin() || isSuperAdmin();
       allow create: if isOwner(adminId) && request.resource.data.id == adminId;
-      allow update: if isExistingOwner(adminId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(adminId);
+      allow update: if (isExistingOwner(adminId) || isSuperAdmin()) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(adminId) || isSuperAdmin();
     }
 
     /**
@@ -166,11 +166,11 @@ service cloud.firestore {
      * @principle Enforces role-based access control, preventing unauthorized privilege escalation.
      */
     match /roles_admin/{uid} {
-      allow get: if isOwner(uid) || isAdmin();
-      allow list: if isAdmin();
-      allow create: if isOwner(uid) && (!exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) || isAdmin());
+      allow get: if isOwner(uid) || isAdmin() || isSuperAdmin();
+      allow list: if isAdmin() || isSuperAdmin();
+      allow create: if isOwner(uid) && (!exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) || isAdmin() || isSuperAdmin());
       allow update: if false;
-      allow delete: if isAdmin() && resource != null;
+      allow delete: if (isAdmin() || isSuperAdmin()) && resource != null;
     }
 
     /**
@@ -178,11 +178,11 @@ service cloud.firestore {
      * @path /bookings/{bookingId}
      */
     match /bookings/{bookingId} {
-        allow read: if isVerified() && (isAdmin() || isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId));
+        allow read: if isVerified() && (isAdmin() || isSuperAdmin() || isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId));
         // Admins can list all bookings. Other users must query by their own UID.
-        allow list: if isAdmin() || (isVerified() && request.query.where.size() > 0 && request.query.where[0][2] == request.auth.uid);
+        allow list: if isVerified() && (isAdmin() || isSuperAdmin());
         allow create: if isVerified() && isOwner(request.resource.data.userId);
-        allow update, delete: if isVerified() && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId));
+        allow update, delete: if isVerified() && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId) || isAdmin() || isSuperAdmin());
     }
     
     /**
@@ -191,12 +191,14 @@ service cloud.firestore {
      */
     match /properties/{propertyId} {
       // Public users can only see approved properties.
-      allow read: if resource.data.status == 'approved';
+      allow read: if resource.data.status == 'approved' || isAdmin() || isSuperAdmin();
+      
       // Admins and owners can read properties regardless of status.
-      allow read: if isAdmin() || (isVerified() && isOwner(resource.data.owner.id));
+      allow read: if isAdmin() || isSuperAdmin() || (isVerified() && isOwner(resource.data.owner.id));
 
       // Public users can only list approved properties. Admins can list all.
-      allow list: if isAdmin() || (request.query.where.size() > 0 && request.query.where[0][0] == 'status' && request.query.where[0][2] == 'approved');
+      allow list: if isAdmin() || isSuperAdmin();
+      
       // Verified users can list properties they own.
       allow list: if isVerified() && request.query.where.size() > 0 && request.query.where[0][2] == request.auth.uid;
       
@@ -211,7 +213,7 @@ service cloud.firestore {
       allow update: if isAdmin() && (request.resource.data.status == resource.data.status || isSuperAdmin());
       
       // Owners or Admins can delete.
-      allow delete: if (isVerified() && isOwner(resource.data.owner.id)) || isAdmin();
+      allow delete: if (isVerified() && isOwner(resource.data.owner.id)) || isAdmin() || isSuperAdmin();
     }
     
     /**
@@ -221,15 +223,15 @@ service cloud.firestore {
     match /visits/{visitId} {
         allow create: if isVerified() && isOwner(request.resource.data.userId);
         
-        allow read: if isVerified() && (isOwner(resource.data.userId) || isAdmin() || isPropertyOwner(resource.data.propertyId));
+        allow read: if isVerified() && (isOwner(resource.data.userId) || isAdmin() || isSuperAdmin() || isPropertyOwner(resource.data.propertyId));
         
-        allow list: if isVerified() && (isAdmin() || 
+        allow list: if isVerified() && (isAdmin() || isSuperAdmin() ||
                        (request.query.where.size() > 0 && request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid) ||
                        (request.query.where.size() > 0 && request.query.where[0][0] == 'propertyId' && isPropertyOwner(request.query.where[0][2])));
 
-        allow update: if (isVerified() && isPropertyOwner(resource.data.propertyId)) || isAdmin();
+        allow update: if (isVerified() && isPropertyOwner(resource.data.propertyId)) || isAdmin() || isSuperAdmin();
 
-        allow delete: if (isVerified() && isOwner(resource.data.userId)) || (isVerified() && isPropertyOwner(resource.data.propertyId)) || isAdmin();
+        allow delete: if (isVerified() && isOwner(resource.data.userId)) || (isVerified() && isPropertyOwner(resource.data.propertyId)) || isAdmin() || isSuperAdmin();
     }
 
     /**
@@ -237,7 +239,7 @@ service cloud.firestore {
      * @path /settings/global
      */
     match /settings/global {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdmin() || isSuperAdmin();
     }
 
     /**
@@ -246,7 +248,7 @@ service cloud.firestore {
      */
     match /announcements/{announcementId} {
       allow read: if isSignedIn();
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isSuperAdmin();
     }
 
     /**
@@ -255,8 +257,8 @@ service cloud.firestore {
      */
     match /tickets/{ticketId} {
       allow create: if isSignedIn();
-      allow read, write: if isAdmin();
-      allow list: if isAdmin();
+      allow read, write: if isAdmin() || isSuperAdmin();
+      allow list: if isAdmin() || isSuperAdmin();
     }
   }
 }
