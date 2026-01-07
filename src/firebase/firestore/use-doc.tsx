@@ -57,7 +57,6 @@ export function useDoc<T = any>(
 
     setIsLoading(true);
     setError(null);
-    // Optional: setData(null); // Clear previous data instantly
 
     const unsubscribe = onSnapshot(
       memoizedDocRef,
@@ -72,17 +71,21 @@ export function useDoc<T = any>(
         setIsLoading(false);
       },
       (error: FirestoreError) => {
-        const contextualError = new FirestorePermissionError({
-          operation: 'get',
-          path: memoizedDocRef.path,
-        })
+        if (error.code === 'permission-denied') {
+            console.warn(`Firestore permission denied on doc: ${memoizedDocRef.path}`);
+            setData(null);
+            setError(null);
+        } else {
+            const contextualError = new FirestorePermissionError({
+                operation: 'get',
+                path: memoizedDocRef.path,
+            })
 
-        setError(contextualError)
-        setData(null)
-        setIsLoading(false)
-
-        // trigger global error propagation
-        errorEmitter.emit('permission-error', contextualError);
+            setError(contextualError)
+            setData(null)
+            errorEmitter.emit('permission-error', contextualError);
+        }
+        setIsLoading(false);
       }
     );
 
