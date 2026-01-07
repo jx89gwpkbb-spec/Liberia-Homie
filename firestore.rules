@@ -165,16 +165,16 @@ service cloud.firestore {
       allow delete: if isAdmin() && resource != null;
     }
 
-    // Secure bookings collection
-    match /bookings/{docId} {
-      // Allow read (get, list, query) only if:
-      allow read: if request.auth != null 
-                  && request.auth.token.email_verified == true;
-
-      // Allow write only if you want verified users to create/update bookings
-      // (optional, depending on your app’s needs)
-      allow write: if request.auth != null 
-                   && request.auth.token.email_verified == true;
+    /**
+     * @description Manages booking data with role-based access.
+     * @path /bookings/{bookingId}
+     */
+    match /bookings/{bookingId} {
+      allow get: if isVerified() && (isOwner(resource.data.userId) || isAdmin());
+      allow list: if isVerified() && (isAdmin() || (request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid));
+      allow create: if isVerified() && isOwner(request.resource.data.userId);
+      allow update: if isVerified() && (isOwner(resource.data.userId) || isAdmin());
+      allow delete: if isVerified() && (isOwner(resource.data.userId) || isAdmin());
     }
     
     /**
