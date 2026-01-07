@@ -213,6 +213,14 @@ service cloud.firestore {
 
         allow delete: if isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId) || isAdmin();
     }
+
+    /**
+     * @description Manages global application settings.
+     * @path /settings/global
+     */
+    match /settings/global {
+      allow read, write: if isAdmin();
+    }
   }
 }
 

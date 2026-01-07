@@ -118,4 +118,9 @@ export type Visit = {
 
 export type User = UserProfile;
 
+export type Setting = {
+    siteName: string;
+    contactEmail: string;
+};
+
     
