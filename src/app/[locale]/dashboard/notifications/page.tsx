@@ -62,8 +62,11 @@ export default function MyNotificationsPage() {
   }, [userProfile, form]);
 
   const onSubmit = (data: NotificationsFormData) => {
-    if (!userProfileRef) return;
-    setDocumentNonBlocking(userProfileRef, { notificationSettings: data }, { merge: true });
+    if (!userProfileRef || !user) return;
+    setDocumentNonBlocking(userProfileRef, { 
+      id: user.uid, // Add this line to satisfy security rule
+      notificationSettings: data 
+    }, { merge: true });
     toast({
       title: "Preferences Saved",
       description: "Your notification settings have been updated.",
