@@ -61,5 +61,3 @@ export type Favorite = {
   propertyId: string;
   createdAt: any;
 };
-
-    
