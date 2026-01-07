@@ -16,7 +16,7 @@
  * - /users/{userId}/favorites/{propertyId}: Stores a user's favorite properties.
  * - /users/{userId}/documents/{documentId}: Stores a user's uploaded documents.
  * - /users/{userId}/savedSearches/{searchId}: Stores a user's saved search filters.
- * - /bookings/{bookingId}: Contains complete booking details, accessible only by admins.
+ * - /bookings/{bookingId}: Contains complete booking details, accessible only by admins and relevant users.
  * - /properties/{propertyId}: Contains property details.
  * - /visits/{visitId}: Contains visit request details.
  * - /announcements/{announcementId}: Contains system-wide announcements.
@@ -184,18 +184,18 @@ service cloud.firestore {
     }
 
     /**
-     * @description Manages the global bookings collection, accessible only by admins.
+     * @description Manages the global bookings collection.
      * @path /bookings/{bookingId}
      */
     match /bookings/{bookingId} {
-      // Admins and SuperAdmins have full read/list access.
+      // Admins and SuperAdmins have unconditional read/list access.
       allow read, list: if isAdmin() || isSuperAdmin();
-
-      // Only authenticated users can create bookings.
-      allow create: if isVerified();
       
-      // Admins and property owners can update or delete.
-      allow update, delete: if isVerified() && (isAdmin() || isSuperAdmin() || (resource.data != null && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId))));
+      // Only verified users can create bookings.
+      allow create: if isVerified();
+
+      // Users can update/delete their own bookings. Admins can update/delete any.
+      allow update, delete: if isVerified() && ( (isAdmin() || isSuperAdmin()) || (resource.data != null && isOwner(resource.data.userId)) );
     }
     
     /**
