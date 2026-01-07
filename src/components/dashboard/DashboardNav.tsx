@@ -5,7 +5,7 @@ import { LayoutDashboard, Package, PlusCircle, BookOpenCheck, Heart, FileText, U
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 
 const userNavItems = [
-  { href: '/dashboard/trips', label: 'My Trips', icon: Plane },
+  { href: '/dashboard', label: 'My Trips', icon: Plane },
   { href: '/dashboard/bookings', label: 'My Bookings', icon: BookOpenCheck },
   { href: '/dashboard/visits', label: 'My Visits', icon: CalendarCheck },
   { href: '/dashboard/favorites', label: 'My Favorites', icon: Heart },
