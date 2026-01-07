@@ -17,6 +17,8 @@ import {
   doc,
   getDoc,
   Timestamp,
+  addDoc,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { firebaseConfig } from '@/firebase/config';
@@ -49,6 +51,12 @@ const CheckAvailabilityInputSchema = z.object({
   propertyId: z.string().describe("The ID of the property to check."),
   checkInDate: z.string().describe("The check-in date in YYYY-MM-DD format."),
   checkOutDate: z.string().describe("The check-out date in YYYY-MM-DD format."),
+});
+
+const ScheduleVisitInputSchema = z.object({
+  propertyId: z.string().describe("The ID of the property for the visit."),
+  userId: z.string().describe("The ID of the user scheduling the visit."),
+  visitDate: z.string().describe("The requested date for the visit in YYYY-MM-DD format."),
 });
 
 
@@ -163,6 +171,36 @@ const checkAvailability = ai.defineTool(
   }
 );
 
+/**
+ * Genkit Tool: Schedules a visit to a property.
+ */
+const scheduleVisit = ai.defineTool(
+  {
+    name: "scheduleVisit",
+    description: "Schedules a visit to a property for a user on a specific date.",
+    inputSchema: ScheduleVisitInputSchema,
+    outputSchema: z.object({ success: z.boolean(), message: z.string(), visitId: z.string().optional() }),
+  },
+  async ({ propertyId, userId, visitDate }) => {
+    if (!firestore) throw new Error("Firestore not initialized");
+
+    try {
+      const visitRequest = {
+        propertyId,
+        userId,
+        visitDate: Timestamp.fromDate(new Date(visitDate)),
+        status: "pending",
+        createdAt: serverTimestamp(),
+      };
+      const docRef = await addDoc(collection(firestore, "visits"), visitRequest);
+      return { success: true, message: `Your visit request for ${visitDate} has been submitted. The property owner will confirm shortly.`, visitId: docRef.id };
+    } catch (error: any) {
+      console.error("Failed to schedule visit", error);
+      return { success: false, message: `Sorry, I was unable to schedule the visit. Please try again. Error: ${error.message}` };
+    }
+  }
+);
+
 
 // Main Agent Flow
 const HomieStaysAgentInputSchema = z.object({
@@ -186,13 +224,14 @@ const homieStaysAgentPrompt = ai.definePrompt({
   name: 'homieStaysAgentPrompt',
   input: { schema: HomieStaysAgentInputSchema },
   output: { schema: z.string() },
-  tools: [getCurrentBookings, cancelBooking, getPropertyDetails, checkAvailability],
+  tools: [getCurrentBookings, cancelBooking, getPropertyDetails, checkAvailability, scheduleVisit],
   system: `You are Agent231, a friendly and helpful AI support agent for Homie Stays, a property rental platform.
-You can help users with their bookings, answer questions about properties, and check availability.
+You can help users with their bookings, answer questions about properties, check availability, and schedule visits.
 
-- If the user is logged in (a userId is provided), you can fetch their bookings or cancel a booking for them. The current user's ID is {{userId}}. You MUST pass this ID to any tool that requires a userId.
+- If the user is logged in (a userId is provided), you can fetch their bookings, cancel a booking, or schedule a visit for them. The current user's ID is {{userId}}. You MUST pass this ID to any tool that requires a userId.
 - If a user asks about a specific property by name, use the 'getPropertyDetails' tool to find information about it.
 - If a user asks about availability for a property, you MUST first use 'getPropertyDetails' to get the property's ID, and then use the 'checkAvailability' tool.
+- If a user wants to schedule a visit or tour, you MUST first get the property's ID using 'getPropertyDetails' if you don't have it, and then use the 'scheduleVisit' tool. You must have the property ID, user ID, and a date to schedule a visit.
 - For all other questions, answer them clearly and concisely based on your general knowledge of a rental platform.
 - Maintain a warm, professional, and encouraging tone.
 

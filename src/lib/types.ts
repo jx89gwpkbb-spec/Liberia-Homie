@@ -103,6 +103,15 @@ export type SavedSearch = {
     }
 };
 
-export type User = UserProfile;
+export type Visit = {
+  id?: string;
+  propertyId: string;
+  userId: string;
+  visitDate: any;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  createdAt: any;
+  propertyName?: string;
+  propertyImage?: string;
+};
 
-    
+export type User = UserProfile;

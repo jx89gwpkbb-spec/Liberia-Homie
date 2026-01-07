@@ -17,6 +17,7 @@
  * - /users/{userId}/savedSearches/{searchId}: Stores a user's saved search filters.
  * - /bookings/{bookingId}: Contains booking details.
  * - /properties/{propertyId}: Contains property details.
+ * - /visits/{visitId}: Contains visit request details.
  *
  * Key Security Decisions:
  * - Admin Listing Disabled for Non-Admins: Non-administrative users cannot list
@@ -30,6 +31,8 @@
  * - Favorite Ownership: Users can only manage their own list of favorites.
  * - Document Ownership: Users can only manage their own documents.
  * - Saved Search Ownership: Users can only manage their own saved searches.
+ * - Visit Ownership: Users can create visits. They can view their own visits.
+ *   Property owners can view and manage visits for their properties.
  *
  * Denormalization for Authorization:
  * The `/roles_admin` collection is a classic example of denormalization for
@@ -71,6 +74,14 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
+    
+    /**
+     * Checks if the user is the owner of a given property.
+     */
+    function isPropertyOwner(propertyId) {
+      return isSignedIn() && get(/databases/$(database)/documents/properties/$(propertyId)).data.owner.id == request.auth.uid;
+    }
+
 
     /**
      * @description Manages individual user profiles and their subcollections.
@@ -184,7 +195,23 @@ service cloud.firestore {
       // Owners or Admins can delete.
       allow delete: if isOwner(resource.data.owner.id) || isAdmin();
     }
+    
+    /**
+     * @description Manages visit requests for properties.
+     * @path /visits/{visitId}
+     */
+    match /visits/{visitId} {
+        allow create: if isOwner(request.resource.data.userId);
+        
+        allow read: if isOwner(resource.data.userId) || isAdmin() || isPropertyOwner(resource.data.propertyId);
+        
+        allow list: if isAdmin() || 
+                       (request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid) ||
+                       (request.query.where[0][0] == 'propertyId' && isPropertyOwner(request.query.where[0][2]));
+
+        allow update: if isPropertyOwner(resource.data.propertyId) || isAdmin();
+
+        allow delete: if isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId) || isAdmin();
+    }
   }
 }
-
-    
