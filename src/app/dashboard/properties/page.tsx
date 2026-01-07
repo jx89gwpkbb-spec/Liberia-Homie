@@ -49,7 +49,7 @@ export default function DashboardPropertiesPage() {
           variant: "default",
           icon: CheckCircle,
           label: "Approved",
-          className: "bg-green-500 hover:bg-green-600",
+          className: "bg-green-500 hover:bg-green-600 text-white",
       },
       pending: {
           variant: "secondary",
