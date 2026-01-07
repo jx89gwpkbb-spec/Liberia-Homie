@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -15,6 +15,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageSquare, Send, X, Loader2 } from 'lucide-react';
 import { ChatBubble } from './ChatBubble';
 import { faqChatbot } from '@/ai/flows/faq-chatbot';
+import { homieStaysAgent } from '@/ai/flows/homie-stays-agent';
+import { useUser } from '@/firebase';
 
 type Message = {
   id: string;
@@ -26,13 +28,22 @@ export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'model',
-      text: 'Hi there! I am Agent231. How can I help you with Homie Stays today?',
-    },
-  ]);
+  const { user } = useUser();
+
+  const initialMessage: Message = {
+    id: '1',
+    role: 'model',
+    text: 'Hi there! I am Agent231. How can I help you with Homie Stays today?',
+  };
+
+  const [messages, setMessages] = useState<Message[]>([initialMessage]);
+
+  useEffect(() => {
+    // Reset chat when the sheet is closed
+    if (!isOpen) {
+      setTimeout(() => setMessages([initialMessage]), 300);
+    }
+  }, [isOpen]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,11 +55,20 @@ export function ChatWidget() {
       text: input,
     };
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = input;
     setInput('');
     setIsLoading(true);
 
     try {
-      const response = await faqChatbot({ question: input });
+      let response;
+      // If the user is logged in, use the more powerful agent.
+      // Otherwise, use the simple FAQ bot.
+      if (user) {
+        response = await homieStaysAgent({ question: currentInput, userId: user.uid });
+      } else {
+        response = await faqChatbot({ question: currentInput });
+      }
+
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'model',
