@@ -19,6 +19,10 @@ export type Property = {
   };
   propertyType: 'House' | 'Apartment' | 'Condo' | 'Villa';
   petFriendly?: boolean;
+  gps?: {
+    lat: number;
+    lng: number;
+  };
 };
 
 export type User = {

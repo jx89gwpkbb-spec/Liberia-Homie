@@ -28,7 +28,15 @@
           },
           "required": ["id", "name", "avatar"]
         },
-        "propertyType": { "type": "string", "enum": ["House", "Apartment", "Condo", "Villa"] }
+        "propertyType": { "type": "string", "enum": ["House", "Apartment", "Condo", "Villa"] },
+        "gps": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          },
+          "required": ["lat", "lng"]
+        }
       },
       "required": [
         "id",

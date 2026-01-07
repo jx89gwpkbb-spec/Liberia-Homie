@@ -33,6 +33,8 @@ const propertySchema = z.object({
     bedrooms: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
     bathrooms: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
     maxGuests: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
+    lat: z.string().optional(),
+    lng: z.string().optional(),
     // Images are not part of the Zod schema as we handle them separately
 });
 
@@ -88,6 +90,8 @@ export function PropertyForm({ property }: PropertyFormProps) {
             bedrooms: '',
             bathrooms: '',
             maxGuests: '',
+            lat: '',
+            lng: '',
         }
     });
 
@@ -104,6 +108,8 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 bedrooms: property.bedrooms.toString(),
                 bathrooms: property.bathrooms.toString(),
                 maxGuests: property.maxGuests.toString(),
+                lat: property.gps?.lat.toString() || '',
+                lng: property.gps?.lng.toString() || '',
             });
             const imageUrls = property.images || [];
             setExistingImageUrls(imageUrls);
@@ -196,6 +202,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 },
                 rating: property?.rating || Math.round((Math.random() * 2 + 3) * 10) / 10,
                 reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
+                gps: (data.lat && data.lng) ? { lat: parseFloat(data.lat), lng: parseFloat(data.lng) } : null
             };
 
             const propertyRef = doc(firestore, 'properties', propertyId);
@@ -241,7 +248,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Card>
-                <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div className="space-y-2">
                         <Label htmlFor="name">Property Name</Label>
                         <Input id="name" {...register("name")} />
@@ -292,8 +299,19 @@ export function PropertyForm({ property }: PropertyFormProps) {
                         <Input id="maxGuests" type="number" {...register("maxGuests")} />
                         {errors.maxGuests && <p className="text-destructive text-sm">{errors.maxGuests.message}</p>}
                     </div>
+                    
+                    <div className="space-y-2">
+                        <Label htmlFor="lat">Latitude</Label>
+                        <Input id="lat" type="text" {...register("lat")} placeholder="e.g. 6.3154" />
+                        {errors.lat && <p className="text-destructive text-sm">{errors.lat.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="lng">Longitude</Label>
+                        <Input id="lng" type="text" {...register("lng")} placeholder="e.g. -10.8048" />
+                        {errors.lng && <p className="text-destructive text-sm">{errors.lng.message}</p>}
+                    </div>
 
-                     <div className="space-y-2">
+                     <div className="space-y-2 md:col-span-3">
                         <Label>Stay Duration</Label>
                         <Controller
                             name="stayDuration"
@@ -308,15 +326,15 @@ export function PropertyForm({ property }: PropertyFormProps) {
                          {errors.stayDuration && <p className="text-destructive text-sm">{errors.stayDuration.message}</p>}
                     </div>
                     
-                    <div className="md:col-span-2 space-y-2">
+                    <div className="md:col-span-3 space-y-2">
                         <Label htmlFor="keyFeatures">Key Features (comma-separated)</Label>
                         <Input id="keyFeatures" {...register("keyFeatures")} placeholder="e.g., Private Pool, Ocean View, Gym"/>
                         {errors.keyFeatures && <p className="text-destructive text-sm">{errors.keyFeatures.message}</p>}
                     </div>
                     
-                    <div className="md:col-span-2 space-y-2">
+                    <div className="md:col-span-3 space-y-2">
                         <Label>Images</Label>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                             {previewUrls.map((src, index) => (
                                 <div key={index} className="relative group aspect-video">
                                     <Image src={src} alt={`Preview ${index + 1}`} width={200} height={112} className="w-full h-full object-cover rounded-md" />
@@ -342,7 +360,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                     </div>
 
 
-                    <div className="md:col-span-2 space-y-2">
+                    <div className="md:col-span-3 space-y-2">
                         <div className="flex justify-between items-center">
                             <Label htmlFor="description">Description</Label>
                             <DescriptionGenerator getFormData={getFormDataForAI} onDescriptionGenerated={handleDescriptionGenerated} />
@@ -350,7 +368,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                         <Textarea id="description" {...register("description")} rows={6} />
                         {errors.description && <p className="text-destructive text-sm">{errors.description.message}</p>}
                     </div>
-                    <div className="md:col-span-2 text-right">
+                    <div className="md:col-span-3 text-right">
                         <Button type="submit" disabled={isSaving}>
                             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {isEditMode ? 'Update Property' : 'Save Property'}
