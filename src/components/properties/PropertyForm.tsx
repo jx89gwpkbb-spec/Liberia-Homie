@@ -16,7 +16,7 @@ import { useUser, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking }
 import { collection, doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, Upload, X, MapPin } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { Property } from "@/lib/types";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -33,9 +33,7 @@ const propertySchema = z.object({
     bedrooms: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
     bathrooms: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
     maxGuests: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
-    lat: z.string().optional(),
-    lng: z.string().optional(),
-    // Images are not part of the Zod schema as we handle them separately
+    // Images and GPS are not part of the Zod schema as we handle them separately
 });
 
 type PropertyFormData = z.infer<typeof propertySchema>;
@@ -69,13 +67,12 @@ export function PropertyForm({ property }: PropertyFormProps) {
     
     const isEditMode = !!property;
     
-    // For edit mode, existing image URLs from Firebase Storage
     const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
-    // For new file uploads
     const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
-    // For generating temporary previews
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
+    const [gpsCoords, setGpsCoords] = useState<{ lat: number, lng: number } | null>(null);
+    const [isFetchingLocation, setIsFetchingLocation] = useState(false);
 
     const { register, handleSubmit, control, formState: { errors }, getValues, setValue, reset } = useForm<PropertyFormData>({
         resolver: zodResolver(propertySchema),
@@ -90,8 +87,6 @@ export function PropertyForm({ property }: PropertyFormProps) {
             bedrooms: '',
             bathrooms: '',
             maxGuests: '',
-            lat: '',
-            lng: '',
         }
     });
 
@@ -108,13 +103,13 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 bedrooms: property.bedrooms.toString(),
                 bathrooms: property.bathrooms.toString(),
                 maxGuests: property.maxGuests.toString(),
-                lat: property.gps?.lat.toString() || '',
-                lng: property.gps?.lng.toString() || '',
             });
             const imageUrls = property.images || [];
             setExistingImageUrls(imageUrls);
             setPreviewUrls(imageUrls);
-
+            if (property.gps) {
+                setGpsCoords(property.gps);
+            }
         }
     }, [property, isEditMode, reset]);
 
@@ -133,15 +128,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
         const removedUrl = previewUrls[index];
         setPreviewUrls(prev => prev.filter((_, i) => i !== index));
 
-        // Check if the removed URL was an existing image URL
         const existingIndex = existingImageUrls.indexOf(removedUrl);
         if (existingIndex > -1) {
             setExistingImageUrls(prev => prev.filter(url => url !== removedUrl));
         } else {
-            // If it's not an existing URL, it must be a new file preview
-            // We need to find the corresponding file in newImageFiles and remove it
-            // This is tricky if filenames aren't unique. A more robust way is to use an object with an ID.
-            // For now, we assume the order of addition is maintained.
             let newFileIndex = -1;
             let fileCounter = 0;
             for(let i = 0; i < previewUrls.length; i++) {
@@ -159,6 +149,37 @@ export function PropertyForm({ property }: PropertyFormProps) {
         }
     };
 
+    const handleFetchLocation = () => {
+        if (!navigator.geolocation) {
+            toast({
+                title: "Geolocation Not Supported",
+                description: "Your browser does not support geolocation.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setIsFetchingLocation(true);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                setGpsCoords({ lat: latitude, lng: longitude });
+                setIsFetchingLocation(false);
+                toast({
+                    title: "Location Fetched",
+                    description: "GPS coordinates have been set.",
+                });
+            },
+            (error) => {
+                setIsFetchingLocation(false);
+                toast({
+                    title: "Location Error",
+                    description: error.message,
+                    variant: "destructive",
+                });
+            }
+        );
+    };
 
     const onSubmit = async (data: PropertyFormData) => {
         if (!user || !firestore) {
@@ -202,7 +223,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 },
                 rating: property?.rating || Math.round((Math.random() * 2 + 3) * 10) / 10,
                 reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
-                gps: (data.lat && data.lng) ? { lat: parseFloat(data.lat), lng: parseFloat(data.lng) } : null
+                gps: gpsCoords,
             };
 
             const propertyRef = doc(firestore, 'properties', propertyId);
@@ -300,16 +321,21 @@ export function PropertyForm({ property }: PropertyFormProps) {
                         {errors.maxGuests && <p className="text-destructive text-sm">{errors.maxGuests.message}</p>}
                     </div>
                     
-                    <div className="space-y-2">
-                        <Label htmlFor="lat">Latitude</Label>
-                        <Input id="lat" type="text" {...register("lat")} placeholder="e.g. 6.3154" />
-                        {errors.lat && <p className="text-destructive text-sm">{errors.lat.message}</p>}
+                    <div className="md:col-span-3 lg:col-span-1 space-y-2">
+                        <Label>GPS Location</Label>
+                        <div className="flex flex-col gap-2">
+                             <Button type="button" variant="outline" onClick={handleFetchLocation} disabled={isFetchingLocation}>
+                                {isFetchingLocation ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MapPin className="mr-2 h-4 w-4" />}
+                                Set Location from Device
+                            </Button>
+                            {gpsCoords && (
+                                <p className="text-sm text-muted-foreground text-center">
+                                    Lat: {gpsCoords.lat.toFixed(6)}, Lng: {gpsCoords.lng.toFixed(6)}
+                                </p>
+                            )}
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="lng">Longitude</Label>
-                        <Input id="lng" type="text" {...register("lng")} placeholder="e.g. -10.8048" />
-                        {errors.lng && <p className="text-destructive text-sm">{errors.lng.message}</p>}
-                    </div>
+
 
                      <div className="space-y-2 md:col-span-3">
                         <Label>Stay Duration</Label>
