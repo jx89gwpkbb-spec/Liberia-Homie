@@ -1,3 +1,4 @@
+
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { Toaster } from '@/components/ui/toaster';
@@ -6,8 +7,6 @@ import { NotificationManager } from '@/components/notifications/NotificationMana
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import type { Metadata } from 'next';
 import './globals.css';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
   title: 'Homie Stays',
