@@ -5,16 +5,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { format } from "date-fns";
-import { Users as UsersIcon, Home, BookOpenCheck, DollarSign } from "lucide-react";
+import { Users as UsersIcon, Home, BookOpenCheck, DollarSign, CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart } from "recharts";
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, limit, where } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase, useUser, setDocumentNonBlocking } from '@/firebase';
+import { collection, query, orderBy, limit, where, doc } from 'firebase/firestore';
 import type { UserProfile as User, Property, Booking } from '@/lib/types';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMemo } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 
 const usersChartConfig: ChartConfig = {
@@ -26,6 +27,8 @@ const usersChartConfig: ChartConfig = {
 
 export default function AdminDashboardPage() {
   const firestore = useFirestore();
+  const { user: adminUser } = useUser();
+  const { toast } = useToast();
 
   const usersCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
   const propertiesCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'properties') : null, [firestore]);
@@ -33,20 +36,21 @@ export default function AdminDashboardPage() {
   
   const recentUsersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users'), orderBy('createdAt', 'desc'), limit(5)) : null, [firestore]);
   const recentPropertiesQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'properties'), where('status', '==', 'approved'), orderBy('reviewCount', 'desc'), limit(3)) : null, [firestore]);
-  
+  const pendingPropertiesQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'properties'), where('status', '==', 'pending')) : null, [firestore]);
+
   const { data: users, isLoading: usersLoading } = useCollection<User>(usersCollectionRef);
   const { data: properties, isLoading: propertiesLoading } = useCollection<Property>(propertiesCollectionRef);
   const { data: bookings, isLoading: bookingsLoading } = useCollection<Booking>(bookingsCollectionRef);
-
   const { data: recentUsers, isLoading: recentUsersLoading } = useCollection<User>(recentUsersQuery);
   const { data: recentProperties, isLoading: recentPropertiesLoading } = useCollection<Property>(recentPropertiesQuery);
+  const { data: pendingProperties, isLoading: pendingPropertiesLoading } = useCollection<Property>(pendingPropertiesQuery);
 
   const totalRevenue = useMemo(() => {
     if (!bookings) return 0;
     return bookings.reduce((acc, booking) => acc + booking.totalPrice, 0);
   }, [bookings]);
 
-  const isLoading = usersLoading || propertiesLoading || bookingsLoading || recentUsersLoading || recentPropertiesLoading;
+  const isLoading = usersLoading || propertiesLoading || bookingsLoading || recentUsersLoading || recentPropertiesLoading || pendingPropertiesLoading;
   
   const usersChartData = useMemo(() => {
     if (!users) return [];
@@ -59,6 +63,16 @@ export default function AdminDashboardPage() {
     });
     return Object.keys(dailyUsers).map(date => ({ date, users: dailyUsers[date] }));
   }, [users]);
+  
+  const handleStatusChange = (propertyId: string, status: 'approved' | 'rejected') => {
+    if (!firestore) return;
+    const propertyRef = doc(firestore, 'properties', propertyId);
+    setDocumentNonBlocking(propertyRef, { status: status }, { merge: true });
+    toast({
+        title: `Property ${status}`,
+        description: `The property has been successfully ${status}.`,
+    })
+  };
 
 
   return (
@@ -110,6 +124,69 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
       </div>
+      
+      {adminUser?.email === 'samuelknimelyjr@gmail.com' && (
+        <Card>
+            <CardHeader>
+                <CardTitle>Pending Property Approvals</CardTitle>
+                <CardDescription>Review and approve new property submissions.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                 <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Property</TableHead>
+                            <TableHead>Owner</TableHead>
+                            <TableHead>Price/Night</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {pendingPropertiesLoading ? (
+                            Array.from({length: 2}).map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                                    <TableCell className="text-right"><Skeleton className="h-8 w-40" /></TableCell>
+                                </TableRow>
+                            ))
+                        ) : pendingProperties && pendingProperties.length > 0 ? (
+                            pendingProperties.map(property => (
+                                <TableRow key={property.id}>
+                                    <TableCell>
+                                      <div className="flex items-center gap-3">
+                                        <Image src={property.images[0]} alt={property.name} width={48} height={48} className="rounded-md object-cover" />
+                                        <div>
+                                            <p className="font-medium">{property.name}</p>
+                                            <p className="text-sm text-muted-foreground">{property.location}</p>
+                                        </div>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell>{property.owner.name}</TableCell>
+                                    <TableCell>${property.pricePerNight}</TableCell>
+                                    <TableCell className="text-right space-x-2">
+                                        <Button size="sm" variant="outline" className="text-green-600 border-green-600 hover:bg-green-50 hover:text-green-700" onClick={() => handleStatusChange(property.id, 'approved')}>
+                                            <CheckCircle className="mr-2 h-4 w-4" /> Approve
+                                        </Button>
+                                        <Button size="sm" variant="destructive" onClick={() => handleStatusChange(property.id, 'rejected')}>
+                                            <XCircle className="mr-2 h-4 w-4" /> Reject
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                             <TableRow>
+                                <TableCell colSpan={4} className="h-24 text-center">
+                                    No properties are currently pending approval.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                 </Table>
+            </CardContent>
+        </Card>
+      )}
 
        <div className="grid gap-8 lg:grid-cols-1">
          <Card>
@@ -228,5 +305,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-    
