@@ -152,7 +152,8 @@ const checkAvailability = ai.defineTool(
     const snapshot = await getDocs(q);
     const conflictingBookings = snapshot.docs.filter(doc => {
       const booking = doc.data() as Booking;
-      return booking.checkInDate < end;
+      const bookingCheckIn = (booking.checkInDate as any).toDate();
+      return bookingCheckIn < end;
     });
 
     if (conflictingBookings.length > 0) {

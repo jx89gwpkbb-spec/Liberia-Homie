@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -127,7 +128,9 @@ export function ChatWidget() {
                 ))}
                 {isLoading && (
                    <div className="flex justify-start">
-                        <ChatBubble role="model" text="..." />
+                        <div className="max-w-xs rounded-lg px-4 py-2 text-sm lg:max-w-md bg-muted text-muted-foreground">
+                            <Loader2 className="animate-spin h-5 w-5" />
+                        </div>
                    </div>
                 )}
               </div>
