@@ -191,11 +191,11 @@ service cloud.firestore {
       // Admins and SuperAdmins have full read/list access.
       allow read, list: if isVerified() && (isAdmin() || isSuperAdmin());
 
-      // Only authenticated users can create bookings. Further validation is done client-side.
+      // Only authenticated users can create bookings.
       allow create: if isVerified();
       
       // Admins and property owners can update or delete.
-      allow update, delete: if isVerified() && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId) || isAdmin() || isSuperAdmin());
+      allow update, delete: if isVerified() && (isAdmin() || isSuperAdmin() || (resource.data != null && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId))));
     }
     
     /**
