@@ -2,7 +2,6 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { Toaster } from '@/components/ui/toaster';
-import { ChatWidget } from '@/components/chatbot/ChatWidget';
 import { NotificationManager } from '@/components/notifications/NotificationManager';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import type { Metadata } from 'next';
