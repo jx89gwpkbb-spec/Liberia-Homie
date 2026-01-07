@@ -15,7 +15,7 @@
     {
       "id": "prop1-2",
       "description": "Living room of a modern villa",
-      "imageUrl": "https://images.unsplash.com/photo-1668277155898-704a26a5cfa3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx2aWxsYSUyMGxpdmluZy1yb29tfGVufDB8fHx8MTc2Nzc0MDM4OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1668277155898-704a26a5cfa3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx2aWxsYSUyMGxpdmluZy1yb29tfGVufDB8fHx8MTc2Nzc0MDM4OXww&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "villa living-room"
     },
     {
@@ -107,6 +107,12 @@
       "description": "A placeholder map view of a city with pins",
       "imageUrl": "https://images.unsplash.com/photo-1594132822362-911b36912def?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxtYXAlMjBwbGFjZWhvbGRlcnxlbnwwfHx8fDE3NjgxODg3OTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "map placeholder"
+    },
+    {
+      "id": "virtual-tour-placeholder",
+      "description": "A 360-degree icon representing a virtual tour",
+      "imageUrl": "https://images.unsplash.com/photo-1530203283902-296243a9169f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHwzNjAlMjB0b3VyfGVufDB8fHx8MTc2Nzc0NjExNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "360 tour"
     }
   ]
 }

@@ -1,7 +1,7 @@
 import { properties } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Star, MapPin, Users, BedDouble, Bath, Wifi, ParkingCircle, Utensils, Wind, Tv } from "lucide-react";
+import { Star, MapPin, Users, BedDouble, Bath, Wifi, ParkingCircle, Utensils, Wind, Tv, PlayCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BookingForm } from "@/components/properties/BookingForm";
 import { ReviewSection } from "@/components/properties/ReviewSection";
@@ -12,6 +12,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import placeholderImages from '@/lib/placeholder-images.json';
 
 const amenityIcons: { [key: string]: React.ElementType } = {
   'WiFi': Wifi,
@@ -27,6 +30,7 @@ const amenityIcons: { [key: string]: React.ElementType } = {
 
 export default function PropertyDetailPage({ params }: { params: { id: string } }) {
   const property = properties.find((p) => p.id === params.id);
+  const virtualTourImage = placeholderImages.placeholderImages.find(p => p.id === "virtual-tour-placeholder");
 
   if (!property) {
     notFound();
@@ -49,7 +53,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 relative">
             <Carousel className="w-full rounded-xl overflow-hidden shadow-lg">
                 <CarouselContent>
                     {property.images.map((img, index) => (
@@ -63,6 +67,31 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
                 <CarouselPrevious className="left-4" />
                 <CarouselNext className="right-4" />
             </Carousel>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="secondary" className="absolute bottom-4 right-4 z-10 shadow-lg">
+                  <PlayCircle className="mr-2 h-5 w-5" />
+                  Virtual Tour
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>360° Virtual Tour</DialogTitle>
+                  <DialogDescription>
+                    Explore every corner of {property.name}.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="relative h-[60vh] w-full mt-4 rounded-lg bg-muted flex items-center justify-center">
+                  {virtualTourImage ? (
+                    <Image src={virtualTourImage.imageUrl} alt={virtualTourImage.description} fill className="object-contain" data-ai-hint={virtualTourImage.imageHint} />
+                  ) : <p>Virtual tour loading...</p>}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 text-white p-4">
+                    <h3 className="text-2xl font-bold">Interactive Tour Placeholder</h3>
+                    <p className="mt-2 text-center">A full 360° virtual tour experience will be available here soon.</p>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
         </div>
         <div className="hidden lg:grid grid-rows-2 gap-4">
             <div className="relative rounded-xl overflow-hidden shadow-lg">
