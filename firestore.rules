@@ -2,21 +2,18 @@
  * Core Philosophy: This ruleset enforces a strict, two-tiered security model.
  * 1. User Ownership: Administrator profiles in `/admin_profiles` and user profiles
  *    in `/users` are private and can only be written by the owner of that profile.
- * 2. Role-Based Access: A separate `/roles_admin` collection acts as a lookup
- *    table. The existence of a document at `/roles_admin/{uid}` grants a user
- *    admin privileges, which are required to view or manage the list of all users and admins.
+ * 2. Role-Based Access: The existence of a document at `/admin_profiles/{uid}` grants a user
+ *    admin privileges. This allows for a simple and secure way to verify admin status.
  *
  * Data Structure:
  * - /admin_profiles/{adminId}: Contains the detailed profile data for a specific
  *   administrator, where `{adminId}` is their Firebase Auth UID.
- * - /roles_admin/{uid}: Contains simple "flag" documents. If a document exists at
- *   this path, the user with the corresponding UID is considered an admin.
  * - /users/{userId}: Contains public profile data for a specific user.
  * - /users/{userId}/bookings/{bookingId}: Lightweight copies of a user's bookings for their own access.
  * - /users/{userId}/favorites/{propertyId}: Stores a user's favorite properties.
  * - /users/{userId}/documents/{documentId}: Stores a user's uploaded documents.
  * - /users/{userId}/savedSearches/{searchId}: Stores a user's saved search filters.
- * - /bookings/{bookingId}: Contains complete booking details, accessible only by admins. Regular users cannot access this path.
+ * - /bookings/{bookingId}: Contains complete booking details, accessible only by admins.
  * - /properties/{propertyId}: Contains property details.
  * - /visits/{visitId}: Contains visit request details.
  * - /announcements/{announcementId}: Contains system-wide announcements.
@@ -24,9 +21,6 @@
  * Key Security Decisions:
  * - Admin Listing Disabled for Non-Admins: Non-administrative users cannot list
  *   or discover who the administrators or other users are.
- * - Privilege Escalation Prevention: A user cannot grant themselves admin status.
- *   Only an existing admin can create or delete documents in the `/roles_admin`
- *   collection (though initial creation is relaxed for the first admin).
  * - Self-Service Profile Management: Admins and Users are responsible for creating and
  *   maintaining their own profile data.
  * - Booking Ownership: Users can only manage bookings within their own user document path. The global collection is admin-only.
@@ -36,13 +30,6 @@
  * - Visit Ownership: Users can create visits. They can view their own visits.
  *   Property owners can view and manage visits for their properties.
  * - Announcement Management: Only admins can create, read, and manage announcements.
- *
- * Denormalization for Authorization:
- * The `/roles_admin` collection is a classic example of denormalization for
- * authorization. Instead of embedding a role field in a user profile and requiring
- * a slow `get()` call, we use a separate collection that allows for a fast and
-
- * efficient `exists()` check to determine a user's admin status from any rule.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -80,10 +67,10 @@ service cloud.firestore {
 
     /**
      * Checks if the requesting user is an administrator by verifying the
-     * existence of a role document in the `/roles_admin` collection.
+     * existence of a profile document in the `/admin_profiles` collection.
      */
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      return isSignedIn() && exists(/databases/$(database)/documents/admin_profiles/$(request.auth.uid));
     }
 
     /**
@@ -100,7 +87,6 @@ service cloud.firestore {
       let propertyDoc = get(/databases/$(database)/documents/properties/$(propertyId));
       return isSignedIn() && propertyDoc.data.owner.id == request.auth.uid;
     }
-
 
     /**
      * @description Manages individual user profiles and their subcollections.
@@ -156,9 +142,6 @@ service cloud.firestore {
     /**
      * @description Manages individual administrator profiles. Access is strictly limited to the profile owner.
      * @path /admin_profiles/{adminId}
-     * @allow (get) A signed-in admin with UID 'admin123' reads their own profile at `/admin_profiles/admin123`.
-     * @deny (get) A different user, 'user456', tries to read the profile at `/admin_profiles/admin123`.
-     * @principle Restricts access to a user's own data tree, enforcing data privacy.
      */
     match /admin_profiles/{adminId} {
       allow get: if isOwner(adminId) || isSuperAdmin();
@@ -167,28 +150,14 @@ service cloud.firestore {
       allow update: if (isExistingOwner(adminId) || isSuperAdmin()) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(adminId) || isSuperAdmin();
     }
-
-    /**
-     * @description Manages admin role flags. The existence of a document grants admin privileges.
-     * @path /roles_admin/{uid}
-     * @allow (create) An existing admin creates a role document for a new user at `/roles_admin/newUser789`. The first admin can self-assign.
-     * @deny (create) A non-admin user attempts to create a role document for themselves at `/roles_admin/nonAdminUser`.
-     * @principle Enforces role-based access control, preventing unauthorized privilege escalation.
-     */
-    match /roles_admin/{uid} {
-      allow get: if isOwner(uid) || isAdmin() || isSuperAdmin();
-      allow list: if isAdmin() || isSuperAdmin();
-      allow create: if isOwner(uid) && (!exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) || isAdmin() || isSuperAdmin());
-      allow update: if false;
-      allow delete: if (isAdmin() || isSuperAdmin()) && resource != null;
-    }
-
+    
     /**
      * @description Manages the global bookings collection. This collection is for admin use only.
      * @path /bookings/{bookingId}
      */
     match /bookings/{bookingId} {
-      allow read, write, list: if isAdmin() || isSuperAdmin();
+      allow read, list: if isAdmin() || isSuperAdmin();
+      allow write, delete: if isAdmin() || isSuperAdmin();
     }
     
     /**
@@ -196,19 +165,9 @@ service cloud.firestore {
      * @path /properties/{propertyId}
      */
     match /properties/{propertyId} {
-      // Admins and owners can read properties regardless of status. Public users can only see approved properties.
       allow get: if (isAdmin() || isSuperAdmin()) || (isVerified() && resource.data != null && isOwner(resource.data.owner.id)) || (resource.data != null && resource.data.status == 'approved');
-      
-      // Users can create properties, but they must be 'pending'.
       allow create: if isVerified() && isOwner(request.resource.data.owner.id) && request.resource.data.status == 'pending';
-      
-      // Owners can update their own properties, but cannot change the status.
-      allow update: if isVerified() && resource.data != null && isOwner(resource.data.owner.id) && request.resource.data.status == resource.data.status;
-      
-      // Admins can update any field, but only the Super Admin can change the status.
-      allow update: if isAdmin() && resource.data != null && (request.resource.data.status == resource.data.status || isSuperAdmin());
-      
-      // Owners or Admins can delete.
+      allow update: if (isVerified() && resource.data != null && isOwner(resource.data.owner.id) && request.resource.data.status == resource.data.status) || (isAdmin() && resource.data != null && (request.resource.data.status == resource.data.status || isSuperAdmin()));
       allow delete: if (isVerified() && resource.data != null && isOwner(resource.data.owner.id)) || isAdmin() || isSuperAdmin();
     }
     
@@ -218,15 +177,9 @@ service cloud.firestore {
      */
     match /visits/{visitId} {
         allow create: if isVerified() && isOwner(request.resource.data.userId);
-        
         allow read: if isVerified() && (isOwner(resource.data.userId) || isAdmin() || isSuperAdmin() || isPropertyOwner(resource.data.propertyId));
-        
-        allow list: if isVerified() && (isAdmin() || isSuperAdmin() ||
-                       (request.query.where.size() > 0 && request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid) ||
-                       (request.query.where.size() > 0 && request.query.where[0][0] == 'propertyId' && isPropertyOwner(request.query.where[0][2])));
-
+        allow list: if isVerified() && (isAdmin() || isSuperAdmin() || (request.query.where.size() > 0 && request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid) || (request.query.where.size() > 0 && request.query.where[0][0] == 'propertyId' && isPropertyOwner(request.query.where[0][2])));
         allow update: if (isVerified() && isPropertyOwner(resource.data.propertyId)) || isAdmin() || isSuperAdmin();
-
         allow delete: if (isVerified() && isOwner(resource.data.userId)) || (isVerified() && isPropertyOwner(resource.data.propertyId)) || isAdmin() || isSuperAdmin();
     }
 
@@ -253,8 +206,7 @@ service cloud.firestore {
      */
     match /tickets/{ticketId} {
       allow create: if isSignedIn();
-      allow read, write: if isAdmin() || isSuperAdmin();
-      allow list: if isAdmin() || isSuperAdmin();
+      allow read, write, list: if isAdmin() || isSuperAdmin();
     }
   }
 }
