@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -101,7 +102,7 @@ export function BookingForm({ property }: { property: Property }) {
       <CardHeader>
         <CardTitle>
           <span className="text-2xl font-bold">${price}</span>
-          <span className="text-base font-normal text-muted-foreground">/night</span>
+          <span className="text-base font-normal text-muted-foreground">/{property.longStay ? 'month' : 'day'}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

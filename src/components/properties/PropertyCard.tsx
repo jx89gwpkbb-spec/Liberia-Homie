@@ -45,7 +45,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <CardFooter className="flex justify-between p-4 pt-0">
           <div>
             <span className="text-xl font-bold text-primary">${property.pricePerNight}</span>
-            <span className="text-sm text-muted-foreground">/night</span>
+            <span className="text-sm text-muted-foreground">/{property.longStay ? 'month' : 'day'}</span>
           </div>
           <div className="flex items-center">
             <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
