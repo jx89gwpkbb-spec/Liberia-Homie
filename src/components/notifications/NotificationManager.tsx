@@ -63,10 +63,10 @@ export function NotificationManager() {
         });
       }
     };
-    if ('Notification' in window && Notification.permission === 'default') {
+    if (user && user.emailVerified && 'Notification' in window && Notification.permission === 'default') {
        setTimeout(requestPermission, 5000);
     }
-  }, [firebaseApp, toast]);
+  }, [firebaseApp, toast, user]);
 
   // Effect for sending booking reminders
   useEffect(() => {

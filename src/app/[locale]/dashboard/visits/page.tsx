@@ -74,7 +74,7 @@ export default function MyVisitsPage() {
       
       const properties: {[key: string]: Property} = {};
       
-      // Firestore 'in' query limited to 10
+      // Firestore 'in' query limited to 30, but we'll use 10 for safety
       for(let i = 0; i < propertyIds.length; i += 10) {
         const chunk = propertyIds.slice(i, i + 10);
         const propertiesQuery = query(collection(firestore, 'properties'), where('id', 'in', chunk));

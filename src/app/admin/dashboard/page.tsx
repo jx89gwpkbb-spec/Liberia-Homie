@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart } from "recharts";
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { collection, query, orderBy, limit, where } from 'firebase/firestore';
 import type { UserProfile as User, Property, Booking } from '@/lib/types';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMemo } from "react";
@@ -32,7 +32,7 @@ export default function AdminDashboardPage() {
   const bookingsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'bookings') : null, [firestore]);
   
   const recentUsersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users'), orderBy('createdAt', 'desc'), limit(5)) : null, [firestore]);
-  const recentPropertiesQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'properties'), orderBy('reviewCount', 'desc'), limit(3)) : null, [firestore]);
+  const recentPropertiesQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'properties'), where('status', '==', 'approved'), orderBy('reviewCount', 'desc'), limit(3)) : null, [firestore]);
   
   const { data: users, isLoading: usersLoading } = useCollection<User>(usersCollectionRef);
   const { data: properties, isLoading: propertiesLoading } = useCollection<Property>(propertiesCollectionRef);

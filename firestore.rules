@@ -172,7 +172,7 @@ service cloud.firestore {
      */
     match /bookings/{bookingId} {
         allow read: if isVerified() && (isAdmin() || isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId));
-        allow list: if isVerified() && (isAdmin() || isOwner(request.query.where[0][2]));
+        allow list: if isVerified() && (isAdmin() || (request.query.where.size() > 0 && request.query.where[0][2] == request.auth.uid));
         allow create: if isVerified() && isOwner(request.resource.data.userId);
         allow update, delete: if isVerified() && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId));
     }
@@ -215,8 +215,8 @@ service cloud.firestore {
         allow read: if isVerified() && (isOwner(resource.data.userId) || isAdmin() || isPropertyOwner(resource.data.propertyId));
         
         allow list: if isVerified() && (isAdmin() || 
-                       (request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid) ||
-                       (request.query.where[0][0] == 'propertyId' && isPropertyOwner(request.query.where[0][2])));
+                       (request.query.where.size() > 0 && request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid) ||
+                       (request.query.where.size() > 0 && request.query.where[0][0] == 'propertyId' && isPropertyOwner(request.query.where[0][2])));
 
         allow update: if (isVerified() && isPropertyOwner(resource.data.propertyId)) || isAdmin();
 
