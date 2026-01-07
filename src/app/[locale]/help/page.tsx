@@ -75,34 +75,28 @@ export default function HelpPage() {
     }
   ];
 
-  const onSubmit = async (data: ContactFormData) => {
+  const onSubmit = (data: ContactFormData) => {
     if (!firestore) {
       toast({ title: 'Error', description: 'Could not connect to our services.', variant: 'destructive'});
       return;
     }
+    
+    const ticketsCollection = collection(firestore, 'tickets');
+    const newTicket = {
+        ...data,
+        userId: user?.uid || null,
+        status: 'New' as const,
+        priority: 'Medium' as const,
+        createdAt: serverTimestamp(),
+    };
+    
+    addDocumentNonBlocking(ticketsCollection, newTicket);
 
-    try {
-        const ticketsCollection = collection(firestore, 'tickets');
-        const newTicket = {
-            ...data,
-            userId: user?.uid || null,
-            status: 'New',
-            priority: 'Medium',
-            createdAt: serverTimestamp(),
-        };
-        
-        await addDocumentNonBlocking(ticketsCollection, newTicket);
-
-        toast({
-            title: "Message Sent!",
-            description: "Thanks for reaching out. A support ticket has been created and our team will get back to you shortly."
-        });
-        form.reset();
-        
-    } catch (error) {
-        console.error("Failed to submit ticket:", error);
-        toast({ title: "Submission Failed", description: "Something went wrong. Please try again.", variant: 'destructive'});
-    }
+    toast({
+        title: "Message Sent!",
+        description: "Thanks for reaching out. A support ticket has been created and our team will get back to you shortly."
+    });
+    form.reset();
   };
 
   return (
@@ -177,5 +171,3 @@ export default function HelpPage() {
     </div>
   );
 }
-
-    
