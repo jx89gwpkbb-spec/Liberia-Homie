@@ -14,7 +14,7 @@ export const properties: Property[] = [
   {
     id: 'prop-1',
     name: 'Modern Villa with Ocean View',
-    location: 'Malibu, California',
+    location: 'Monrovia, Liberia',
     pricePerNight: 850,
     description: 'Experience luxury in this stunning modern villa. With breathtaking ocean views, a private pool, and state-of-the-art amenities, it is the perfect getaway for families or groups of friends.',
     longStay: true,
@@ -151,29 +151,29 @@ export const reviews: Review[] = [
 export const bookings: Booking[] = [
     {
         id: 'book-1',
-        propertyId: properties[0].id,
         userId: users[3].id,
+        propertyId: 'prop-1',
         checkInDate: new Date('2024-08-01'),
         checkOutDate: new Date('2024-08-10'),
         totalPrice: 8500,
         guests: 4,
         createdAt: new Date(),
-        propertyName: properties[0].name,
-        propertyImage: properties[0].images[0],
-        propertyLocation: properties[0].location
+        propertyName: 'Modern Villa with Ocean View',
+        propertyImage: 'https://images.unsplash.com/photo-1599777560450-e462cffc5368?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtb2Rlcm4lMjB2aWxsYXxlbnwwfHx8fDE3Njc3MDYwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080',
+        propertyLocation: 'Monrovia, Liberia',
     },
     {
         id: 'book-2',
-        propertyId: properties[2].id,
         userId: users[3].id,
+        propertyId: 'prop-3',
         checkInDate: new Date('2024-09-15'),
         checkOutDate: new Date('2024-09-20'),
         totalPrice: 2000,
         guests: 2,
         createdAt: new Date(),
-        propertyName: properties[2].name,
-        propertyImage: properties[2].images[0],
-        propertyLocation: properties[2].location
+        propertyName: 'Spacious Suburban Family Home',
+        propertyImage: 'https://images.unsplash.com/photo-1625603736199-775425d2890a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdWJ1cmJhbiUyMGhvdXNlfGVufDB8fHx8MTc2NzY2Nzg1Mnww&ixlib=rb-4.1.0&q=80&w=1080',
+        propertyLocation: 'Austin, Texas',
     }
 ];
 
