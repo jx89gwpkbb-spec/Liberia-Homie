@@ -63,11 +63,11 @@ export default function AdminBookingsPage() {
                   <TableRow key={booking.id}>
                     <TableCell className="font-medium">{booking.propertyName}</TableCell>
                     <TableCell className="font-mono text-xs">{booking.userId}</TableCell>
-                    <TableCell>{format(new Date(booking.checkInDate), 'MMM dd, yyyy')} - {format(new Date(booking.checkOutDate), 'MMM dd, yyyy')}</TableCell>
+                    <TableCell>{booking.checkInDate?.toDate ? `${format(booking.checkInDate.toDate(), 'MMM dd, yyyy')} - ${format(booking.checkOutDate.toDate(), 'MMM dd, yyyy')}` : 'N/A'}</TableCell>
                     <TableCell>${booking.totalPrice.toLocaleString()}</TableCell>
                     <TableCell>
-                      <Badge variant={new Date(booking.checkOutDate) < new Date() ? 'secondary' : 'default'}>
-                        {new Date(booking.checkOutDate) < new Date() ? 'Completed' : 'Upcoming'}
+                      <Badge variant={booking.checkOutDate?.toDate() < new Date() ? 'secondary' : 'default'}>
+                        {booking.checkOutDate?.toDate() < new Date() ? 'Completed' : 'Upcoming'}
                       </Badge>
                     </TableCell>
                     <TableCell>

@@ -30,7 +30,7 @@ export default function AdminVendorsPage() {
       <Card>
         <CardHeader>
           <CardTitle>All Vendors</CardTitle>
-          <CardDescription>A complete list of all registered vendors.</CardDescription>
+          <CardDescription>A complete list of all registered vendors (property owners).</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>

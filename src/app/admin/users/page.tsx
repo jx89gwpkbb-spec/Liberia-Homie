@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 
 export default function AdminUsersPage() {
   const firestore = useFirestore();
@@ -29,7 +30,7 @@ export default function AdminUsersPage() {
       <Card>
         <CardHeader>
           <CardTitle>All Users</CardTitle>
-          <CardDescription>A complete list of all registered users.</CardDescription>
+          <CardDescription>A complete list of all registered users, including vendors and renters.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -37,6 +38,7 @@ export default function AdminUsersPage() {
               <TableRow>
                 <TableHead>User</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
                 <TableHead>User ID</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
@@ -52,6 +54,7 @@ export default function AdminUsersPage() {
                       </div>
                     </TableCell>
                     <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-8 w-8" /></TableCell>
                   </TableRow>
@@ -68,6 +71,9 @@ export default function AdminUsersPage() {
                       </div>
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Badge variant={user.role === 'vendor' ? 'secondary' : 'outline'}>{user.role}</Badge>
+                    </TableCell>
                     <TableCell className="font-mono text-xs">{user.id}</TableCell>
                     <TableCell>
                        <DropdownMenu>
@@ -89,7 +95,7 @@ export default function AdminUsersPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
+                  <TableCell colSpan={5} className="h-24 text-center">
                     No users found.
                   </TableCell>
                 </TableRow>

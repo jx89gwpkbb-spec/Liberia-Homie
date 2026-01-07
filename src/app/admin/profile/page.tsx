@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,20 +34,17 @@ export default function AdminProfilePage() {
         creationDate: serverTimestamp(),
         lastLogin: serverTimestamp(),
         role: 'superadmin',
-        permissions: ['manage_properties', 'manage_users', 'view_analytics'],
+        permissions: ['manage_properties', 'manage_users', 'view_analytics', 'full_system_management'],
       };
       
       const roleRef = doc(firestore, 'roles_admin', user.uid);
       
-      // These writes can proceed without blocking the UI
-      setDoc(adminProfileRef, adminProfileData, { merge: true }).catch(err => console.error("Failed to create profile:", err));
-      setDoc(roleRef, { admin: true }).catch(err => console.error("Failed to set role:", err));
+      await setDoc(adminProfileRef, adminProfileData, { merge: true });
+      await setDoc(roleRef, { admin: true });
 
     } catch (error) {
       console.error('Error creating admin profile:', error);
     } finally {
-      // The UI will optimistically update due to the real-time listener from useDoc
-      // so we don't need to force a reload or wait for the write to complete.
        setIsCreatingProfile(false);
     }
   };

@@ -26,7 +26,7 @@ export default function AdminLayout({
 
     useEffect(() => {
         const checkAdminStatus = async () => {
-            if (isUserLoading) return;
+            if (isUserLoading || !firestore) return;
             if (!user) {
                 router.push('/login');
                 return;

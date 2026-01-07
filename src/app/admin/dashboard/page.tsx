@@ -54,8 +54,10 @@ export default function AdminDashboardPage() {
     if (!bookings) return [];
     const monthlyBookings: {[key: string]: number} = {};
     bookings.forEach(booking => {
-      const month = format(booking.createdAt.toDate(), 'MMMM');
-      monthlyBookings[month] = (monthlyBookings[month] || 0) + 1;
+        if(booking.createdAt?.toDate) {
+            const month = format(booking.createdAt.toDate(), 'MMMM');
+            monthlyBookings[month] = (monthlyBookings[month] || 0) + 1;
+        }
     });
     return Object.keys(monthlyBookings).map(month => ({ month, bookings: monthlyBookings[month] }));
   }, [bookings]);
@@ -64,8 +66,10 @@ export default function AdminDashboardPage() {
     if (!users) return [];
     const dailyUsers: {[key: string]: number} = {};
      users.slice(-7).forEach(user => {
-      const date = format(user.createdAt.toDate(), 'yyyy-MM-dd');
-      dailyUsers[date] = (dailyUsers[date] || 0) + 1;
+        if (user.createdAt?.toDate) {
+            const date = format(user.createdAt.toDate(), 'yyyy-MM-dd');
+            dailyUsers[date] = (dailyUsers[date] || 0) + 1;
+        }
     });
     return Object.keys(dailyUsers).map(date => ({ date, users: dailyUsers[date] }));
   }, [users]);
@@ -284,10 +288,10 @@ export default function AdminDashboardPage() {
                 <TableRow key={booking.id}>
                   <TableCell className="font-medium">{booking.propertyName}</TableCell>
                   <TableCell className="text-xs font-mono">{booking.userId}</TableCell>
-                  <TableCell>{format(booking.checkInDate.toDate(), 'MMM dd')} - {format(booking.checkOutDate.toDate(), 'MMM dd, yyyy')}</TableCell>
+                  <TableCell>{booking.checkInDate?.toDate ? `${format(booking.checkInDate.toDate(), 'MMM dd')} - ${format(booking.checkOutDate.toDate(), 'MMM dd, yyyy')}`: 'N/A'}</TableCell>
                   <TableCell>
-                    <Badge variant={booking.checkOutDate.toDate() < new Date() ? 'secondary' : 'default'}>
-                      {booking.checkOutDate.toDate() < new Date() ? 'Completed' : 'Upcoming'}
+                    <Badge variant={booking.checkOutDate?.toDate() < new Date() ? 'secondary' : 'default'}>
+                      {booking.checkOutDate?.toDate() < new Date() ? 'Completed' : 'Upcoming'}
                     </Badge>
                   </TableCell>
                 </TableRow>

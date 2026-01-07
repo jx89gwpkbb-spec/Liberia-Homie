@@ -83,7 +83,7 @@ export default function AdminAdminsPage() {
                     <TableCell>
                       <Badge variant="destructive">{admin.role}</Badge>
                     </TableCell>
-                     <TableCell>{admin.creationDate ? format(new Date(admin.creationDate), 'MMM dd, yyyy') : 'N/A'}</TableCell>
+                     <TableCell>{admin.creationDate?.toDate ? format(admin.creationDate.toDate(), 'MMM dd, yyyy') : 'N/A'}</TableCell>
                     <TableCell>
                        <DropdownMenu>
                         <DropdownMenuTrigger asChild>
