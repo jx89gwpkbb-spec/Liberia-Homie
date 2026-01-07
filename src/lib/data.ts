@@ -150,6 +150,12 @@ export const reviews: Review[] = [
         rating: 5,
         comment: "Absolutely stunning villa! The views were even better than the pictures. Everything was clean and the host was very responsive. Highly recommend!",
         createdAt: "2023-10-20T14:48:00.000Z",
+        cleanliness: 5,
+        communication: 5,
+        checkIn: 5,
+        accuracy: 5,
+        location: 5,
+        value: 5,
     },
     {
         id: 'rev-2',
@@ -158,6 +164,12 @@ export const reviews: Review[] = [
         rating: 4,
         comment: "Great location and beautiful house. We had a minor issue with the pool heater but the owner fixed it quickly. Overall, a fantastic stay.",
         createdAt: "2023-09-15T10:30:00.000Z",
+        cleanliness: 4,
+        communication: 5,
+        checkIn: 4,
+        accuracy: 5,
+        location: 5,
+        value: 4,
     },
     {
         id: 'rev-3',
@@ -166,6 +178,12 @@ export const reviews: Review[] = [
         rating: 5,
         comment: "The apartment was perfect for our city trip. It's small but has everything you need and the location is unbeatable. We would definitely stay here again.",
         createdAt: "2023-11-05T18:00:00.000Z",
+        cleanliness: 5,
+        communication: 5,
+        checkIn: 5,
+        accuracy: 5,
+        location: 5,
+        value: 5,
     }
 ];
 
@@ -193,7 +211,7 @@ export const bookings: Booking[] = [
         guests: 2,
         createdAt: new Date(),
         propertyName: 'Spacious Suburban Family Home',
-        propertyImage: 'https://images.unsplash.com/photo-1625603736199-775425d2890a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdWJ1cmJhbiUyMGhvdXNlfGVufDB8fHx8MTc2NzY2Nzg1Mnww&ixlib=rb-4.1.0&q=80&w=1080',
+        propertyImage: 'https://images.unsplash.com/photo-1625603736199-775425d2890a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdWJ1cmJhbiUyMGhvdXNlfGVufDB8fHx8MTc2NzY2Nzg1Mnww&ixlib-rb-4.1.0&q=80&w=1080',
         propertyLocation: 'Ganta, Liberia',
     }
 ];

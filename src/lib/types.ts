@@ -68,6 +68,12 @@ export type Review = {
   rating: number;
   comment: string;
   createdAt: string;
+  cleanliness: number;
+  communication: number;
+  checkIn: number;
+  accuracy: number;
+  location: number;
+  value: number;
 };
 
 export type Booking = {
@@ -163,3 +169,4 @@ export type SupportTicket = {
     
 
     
+
