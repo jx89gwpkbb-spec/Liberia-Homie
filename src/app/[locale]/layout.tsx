@@ -20,7 +20,7 @@ export default async function LocaleLayout({
 
   return (
     <FirebaseClientProvider>
-      <NextIntlClientProvider messages={messages}>
+      <NextIntlClientProvider locale={locale} messages={messages}>
         <div className="flex min-h-screen flex-col">
           <Header />
           <main className="flex-1">{children}</main>
@@ -28,8 +28,8 @@ export default async function LocaleLayout({
         </div>
         <ChatWidget />
         <Toaster />
+        <NotificationManager />
       </NextIntlClientProvider>
-      <NotificationManager />
     </FirebaseClientProvider>
   );
 }
