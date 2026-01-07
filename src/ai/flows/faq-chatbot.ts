@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A simple FAQ chatbot flow for Homie Stays.
@@ -30,8 +31,11 @@ const prompt = ai.definePrompt({
   name: 'faqChatbotPrompt',
   input: { schema: FaqChatbotInputSchema },
   output: { schema: FaqChatbotOutputSchema },
-  prompt: `You are Agent231, a friendly and helpful AI support agent for Homie Stays.
-  Answer the user's question concisely and clearly. Maintain a warm and professional tone.
+  prompt: `You are Agent231, a friendly and helpful AI support agent for Homie Stays, a property rental platform.
+  Your goal is to answer user questions about booking, payments, listing properties, and general platform use.
+  
+  Answer the user's question clearly and concisely. If the question is complex or you don't know the answer,
+  politely suggest they visit the Help Center or contact support directly. Maintain a warm, professional, and encouraging tone.
 
   User Question: {{question}}
   `,
