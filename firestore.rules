@@ -13,6 +13,7 @@
  *   this path, the user with the corresponding UID is considered an admin.
  * - /users/{userId}: Contains public profile data for a specific user.
  * - /users/{userId}/favorites/{propertyId}: Stores a user's favorite properties.
+ * - /users/{userId}/documents/{documentId}: Stores a user's uploaded documents.
  * - /bookings/{bookingId}: Contains booking details.
  * - /properties/{propertyId}: Contains property details.
  *
@@ -26,6 +27,7 @@
  *   maintaining their own profile data.
  * - Booking Ownership: Users can only create and view their own bookings.
  * - Favorite Ownership: Users can only manage their own list of favorites.
+ * - Document Ownership: Users can only manage their own documents.
  *
  * Denormalization for Authorization:
  * The `/roles_admin` collection is a classic example of denormalization for
@@ -86,6 +88,16 @@ service cloud.firestore {
        * @deny (read, write) A user cannot access another user's favorites.
        */
       match /favorites/{propertyId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      /**
+       * @description Manages a user's uploaded documents.
+       * @path /users/{userId}/documents/{documentId}
+       * @allow (read, write) A user can manage their own documents.
+       * @deny (read, write) A user cannot access another user's documents.
+       */
+      match /documents/{documentId} {
         allow read, write: if isOwner(userId);
       }
     }
@@ -149,5 +161,3 @@ service cloud.firestore {
     }
   }
 }
-
-    

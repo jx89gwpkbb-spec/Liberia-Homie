@@ -252,6 +252,48 @@
         "propertyId",
         "createdAt"
       ]
+    },
+     "Document": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Document",
+      "description": "Represents a document uploaded by a user.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the document."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who uploaded the document."
+        },
+        "fileName": {
+          "type": "string",
+          "description": "The name of the uploaded file."
+        },
+        "fileUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "The URL to access the uploaded file."
+        },
+        "documentType": {
+          "type": "string",
+          "enum": ["ID Proof", "Rental Agreement", "Other"],
+          "description": "The type of the document."
+        },
+        "uploadedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the document was uploaded."
+        }
+      },
+      "required": [
+        "userId",
+        "fileName",
+        "fileUrl",
+        "documentType",
+        "uploadedAt"
+      ]
     }
   },
   "auth": {
@@ -379,8 +421,28 @@
             }
           ]
         }
+      },
+       {
+        "path": "/users/{userId}/documents/{documentId}",
+        "definition": {
+          "entityName": "Document",
+          "schema": {
+            "$ref": "#/backend/entities/Document"
+          },
+          "description": "Stores documents uploaded by a user. Users can only manage their own documents.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, matching the Firebase Authentication UID."
+            },
+            {
+              "name": "documentId",
+              "description": "The unique identifier of the document."
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to securely manage admin and user profiles using a path-based ownership model. This approach provides authorization independence and facilitates secure list operations.\n\n**Authorization Independence:** Admin profiles are stored under the `/admin_profiles/{adminId}` path. Authorization is based solely on the `adminId` matching the `request.auth.uid`. There's no reliance on data from other documents to determine access.\n\n**Structural Segregation:** Admin profiles are stored in a dedicated collection (`/admin_profiles`), ensuring a homogeneous security posture. All documents in this collection share the same security requirements (only the admin can access their profile).\n\n**Access Modeling:** Path-based ownership is used for user data (`/users/{userId}`), admin data (`/admin_profiles/{adminId}`), and user-specific subcollections like favorites (`/users/{userId}/favorites`).\n\n**QAPs:**\n*   Secure `list` operations for user profiles are enabled for admins, while non-admins can only read their own profile.\n*   The structure avoids using rules as filters, ensuring that list operations are secure and efficient."
+    "reasoning": "The Firestore structure is designed to securely manage admin and user profiles using a path-based ownership model. This approach provides authorization independence and facilitates secure list operations.\n\n**Authorization Independence:** Admin profiles are stored under the `/admin_profiles/{adminId}` path. Authorization is based solely on the `adminId` matching the `request.auth.uid`. There's no reliance on data from other documents to determine access.\n\n**Structural Segregation:** Admin profiles are stored in a dedicated collection (`/admin_profiles`), ensuring a homogeneous security posture. All documents in this collection share the same security requirements (only the admin can access their profile).\n\n**Access Modeling:** Path-based ownership is used for user data (`/users/{userId}`), admin data (`/admin_profiles/{adminId}`), and user-specific subcollections like favorites (`/users/{userId}/favorites`) and documents (`/users/{userId}/documents`).\n\n**QAPs:**\n*   Secure `list` operations for user profiles are enabled for admins, while non-admins can only read their own profile.\n*   The structure avoids using rules as filters, ensuring that list operations are secure and efficient."
   }
 }

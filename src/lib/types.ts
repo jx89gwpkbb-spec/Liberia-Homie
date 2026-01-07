@@ -62,3 +62,12 @@ export type Favorite = {
   propertyId: string;
   createdAt: any;
 };
+
+export type Document = {
+  id?: string;
+  userId: string;
+  fileName: string;
+  fileUrl: string;
+  documentType: 'ID Proof' | 'Rental Agreement' | 'Other';
+  uploadedAt: any;
+};

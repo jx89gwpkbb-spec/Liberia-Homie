@@ -1,12 +1,13 @@
 "use client"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, PlusCircle, BookOpenCheck, Heart } from 'lucide-react';
+import { LayoutDashboard, Package, PlusCircle, BookOpenCheck, Heart, FileText } from 'lucide-react';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 
 const navItems = [
   { href: '/dashboard/bookings', label: 'My Bookings', icon: BookOpenCheck },
   { href: '/dashboard/favorites', label: 'My Favorites', icon: Heart },
+  { href: '/dashboard/documents', label: 'My Documents', icon: FileText },
   { href: '/dashboard/properties', label: 'My Properties', icon: Package },
   { href: '/dashboard/properties/new', label: 'Add Property', icon: PlusCircle },
 ];
@@ -28,5 +29,3 @@ export function DashboardNav() {
     </SidebarMenu>
   );
 }
-
-    
