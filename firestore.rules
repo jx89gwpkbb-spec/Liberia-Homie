@@ -183,14 +183,15 @@ service cloud.firestore {
      */
     match /properties/{propertyId} {
       // Public users can only see approved properties.
-      allow read, list: if resource.data.status == 'approved';
+      allow read: if resource.data.status == 'approved';
+      allow list: if request.query.where.size() > 0 && request.query.where[0][0] == 'status' && request.query.where[0][2] == 'approved';
       
       // Admins can see all properties regardless of status.
       allow read, list: if isAdmin();
       
       // Owners can view their own properties regardless of status.
       allow read: if isVerified() && isOwner(resource.data.owner.id);
-      allow list: if isVerified() && isOwner(request.resource.data.owner.id);
+      allow list: if isVerified() && request.query.where.size() > 0 && request.query.where[0][2] == request.auth.uid;
 
       // Users can create properties, but they must be 'pending'.
       allow create: if isVerified() && isOwner(request.resource.data.owner.id) && request.resource.data.status == 'pending';
