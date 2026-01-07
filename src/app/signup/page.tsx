@@ -65,7 +65,7 @@ export default function SignupPage() {
     const isValid = await trigger(['fullName', 'email', 'password']);
     if (isValid) {
       setIsLoading(true);
-      if (!firestore || !auth) {
+      if (!auth) {
         toast({ title: 'Error', description: 'Services not available.', variant: 'destructive' });
         setIsLoading(false);
         return;
