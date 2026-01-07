@@ -1,7 +1,13 @@
-
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
+import { Toaster } from '@/components/ui/toaster';
+import { ChatWidget } from '@/components/chatbot/ChatWidget';
+import { NotificationManager } from '@/components/notifications/NotificationManager';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
 import type { Metadata } from 'next';
 import './globals.css';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
   title: 'Homie Stays',
@@ -10,13 +16,17 @@ export const metadata: Metadata = {
   themeColor: '#5D28D2',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{
+  params: { locale },
+}: {
   children: React.ReactNode;
-}>) {
+  params: { locale: string };
+}) {
+  const messages = await getMessages();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -30,7 +40,13 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased" suppressHydrationWarning={true}>
-        <FirebaseClientProvider>{children}</FirebaseClientProvider>
+        <FirebaseClientProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            {children}
+            <Toaster />
+            <NotificationManager />
+          </NextIntlClientProvider>
+        </FirebaseClientProvider>
       </body>
     </html>
   );
