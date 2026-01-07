@@ -151,7 +151,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
     };
 
     const onSubmit = (data: PropertyFormData) => {
-        if (!user || !firestore) return;
+        if (!user || !firestore) {
+            toast({ title: "Authentication Error", description: "Please log in to submit a property.", variant: "destructive" });
+            return;
+        }
         if (previewUrls.length === 0) {
             toast({ title: "Error", description: "You must upload at least one image.", variant: "destructive" });
             return;
@@ -161,38 +164,50 @@ export function PropertyForm({ property }: PropertyFormProps) {
         const propertyId = property?.id || doc(collection(firestore, 'properties')).id;
         
         const processSubmit = async (uploadedUrls: string[]) => {
-            const finalImageUrls = [...existingImageUrls, ...uploadedUrls];
-            const propertyData = {
-                id: propertyId,
-                name: data.name, location: data.location,
-                pricePerNight: parseFloat(data.price),
-                bedrooms: parseInt(data.bedrooms, 10), bathrooms: parseInt(data.bathrooms, 10),
-                maxGuests: parseInt(data.maxGuests, 10), longStay: data.stayDuration === 'long',
-                amenities: data.keyFeatures.split(',').map(s => s.trim()),
-                description: data.description, propertyType: data.propertyType,
-                images: finalImageUrls, petFriendly: data.petFriendly,
-                owner: property?.owner || {
-                    id: user.uid,
-                    name: user.displayName || 'Anonymous',
-                    avatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
-                },
-                rating: property?.rating || Math.round((Math.random() * 2 + 3) * 10) / 10,
-                reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
-                viewCount: property?.viewCount || Math.floor(Math.random() * 2000),
-                gps: gpsCoords, status: property?.status || 'pending',
-            };
-
-            const propertyRef = doc(firestore, 'properties', propertyId);
-            
-            if (isEditMode) {
-                setDocumentNonBlocking(propertyRef, propertyData, { merge: true });
-                toast({ title: "Property Updated!", description: `${data.name} has been updated successfully.` });
-            } else {
-                 setDocumentNonBlocking(propertyRef, propertyData, { merge: false });
-                toast({ title: "Property Submitted!", description: `${data.name} has been submitted for review.` });
+            try {
+                const finalImageUrls = [...existingImageUrls, ...uploadedUrls];
+                const propertyData = {
+                    id: propertyId,
+                    name: data.name,
+                    location: data.location,
+                    pricePerNight: parseFloat(data.price),
+                    bedrooms: parseInt(data.bedrooms, 10),
+                    bathrooms: parseInt(data.bathrooms, 10),
+                    maxGuests: parseInt(data.maxGuests, 10),
+                    longStay: data.stayDuration === 'long',
+                    amenities: data.keyFeatures.split(',').map(s => s.trim()),
+                    description: data.description,
+                    propertyType: data.propertyType,
+                    images: finalImageUrls,
+                    petFriendly: data.petFriendly,
+                    owner: property?.owner || {
+                        id: user.uid,
+                        name: user.displayName || 'Anonymous',
+                        avatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
+                    },
+                    rating: property?.rating || Math.round((Math.random() * 2 + 3) * 10) / 10,
+                    reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
+                    viewCount: property?.viewCount || Math.floor(Math.random() * 2000),
+                    gps: gpsCoords,
+                    status: property?.status || 'pending',
+                };
+    
+                const propertyRef = doc(firestore, 'properties', propertyId);
+                
+                if (isEditMode) {
+                    await setDoc(propertyRef, propertyData, { merge: true });
+                    toast({ title: "Property Updated!", description: `${data.name} has been updated successfully.` });
+                } else {
+                    await setDoc(propertyRef, propertyData, { merge: false });
+                    toast({ title: "Property Submitted!", description: `${data.name} has been submitted for review.` });
+                }
+                router.push('/dashboard/properties');
+            } catch (error) {
+                console.error("Firestore operation failed", error);
+                toast({ title: "Submission Failed", description: "Could not save the property. Please check your connection and security rules.", variant: "destructive" });
+            } finally {
+                setIsSaving(false);
             }
-            router.push('/dashboard/properties');
-            setIsSaving(false);
         };
 
         if (newImageFiles.length > 0) {
