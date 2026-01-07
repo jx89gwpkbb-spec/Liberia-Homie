@@ -22,6 +22,7 @@ export default function AdminAdminsPage() {
   const { data: admins, isLoading } = useCollection<AdminProfile>(adminsCollectionRef);
   
   const getInitials = (name: string) => {
+    if (!name) return '';
     return name.split(' ').map((n) => n[0]).join('');
   }
 
@@ -82,7 +83,7 @@ export default function AdminAdminsPage() {
                     <TableCell>
                       <Badge variant="destructive">{admin.role}</Badge>
                     </TableCell>
-                     <TableCell>{admin.creationDate ? format(admin.creationDate.toDate(), 'MMM dd, yyyy') : 'N/A'}</TableCell>
+                     <TableCell>{admin.creationDate ? format(new Date(admin.creationDate), 'MMM dd, yyyy') : 'N/A'}</TableCell>
                     <TableCell>
                        <DropdownMenu>
                         <DropdownMenuTrigger asChild>
