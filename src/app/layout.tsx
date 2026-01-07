@@ -4,6 +4,8 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Homie Stays',
   description: 'Find your next home, for a short or long stay.',
+  manifest: '/manifest.json',
+  themeColor: '#5D28D2',
 };
 
 export default function RootLayout({

@@ -9,11 +9,48 @@ import { Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import type { Property } from '@/lib/types';
+import { properties as staticProperties } from '@/lib/data';
 
 type FavoriteButtonProps = {
   propertyId: string;
   size?: 'default' | 'sm' | 'lg' | 'icon';
 };
+
+// Caches for offline data
+const CACHE_NAME = 'favorited-properties-v1';
+
+async function cacheFavoritedProperty(property: Property) {
+  if ('caches' in window) {
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      const imageUrls = property.images.map(url => new Request(url, { mode: 'no-cors' }));
+      await cache.addAll(imageUrls);
+      await cache.put(`/api/properties/${property.id}`, new Response(JSON.stringify(property)));
+    } catch (error) {
+      console.error('Failed to cache property:', error);
+    }
+  }
+}
+
+async function removePropertyFromCache(propertyId: string) {
+    if ('caches' in window) {
+        try {
+            const cache = await caches.open(CACHE_NAME);
+            const property = staticProperties.find(p => p.id === propertyId);
+            if (property) {
+                // We must also remove images from cache
+                 for (const imageUrl of property.images) {
+                    await cache.delete(imageUrl);
+                }
+            }
+            await cache.delete(`/api/properties/${propertyId}`);
+        } catch(error) {
+            console.error("Failed to remove from cache:", error);
+        }
+    }
+}
+
 
 export function FavoriteButton({ propertyId, size = 'default' }: FavoriteButtonProps) {
   const { user, isUserLoading } = useUser();
@@ -60,12 +97,14 @@ export function FavoriteButton({ propertyId, size = 'default' }: FavoriteButtonP
 
     setIsLoading(true);
 
+    const property = staticProperties.find(p => p.id === propertyId);
+
     try {
       if (isFavorited) {
         await deleteDoc(favoriteRef);
+        if (property) await removePropertyFromCache(propertyId);
         toast({ title: 'Removed from favorites.' });
       } else {
-        // Milestone Gamification: Check if this is the first favorite
         const favoritesCollection = collection(firestore, `users/${user.uid}/favorites`);
         const q = query(favoritesCollection, limit(1));
         const snapshot = await getDocs(q);
@@ -74,6 +113,8 @@ export function FavoriteButton({ propertyId, size = 'default' }: FavoriteButtonP
           propertyId,
           createdAt: serverTimestamp(),
         });
+        
+        if (property) await cacheFavoritedProperty(property);
 
         if (snapshot.empty) {
           toast({ title: 'Congrats on your first saved property! 🎉' });
@@ -89,9 +130,6 @@ export function FavoriteButton({ propertyId, size = 'default' }: FavoriteButtonP
         variant: 'destructive',
       });
     } finally {
-      // The onSnapshot listener will handle the final state update,
-      // so we don't need to manually set isFavorited here.
-      // We just need to stop the local loading indicator.
       setIsLoading(false);
     }
   };
@@ -118,5 +156,3 @@ export function FavoriteButton({ propertyId, size = 'default' }: FavoriteButtonP
     </Button>
   );
 }
-
-    
