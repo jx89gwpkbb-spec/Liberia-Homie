@@ -38,7 +38,8 @@ export default function DashboardLayout({
   }, [user, isUserLoading, router]);
 
   // While loading auth state, or if user is unverified, show a loader
-  if (isUserLoading || !user || (user && !user.emailVerified)) {
+  // This prevents child components from rendering and making premature Firestore queries
+  if (isUserLoading || !user || !user.emailVerified) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
