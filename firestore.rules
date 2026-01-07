@@ -166,8 +166,8 @@ service cloud.firestore {
      */
     match /bookings/{bookingId} {
       allow create: if request.auth.uid == request.resource.data.userId;
-      allow read: if request.auth.uid == resource.data.userId || isAdmin();
-      allow list: if isAdmin() || (request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid);
+      allow read: if request.auth.uid == resource.data.userId || isAdmin() || isPropertyOwner(resource.data.propertyId);
+      allow list: if isAdmin() || (request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid) || (request.query.where[0][0] == 'propertyId' && isPropertyOwner(request.query.where[0][2]));
       allow update, delete: if false;
     }
     
