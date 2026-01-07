@@ -8,11 +8,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AdminProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
+  const { toast } = useToast();
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
 
   const adminProfileRef = useMemoFirebase(() => {
@@ -24,13 +26,22 @@ export default function AdminProfilePage() {
 
   useEffect(() => {
     const createProfileIfNeeded = async () => {
+      // Wait for user and Firestore to be available, and only proceed if there is no profile.
       if (isUserLoading || isProfileLoading || !user || !firestore || adminProfile) {
         return;
       }
       
-      // If we are here, it means user is loaded, profile is loaded, but profile is null.
-      // So, we create it automatically.
+      // Secondary check: only the superadmin email can auto-create a profile.
+      if (user.email !== 'samuelknimelyjr@gmail.com') {
+        return;
+      }
+
       setIsCreatingProfile(true);
+      toast({
+        title: "Setting Up Admin Profile",
+        description: "Please wait while we initialize your admin account.",
+      });
+
       try {
         const adminProfileRef = doc(firestore, 'admin_profiles', user.uid);
         const roleRef = doc(firestore, 'roles_admin', user.uid);
@@ -47,13 +58,16 @@ export default function AdminProfilePage() {
           permissions: ['manage_properties', 'manage_users', 'view_analytics', 'full_system_management'],
         };
         
-        // Perform both writes
+        // Perform both writes atomically using a batch in a real app, but for simplicity here we do them sequentially.
         await setDoc(adminProfileRef, adminProfileData, { merge: true });
         await setDoc(roleRef, { admin: true });
 
-        // The useDoc hook will automatically update with the new profile data.
+        // The useDoc hook will automatically update with the new profile data after this.
+        toast({ title: "Admin Profile Created", description: "Your admin account is ready."});
+
       } catch (error) {
         console.error('Error creating admin profile:', error);
+         toast({ title: "Profile Creation Failed", description: "Could not initialize your admin account.", variant: "destructive" });
       } finally {
          setIsCreatingProfile(false);
       }
@@ -61,7 +75,7 @@ export default function AdminProfilePage() {
     
     createProfileIfNeeded();
 
-  }, [adminProfile, isProfileLoading, user, isUserLoading, firestore]);
+  }, [adminProfile, isProfileLoading, user, isUserLoading, firestore, toast]);
   
   const isLoading = isUserLoading || isProfileLoading || isCreatingProfile;
   
