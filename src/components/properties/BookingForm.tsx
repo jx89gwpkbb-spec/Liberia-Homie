@@ -226,12 +226,12 @@ export function BookingForm({ property }: { property: Property }) {
                       <span>Total Price:</span>
                       <span>${total.toLocaleString()}</span>
                   </div>
-                   <p className="text-sm text-muted-foreground mt-1">This is a placeholder for the payment step. Choose to pay now or at the residence. No real payment will be processed.</p>
+                   <p className="text-sm text-muted-foreground mt-1">This is a placeholder for the payment step. No real payment will be processed.</p>
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={handleReserve} disabled={isBooking}>
-                   {isBooking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Confirm and Pay now or pay at resident'}
+                   {isBooking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Confirm Instant Booking'}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
