@@ -153,6 +153,16 @@
           "type": "string",
           "description": "The user's role in the application.",
           "enum": ["renter", "vendor"]
+        },
+        "notificationSettings": {
+          "type": "object",
+          "description": "User's notification preferences.",
+          "properties": {
+            "newListingAlerts": { "type": "boolean" },
+            "priceDropAlerts": { "type": "boolean" },
+            "rentReminders": { "type": "boolean" },
+            "marketingEmails": { "type": "boolean" }
+          }
         }
       },
       "required": [
@@ -558,5 +568,3 @@
     "reasoning": "The Firestore structure is designed to securely manage admin and user profiles using a path-based ownership model. This approach provides authorization independence and facilitates secure list operations.\n\n**Authorization Independence:** Admin profiles are stored under the `/admin_profiles/{adminId}` path. Authorization is based solely on the `adminId` matching the `request.auth.uid`. There's no reliance on data from other documents to determine access.\n\n**Structural Segregation:** Admin profiles are stored in a dedicated collection (`/admin_profiles`), ensuring a homogeneous security posture. All documents in this collection share the same security requirements (only the admin can access their profile).\n\n**Access Modeling:** Path-based ownership is used for user data (`/users/{userId}`), admin data (`/admin_profiles/{adminId}`), and user-specific subcollections like favorites (`/users/{userId}/favorites`), documents (`/users/{userId}/documents`), and saved searches (`/users/{userId}/savedSearches`).\n\n**QAPs:**\n*   Secure `list` operations for user profiles are enabled for admins, while non-admins can only read their own profile.\n*   The structure avoids using rules as filters, ensuring that list operations are secure and efficient."
   }
 }
-
-    

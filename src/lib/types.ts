@@ -29,6 +29,13 @@ export type Property = {
   status: 'pending' | 'approved' | 'rejected';
 };
 
+export type NotificationSettings = {
+  newListingAlerts?: boolean;
+  priceDropAlerts?: boolean;
+  rentReminders?: boolean;
+  marketingEmails?: boolean;
+};
+
 export type UserProfile = {
   id: string;
   name:string;
@@ -36,6 +43,7 @@ export type UserProfile = {
   avatar: string;
   createdAt?: any;
   role?: 'renter' | 'vendor';
+  notificationSettings?: NotificationSettings;
 };
 
 export type AdminProfile = {
