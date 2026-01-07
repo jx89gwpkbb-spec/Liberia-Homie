@@ -20,22 +20,13 @@ export default function DashboardLayout({
   const router = useRouter();
 
   useEffect(() => {
-    // This effect handles the redirection logic.
-    // It runs after the initial render and whenever the user's auth state changes.
-    if (isUserLoading) {
-      return; // Do nothing while we are waiting for the auth state.
-    }
-
-    if (!user) {
-      // If there is no user after loading, redirect to login.
-      router.push('/login');
-      return;
-    }
-
-    if (user && !user.emailVerified) {
-      // If there is a user but their email is not verified, redirect.
-      router.push('/verify-email');
-      return;
+    // This effect handles the redirection logic for unauthenticated or unverified users.
+    if (!isUserLoading) {
+      if (!user) {
+        router.push('/login');
+      } else if (!user.emailVerified) {
+        router.push('/verify-email');
+      }
     }
   }, [user, isUserLoading, router]);
 
