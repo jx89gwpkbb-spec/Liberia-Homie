@@ -1,7 +1,7 @@
 'use client';
 import { useMemo } from 'react';
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { useUser, useFirestore, useCollection, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
+import { collection, query, where, doc } from 'firebase/firestore';
 import type { Booking } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,7 +10,7 @@ import { format } from "date-fns";
 import Image from "next/image";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { QrCode, Ticket } from 'lucide-react';
+import { QrCode, Ticket, XCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,20 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from '@/hooks/use-toast';
+import { homieStaysAgent } from '@/ai/flows/homie-stays-agent';
+
 
 function DigitalKeyDialog({ booking }: { booking: Booking }) {
     if (!booking.id) return null;
@@ -53,6 +67,7 @@ function DigitalKeyDialog({ booking }: { booking: Booking }) {
 export default function MyBookingsPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   const bookingsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -60,6 +75,29 @@ export default function MyBookingsPage() {
   }, [firestore, user]);
 
   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
+
+  const handleCancelBooking = async (bookingId: string) => {
+    if (!firestore || !bookingId) return;
+
+    try {
+        await homieStaysAgent({
+            question: `Cancel booking ${bookingId}`,
+            userId: user?.uid,
+        });
+
+        toast({
+            title: "Booking Cancelled",
+            description: "Your booking has been successfully cancelled and a full refund is being processed.",
+        });
+    } catch(e) {
+        console.error("Failed to cancel booking", e);
+        toast({
+            title: "Cancellation Failed",
+            description: "We were unable to cancel your booking. Please try again.",
+            variant: "destructive",
+        })
+    }
+  };
 
   const isLoading = isUserLoading || areBookingsLoading;
 
@@ -102,7 +140,10 @@ export default function MyBookingsPage() {
                     <TableCell><Skeleton className="h-4 w-48" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-8 w-24" /></TableCell>
+                    <TableCell className="text-right space-x-2">
+                        <Skeleton className="h-8 w-24 inline-block" />
+                        <Skeleton className="h-8 w-24 inline-block" />
+                    </TableCell>
                   </TableRow>
                 ))
               ) : bookings && bookings.length > 0 ? (
@@ -128,8 +169,32 @@ export default function MyBookingsPage() {
                         {isUpcoming ? 'Upcoming' : 'Completed'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-2">
                         {isUpcoming && <DigitalKeyDialog booking={booking} />}
+                        {isUpcoming && (
+                             <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" size="sm">
+                                        <XCircle className="mr-2 h-4 w-4" />
+                                        Cancel
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This will cancel your booking for {booking.propertyName}. A full refund of ${booking.totalPrice.toLocaleString()} will be issued. This action cannot be undone.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Go Back</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleCancelBooking(booking.id!)} className="bg-destructive hover:bg-destructive/90">
+                                            Confirm Cancellation
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
                     </TableCell>
                   </TableRow>
                   );
@@ -148,3 +213,4 @@ export default function MyBookingsPage() {
     </div>
   );
 }
+    
