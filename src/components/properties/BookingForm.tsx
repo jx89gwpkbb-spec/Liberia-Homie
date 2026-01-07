@@ -37,8 +37,8 @@ type PriceDetails = {
   extrasPrice: number;
   serviceFee: number;
   total: number;
-  weekendDays: number;
   weekdayDays: number;
+  weekendDays: number;
 };
 
 function calculateTotalPrice(
@@ -110,7 +110,7 @@ export function BookingForm({ property }: { property: Property }) {
   const bookingsQuery = useMemoFirebase(() => {
     if (!firestore || !property?.id) return null;
     return query(collection(firestore, 'bookings'), where('propertyId', '==', property.id));
-  }, [firestore, property?.id]);
+  }, [firestore, property.id]);
 
   const { data: bookings } = useCollection<Booking>(bookingsQuery);
 
@@ -166,7 +166,7 @@ export function BookingForm({ property }: { property: Property }) {
             extras: selectedExtras,
         };
 
-        await addDocumentNonBlocking(bookingsCollection, newBooking);
+        addDocumentNonBlocking(bookingsCollection, newBooking);
 
         toast({
             title: "Booking Successful!",

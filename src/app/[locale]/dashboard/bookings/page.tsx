@@ -79,12 +79,12 @@ export default function MyBookingsPage() {
   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
 
   const handleCancelBooking = async (bookingId: string) => {
-    if (!firestore || !bookingId) return;
+    if (!user || !bookingId) return;
 
     try {
         await homieStaysAgent({
             question: `Cancel booking ${bookingId}`,
-            userId: user?.uid,
+            userId: user.uid,
         });
 
         toast({
