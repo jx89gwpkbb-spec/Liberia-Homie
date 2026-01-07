@@ -12,10 +12,11 @@
  * - /roles_admin/{uid}: Contains simple "flag" documents. If a document exists at
  *   this path, the user with the corresponding UID is considered an admin.
  * - /users/{userId}: Contains public profile data for a specific user.
+ * - /users/{userId}/bookings/{bookingId}: Lightweight copies of a user's bookings for their own access.
  * - /users/{userId}/favorites/{propertyId}: Stores a user's favorite properties.
  * - /users/{userId}/documents/{documentId}: Stores a user's uploaded documents.
  * - /users/{userId}/savedSearches/{searchId}: Stores a user's saved search filters.
- * - /bookings/{bookingId}: Contains booking details.
+ * - /bookings/{bookingId}: Contains complete booking details, accessible only by admins.
  * - /properties/{propertyId}: Contains property details.
  * - /visits/{visitId}: Contains visit request details.
  * - /announcements/{announcementId}: Contains system-wide announcements.
@@ -28,7 +29,7 @@
  *   collection (though initial creation is relaxed for the first admin).
  * - Self-Service Profile Management: Admins and Users are responsible for creating and
  *   maintaining their own profile data.
- * - Booking Ownership: Users can only create and view their own bookings.
+ * - Booking Ownership: Users can only manage bookings within their own user document path.
  * - Favorite Ownership: Users can only manage their own list of favorites.
  * - Document Ownership: Users can only manage their own documents.
  * - Saved Search Ownership: Users can only manage their own saved searches.
@@ -113,6 +114,15 @@ service cloud.firestore {
       allow delete: if isExistingOwner(userId) || isAdmin() || isSuperAdmin();
       
       /**
+       * @description Manages a user's own lightweight booking records.
+       * @path /users/{userId}/bookings/{bookingId}
+       * @allow (read, write, delete) A user can only manage their own booking records.
+       */
+      match /bookings/{bookingId} {
+        allow read, write, delete: if isVerified() && isOwner(userId);
+      }
+
+      /**
        * @description Manages a user's favorite properties.
        * @path /users/{userId}/favorites/{propertyId}
        * @allow (read, write) A user can manage their own favorites list.
@@ -174,19 +184,18 @@ service cloud.firestore {
     }
 
     /**
-     * @description Manages booking data with role-based access.
+     * @description Manages the global bookings collection, accessible only by admins.
      * @path /bookings/{bookingId}
      */
     match /bookings/{bookingId} {
-        // Admins can read/list all bookings unconditionally.
-        allow get: if isVerified() && (isAdmin() || isSuperAdmin());
-        allow list: if isVerified() && (isAdmin() || isSuperAdmin());
+      // Admins and SuperAdmins have full read/list access.
+      allow read, list: if isVerified() && (isAdmin() || isSuperAdmin());
 
-        // Users can only get their own bookings or bookings for properties they own.
-        allow get: if isVerified() && resource.data != null && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId));
-
-        allow create: if isVerified() && isOwner(request.resource.data.userId);
-        allow update, delete: if isVerified() && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId) || isAdmin() || isSuperAdmin());
+      // Only authenticated users can create bookings. Further validation is done client-side.
+      allow create: if isVerified();
+      
+      // Admins and property owners can update or delete.
+      allow update, delete: if isVerified() && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId) || isAdmin() || isSuperAdmin());
     }
     
     /**

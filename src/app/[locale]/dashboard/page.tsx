@@ -58,7 +58,8 @@ export default function DashboardPage() {
 
   const bookingsQuery = useMemoFirebase(() => {
     if (!firestore || !user || !user.emailVerified) return null;
-    return query(collection(firestore, 'bookings'), where('userId', '==', user.uid));
+    // Fetch bookings from the user-specific subcollection
+    return collection(firestore, `users/${user.uid}/bookings`);
   }, [firestore, user]);
 
   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);

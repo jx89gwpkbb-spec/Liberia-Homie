@@ -71,7 +71,8 @@ export default function MyBookingsPage() {
 
   const bookingsQuery = useMemoFirebase(() => {
     if (!firestore || !user || !user.emailVerified) return null;
-    return query(collection(firestore, 'bookings'), where('userId', '==', user.uid));
+    // Fetch bookings from the user-specific subcollection
+    return collection(firestore, `users/${user.uid}/bookings`);
   }, [firestore, user]);
 
   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
@@ -84,6 +85,12 @@ export default function MyBookingsPage() {
             question: `Cancel booking ${bookingId}`,
             userId: user.uid,
         });
+
+        // Also delete the booking record from the user's subcollection
+        if(firestore) {
+            const userBookingRef = doc(firestore, `users/${user.uid}/bookings`, bookingId);
+            await deleteDoc(userBookingRef);
+        }
 
         toast({
             title: "Booking Cancelled",
@@ -213,5 +220,3 @@ export default function MyBookingsPage() {
     </div>
   );
 }
-
-    

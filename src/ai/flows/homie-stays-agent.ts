@@ -19,6 +19,7 @@ import {
   Timestamp,
   addDoc,
   serverTimestamp,
+  writeBatch,
 } from 'firebase/firestore';
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { firebaseConfig } from '@/firebase/config';
@@ -41,6 +42,7 @@ const GetCurrentBookingsInputSchema = z.object({
 
 const CancelBookingInputSchema = z.object({
   bookingId: z.string().describe('The ID of the booking to cancel.'),
+  userId: z.string().describe('The ID of the user who owns the booking.'),
 });
 
 const GetPropertyDetailsInputSchema = z.object({
@@ -75,7 +77,8 @@ const getCurrentBookings = ai.defineTool(
     if (!firestore) throw new Error('Firestore is not initialized.');
     
     const bookings: any[] = [];
-    const bookingsRef = collection(firestore, 'bookings');
+    // Fetches from the user-specific subcollection for security and efficiency.
+    const bookingsRef = collection(firestore, `users/${userId}/bookings`);
     const q = query(bookingsRef, where('userId', '==', userId));
 
     const querySnapshot = await getDocs(q);
@@ -92,18 +95,28 @@ const getCurrentBookings = ai.defineTool(
 const cancelBooking = ai.defineTool(
   {
     name: 'cancelBooking',
-    description: 'Cancels a booking with the given ID. Requires a bookingId.',
+    description: 'Cancels a booking with the given ID for a specific user. Requires a bookingId and userId.',
     inputSchema: CancelBookingInputSchema,
     outputSchema: z.object({ success: z.boolean(), message: z.string() }),
   },
-  async ({ bookingId }) => {
+  async ({ bookingId, userId }) => {
     if (!firestore) throw new Error('Firestore is not initialized.');
 
     try {
-      const bookingRef = doc(firestore, 'bookings', bookingId);
-      await deleteDoc(bookingRef);
+      // Use a batch to delete from both locations atomically.
+      const batch = writeBatch(firestore);
+
+      const globalBookingRef = doc(firestore, 'bookings', bookingId);
+      const userBookingRef = doc(firestore, `users/${userId}/bookings`, bookingId);
+      
+      batch.delete(globalBookingRef);
+      batch.delete(userBookingRef);
+
+      await batch.commit();
+
       return { success: true, message: `Successfully canceled booking ${bookingId}.` };
     } catch (error: any) {
+      console.error("Failed to cancel booking", error);
       return { success: false, message: `Failed to cancel booking: ${error.message}` };
     }
   }
@@ -229,6 +242,7 @@ const homieStaysAgentPrompt = ai.definePrompt({
 You can help users with their bookings, answer questions about properties, check availability, and schedule visits.
 
 - If the user is logged in (a userId is provided), you can fetch their bookings, cancel a booking, or schedule a visit for them. The current user's ID is {{userId}}. You MUST pass this ID to any tool that requires a userId.
+- When cancelling a booking, you MUST have both the bookingId and the userId.
 - If a user asks about a specific property by name, use the 'getPropertyDetails' tool to find information about it.
 - If a user asks about availability for a property, you MUST first use 'getPropertyDetails' to get the property's ID, and then use the 'checkAvailability' tool.
 - If a user wants to schedule a visit or tour, you MUST first get the property's ID using 'getPropertyDetails' if you don't have it, and then use the 'scheduleVisit' tool. You must have the property ID, user ID, and a date to schedule a visit.
@@ -238,5 +252,3 @@ You can help users with their bookings, answer questions about properties, check
 User Question: {{question}}
 `,
 });
-
-    

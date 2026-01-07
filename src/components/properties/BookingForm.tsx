@@ -11,10 +11,10 @@ import { cn } from "@/lib/utils";
 import type { Property, Booking, Extra } from "@/lib/types";
 import { DateRange } from "react-day-picker";
 import { DateSuggestionClient } from "./DateSuggestionClient";
-import { useUser, useFirestore, addDocumentNonBlocking, useCollection, useMemoFirebase } from "@/firebase";
+import { useUser, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking, useCollection, useMemoFirebase } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { collection, serverTimestamp, query, where } from "firebase/firestore";
+import { collection, serverTimestamp, query, where, doc } from "firebase/firestore";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -149,8 +149,10 @@ export function BookingForm({ property }: { property: Property }) {
 
     setIsBooking(true);
     
-    const bookingsCollection = collection(firestore, 'bookings');
-    const newBooking = {
+    // Generate a new booking ID for both collections
+    const bookingId = doc(collection(firestore, 'bookings')).id;
+
+    const bookingData = {
         userId: user.uid,
         vendorId: property.owner.id,
         propertyId: property.id,
@@ -165,7 +167,14 @@ export function BookingForm({ property }: { property: Property }) {
         extras: selectedExtras,
     };
 
-    addDocumentNonBlocking(bookingsCollection, newBooking);
+    // Write to the global /bookings collection (for admin)
+    const globalBookingRef = doc(firestore, 'bookings', bookingId);
+    setDocumentNonBlocking(globalBookingRef, bookingData, { merge: false });
+
+    // Write to the user-specific /users/{uid}/bookings collection (for user)
+    const userBookingRef = doc(firestore, `users/${user.uid}/bookings`, bookingId);
+    setDocumentNonBlocking(userBookingRef, bookingData, { merge: false });
+
 
     toast({
         title: "Booking Successful!",
