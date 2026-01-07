@@ -39,7 +39,7 @@ export function BookingForm({ property }: { property: Property }) {
   const bookingsQuery = useMemoFirebase(() => {
     if (!firestore || !property?.id) return null;
     return query(collection(firestore, 'bookings'), where('propertyId', '==', property.id));
-  }, [firestore, property]);
+  }, [firestore, property?.id]);
 
   const { data: bookings } = useCollection<Booking>(bookingsQuery);
 
