@@ -43,7 +43,7 @@ export default function PrivacyPage() {
         <Alert variant="default" className="mb-8">
           <AlertTitle>External Privacy Information</AlertTitle>
           <AlertDescription>
-            This app is built using technologies from major providers. For more details on how data may be handled by underlying services, you can refer to the <Link href="https://privacy.microsoft.com/en-us/privacystatement" className="font-semibold underline" target="_blank">Microsoft Privacy Statement</Link>.
+            This app is built using Firebase services. For more details on how data is handled by the underlying platform, you can refer to the <Link href="https://firebase.google.com/support/privacy" className="font-semibold underline" target="_blank">Firebase Privacy Policy</Link>.
           </AlertDescription>
         </Alert>
 
