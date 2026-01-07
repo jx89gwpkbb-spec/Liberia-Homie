@@ -81,7 +81,8 @@ service cloud.firestore {
      * Checks if the user is the owner of a given property.
      */
     function isPropertyOwner(propertyId) {
-      return isSignedIn() && get(/databases/$(database)/documents/properties/$(propertyId)).data.owner.id == request.auth.uid;
+      let propertyDoc = get(/databases/$(database)/documents/properties/$(propertyId));
+      return isSignedIn() && propertyDoc.data.owner.id == request.auth.uid;
     }
 
 
@@ -167,7 +168,7 @@ service cloud.firestore {
     match /bookings/{bookingId} {
       allow create: if request.auth.uid == request.resource.data.userId;
       allow read: if request.auth.uid == resource.data.userId || isAdmin() || isPropertyOwner(resource.data.propertyId);
-      allow list: if isAdmin() || (request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid) || (request.query.where[0][0] == 'propertyId' && isPropertyOwner(request.query.where[0][2]));
+      allow list: if isAdmin() || (request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid);
       allow update, delete: if false;
     }
     
@@ -183,7 +184,8 @@ service cloud.firestore {
       allow read, list: if isAdmin();
       
       // Owners can view their own properties regardless of status.
-      allow read, list: if isOwner(resource.data.owner.id);
+      allow read: if isOwner(resource.data.owner.id);
+      allow list: if isOwner(request.resource.data.owner.id);
 
       // Users can create properties, but they must be 'pending'.
       allow create: if isOwner(request.resource.data.owner.id) && request.resource.data.status == 'pending';
