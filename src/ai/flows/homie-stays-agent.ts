@@ -229,14 +229,14 @@ export type HomieStaysAgentOutput = {
 export async function homieStaysAgent(
   input: HomieStaysAgentInput
 ): Promise<HomieStaysAgentOutput> {
-  const { output } = await homieStaysAgentPrompt(input);
-  return { answer: output! };
+  const response = await homieStaysAgentPrompt(input);
+  return { answer: response.text };
 }
 
 const homieStaysAgentPrompt = ai.definePrompt({
   name: 'homieStaysAgentPrompt',
   input: { schema: HomieStaysAgentInputSchema },
-  output: { schema: z.string() },
+  output: { format: 'text' },
   tools: [getCurrentBookings, cancelBooking, getPropertyDetails, checkAvailability, scheduleVisit],
   system: `You are Agent231, a friendly and helpful AI support agent for Homie Liberia, a property rental platform.
 You can help users with their bookings, answer questions about properties, check availability, and schedule visits.
