@@ -36,8 +36,11 @@ export function initializeFirebase() {
 }
 
 export function getSdks(firebaseApp: FirebaseApp) {
-  // Conditionally initialize messaging only on the client side
-  const messaging = typeof window !== 'undefined' ? getMessaging(firebaseApp) : undefined;
+  // Conditionally initialize messaging only on the client side and in a secure context
+  const messaging =
+    typeof window !== 'undefined' && typeof navigator !== 'undefined' && 'serviceWorker' in navigator
+      ? getMessaging(firebaseApp)
+      : undefined;
   return {
     firebaseApp,
     auth: getAuth(firebaseApp),
