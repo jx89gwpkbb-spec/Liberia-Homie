@@ -5,6 +5,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { ChatWidget } from '@/components/chatbot/ChatWidget';
+import { NotificationManager } from '@/components/notifications/NotificationManager';
 
 export const metadata: Metadata = {
   title: 'Homie Stays',
@@ -35,6 +36,7 @@ export default function RootLayout({
           </div>
           <ChatWidget />
           <Toaster />
+          <NotificationManager />
         </FirebaseClientProvider>
       </body>
     </html>

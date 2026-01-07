@@ -5,6 +5,7 @@ import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getMessaging } from 'firebase/messaging';
 
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
@@ -35,11 +36,14 @@ export function initializeFirebase() {
 }
 
 export function getSdks(firebaseApp: FirebaseApp) {
+  // Conditionally initialize messaging only on the client side
+  const messaging = typeof window !== 'undefined' ? getMessaging(firebaseApp) : undefined;
   return {
     firebaseApp,
     auth: getAuth(firebaseApp),
     firestore: getFirestore(firebaseApp),
     storage: getStorage(firebaseApp),
+    messaging: messaging,
   };
 }
 

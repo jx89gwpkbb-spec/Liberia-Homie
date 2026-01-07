@@ -29,6 +29,12 @@ export function BookingForm({ property }: { property: Property }) {
   const serviceFee = nights > 0 ? 50 : 0;
   const total = nights * price + serviceFee;
 
+  const showNotification = (title: string, body: string) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body });
+    }
+  };
+
   const handleReserve = async () => {
     if (!user || !date?.from || !date?.to || !firestore) {
         toast({
@@ -62,6 +68,12 @@ export function BookingForm({ property }: { property: Property }) {
             title: "Booking Successful!",
             description: `You have reserved ${property.name}.`,
         });
+        
+        showNotification(
+            'Booking Confirmed!',
+            `Your stay at ${property.name} from ${format(date.from, "MMM dd")} to ${format(date.to, "MMM dd")} is confirmed.`
+        );
+
         setDate(undefined);
         setGuests(1);
     } catch (error) {
