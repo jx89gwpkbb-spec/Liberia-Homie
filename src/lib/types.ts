@@ -27,7 +27,7 @@ export type Property = {
   status: 'pending' | 'approved' | 'rejected';
 };
 
-export type User = {
+export type UserProfile = {
   id: string;
   name:string;
   email: string;
@@ -51,7 +51,7 @@ export type AdminProfile = {
 export type Review = {
   id: string;
   propertyId: string;
-  user: User;
+  user: UserProfile;
   rating: number;
   comment: string;
   createdAt: string;

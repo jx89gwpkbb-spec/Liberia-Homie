@@ -12,7 +12,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart } from "recharts";
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
-import type { User, Property, Booking } from '@/lib/types';
+import type { UserProfile as User, Property, Booking } from '@/lib/types';
 import { Skeleton } from "@/components/ui/skeleton";
 
 const bookingsChartConfig: ChartConfig = {
@@ -37,7 +37,7 @@ export default function AdminDashboardPage() {
   const bookingsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'bookings') : null, [firestore]);
 
   const recentUsersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users'), orderBy('createdAt', 'desc'), limit(5)) : null, [firestore]);
-  const recentPropertiesQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'properties'), limit(3)) : null, [firestore]);
+  const recentPropertiesQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'properties'), orderBy('reviewCount', 'desc'), limit(3)) : null, [firestore]);
   const recentBookingsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'bookings'), orderBy('createdAt', 'desc'), limit(5)) : null, [firestore]);
   
   const { data: users, isLoading: usersLoading } = useCollection<User>(usersCollectionRef);
