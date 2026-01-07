@@ -61,7 +61,7 @@ const pwaConfig = {
       },
     },
     {
-      urlPattern: /^https://fonts\.gstatic\.com\/.*/,
+      urlPattern: /^https:\/\/fonts\\.gstatic\\.com\/.*/,
       handler: 'CacheFirst',
       options: {
         cacheName: 'google-fonts-webfonts',
@@ -80,3 +80,4 @@ const pwaConfig = {
 const withPwaPlugin = withPWA(pwaConfig);
 
 export default withIntl(withPwaPlugin(nextConfig));
+
