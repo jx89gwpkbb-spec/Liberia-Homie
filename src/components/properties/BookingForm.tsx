@@ -355,5 +355,4 @@ export function BookingForm({ property }: { property: Property }) {
     </Card>
   );
 }
-
     

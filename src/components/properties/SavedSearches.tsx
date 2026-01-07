@@ -98,5 +98,4 @@ export function SavedSearches() {
         </div>
     );
 }
-
     
