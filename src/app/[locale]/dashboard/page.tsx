@@ -67,8 +67,8 @@ export default function DashboardPage() {
     if (bookings) {
       const sortedBookings = [...bookings].sort((a, b) => b.checkInDate.toDate().getTime() - a.checkInDate.toDate().getTime());
       const now = new Date();
-      setUpcomingTrips(sortedBookings.filter(b => !isPast(b.checkInDate.toDate())));
-      setPastTrips(sortedBookings.filter(b => isPast(b.checkInDate.toDate())));
+      setUpcomingTrips(sortedBookings.filter(b => !isPast(b.checkOutDate.toDate())));
+      setPastTrips(sortedBookings.filter(b => isPast(b.checkOutDate.toDate())));
     }
   }, [bookings]);
 
