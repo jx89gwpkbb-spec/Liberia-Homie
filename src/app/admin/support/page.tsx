@@ -89,7 +89,8 @@ export default function AdminSupportPage() {
                             <div>{ticket.name}</div>
                             <div className="text-xs text-muted-foreground">{ticket.email}</div>
                         </TableCell>
-                        <TableCell>{ticket.createdAt ? formatDistanceToNow(ticket.createdAt.toDate(), { addSuffix: true }) : 'N/A'}</TableCell>
+                        <TableCell>{ticket.createdAt ? formatDistanceToNow(ticket.createdAt.toDate(), { addSuffix: true }) : 'N/A'}
+                        </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>

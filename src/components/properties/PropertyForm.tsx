@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
@@ -163,44 +162,38 @@ export function PropertyForm({ property }: PropertyFormProps) {
         const propertyId = property?.id || doc(collection(firestore, 'properties')).id;
         
         const processSubmit = async (uploadedUrls: string[]) => {
-            try {
-                const finalImageUrls = [...existingImageUrls, ...uploadedUrls];
-                const propertyData = {
-                    id: propertyId,
-                    name: data.name, location: data.location,
-                    pricePerNight: parseFloat(data.price),
-                    bedrooms: parseInt(data.bedrooms, 10), bathrooms: parseInt(data.bathrooms, 10),
-                    maxGuests: parseInt(data.maxGuests, 10), longStay: data.stayDuration === 'long',
-                    amenities: data.keyFeatures.split(',').map(s => s.trim()),
-                    description: data.description, propertyType: data.propertyType,
-                    images: finalImageUrls, petFriendly: data.petFriendly,
-                    owner: property?.owner || {
-                        id: user.uid,
-                        name: user.displayName || 'Anonymous',
-                        avatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
-                    },
-                    rating: property?.rating || Math.round((Math.random() * 2 + 3) * 10) / 10,
-                    reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
-                    viewCount: property?.viewCount || Math.floor(Math.random() * 2000),
-                    gps: gpsCoords, status: property?.status || 'pending',
-                };
+            const finalImageUrls = [...existingImageUrls, ...uploadedUrls];
+            const propertyData = {
+                id: propertyId,
+                name: data.name, location: data.location,
+                pricePerNight: parseFloat(data.price),
+                bedrooms: parseInt(data.bedrooms, 10), bathrooms: parseInt(data.bathrooms, 10),
+                maxGuests: parseInt(data.maxGuests, 10), longStay: data.stayDuration === 'long',
+                amenities: data.keyFeatures.split(',').map(s => s.trim()),
+                description: data.description, propertyType: data.propertyType,
+                images: finalImageUrls, petFriendly: data.petFriendly,
+                owner: property?.owner || {
+                    id: user.uid,
+                    name: user.displayName || 'Anonymous',
+                    avatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
+                },
+                rating: property?.rating || Math.round((Math.random() * 2 + 3) * 10) / 10,
+                reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
+                viewCount: property?.viewCount || Math.floor(Math.random() * 2000),
+                gps: gpsCoords, status: property?.status || 'pending',
+            };
 
-                const propertyRef = doc(firestore, 'properties', propertyId);
-                
-                if (isEditMode) {
-                    setDocumentNonBlocking(propertyRef, propertyData, { merge: true });
-                    toast({ title: "Property Updated!", description: `${data.name} has been updated successfully.` });
-                } else {
-                     setDocumentNonBlocking(propertyRef, propertyData, { merge: false });
-                    toast({ title: "Property Submitted!", description: `${data.name} has been submitted for review.` });
-                }
-                router.push('/dashboard/properties');
-            } catch (error) {
-                console.error("Error saving property:", error);
-                toast({ title: "Error", description: "Failed to save property.", variant: "destructive" });
-            } finally {
-                setIsSaving(false);
+            const propertyRef = doc(firestore, 'properties', propertyId);
+            
+            if (isEditMode) {
+                setDocumentNonBlocking(propertyRef, propertyData, { merge: true });
+                toast({ title: "Property Updated!", description: `${data.name} has been updated successfully.` });
+            } else {
+                 setDocumentNonBlocking(propertyRef, propertyData, { merge: false });
+                toast({ title: "Property Submitted!", description: `${data.name} has been submitted for review.` });
             }
+            router.push('/dashboard/properties');
+            setIsSaving(false);
         };
 
         if (newImageFiles.length > 0) {

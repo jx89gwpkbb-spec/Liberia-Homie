@@ -11,7 +11,7 @@ import Image from "next/image";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,9 +53,10 @@ export default function MyVisitsPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const [enrichedVisits, setEnrichedVisits] = useState<EnrichedVisit[]>([]);
+  const { toast } = useToast();
 
   const visitsQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
+    if (!firestore || !user || !user.emailVerified) return null;
     return query(collection(firestore, 'visits'), where('userId', '==', user.uid));
   }, [firestore, user]);
 

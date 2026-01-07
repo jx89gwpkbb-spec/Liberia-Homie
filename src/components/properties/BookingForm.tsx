@@ -142,54 +142,44 @@ export function BookingForm({ property }: { property: Property }) {
     }
   };
 
-  const handleReserve = async () => {
+  const handleReserve = () => {
     if (!user || !date?.from || !date?.to || !firestore) {
         return;
     }
 
     setIsBooking(true);
     
-    try {
-        const bookingsCollection = collection(firestore, 'bookings');
-        const newBooking = {
-            userId: user.uid,
-            propertyId: property.id,
-            checkInDate: date.from,
-            checkOutDate: date.to,
-            totalPrice: total,
-            guests: guests,
-            createdAt: serverTimestamp(),
-            propertyName: property.name,
-            propertyImage: property.images[0],
-            propertyLocation: property.location,
-            extras: selectedExtras,
-        };
+    const bookingsCollection = collection(firestore, 'bookings');
+    const newBooking = {
+        userId: user.uid,
+        propertyId: property.id,
+        checkInDate: date.from,
+        checkOutDate: date.to,
+        totalPrice: total,
+        guests: guests,
+        createdAt: serverTimestamp(),
+        propertyName: property.name,
+        propertyImage: property.images[0],
+        propertyLocation: property.location,
+        extras: selectedExtras,
+    };
 
-        addDocumentNonBlocking(bookingsCollection, newBooking);
+    addDocumentNonBlocking(bookingsCollection, newBooking);
 
-        toast({
-            title: "Booking Successful!",
-            description: `You have reserved ${property.name}.`,
-        });
-        
-        showNotification(
-            'Booking Confirmed!',
-            `Your stay at ${property.name} from ${format(date.from, "MMM dd")} to ${format(date.to, "MMM dd")} is confirmed.`
-        );
+    toast({
+        title: "Booking Successful!",
+        description: `You have reserved ${property.name}.`,
+    });
+    
+    showNotification(
+        'Booking Confirmed!',
+        `Your stay at ${property.name} from ${format(date.from, "MMM dd")} to ${format(date.to, "MMM dd")} is confirmed.`
+    );
 
-        setDate(undefined);
-        setGuests(1);
-        setSelectedExtras([]);
-    } catch (error: any) {
-        console.error("Booking failed:", error);
-        toast({
-            title: "Booking Failed",
-            description: error.message || "Something went wrong. Please try again.",
-            variant: "destructive",
-        });
-    } finally {
-        setIsBooking(false);
-    }
+    setDate(undefined);
+    setGuests(1);
+    setSelectedExtras([]);
+    setIsBooking(false);
   };
 
 
@@ -317,13 +307,13 @@ export function BookingForm({ property }: { property: Property }) {
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Loading...
                     </Button>
-                ) : user ? (
+                ) : user && user.emailVerified ? (
                     <Button className="w-full" size="lg" disabled={isBooking || !date?.from || !date.to}>
                         {isBooking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Reserve'}
                     </Button>
                 ): (
                     <Button className="w-full" size="lg" asChild>
-                        <Link href="/login">Login to Reserve</Link>
+                        <Link href="/login">{user ? 'Verify Email to Reserve' : 'Login to Reserve'}</Link>
                     </Button>
                 )}
            </AlertDialogTrigger>

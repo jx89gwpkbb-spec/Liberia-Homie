@@ -38,7 +38,7 @@ export default function MyNotificationsPage() {
   const { toast } = useToast();
 
   const userProfileRef = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
+    if (!user || !firestore || !user.emailVerified) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
 
@@ -61,22 +61,13 @@ export default function MyNotificationsPage() {
     }
   }, [userProfile, form]);
 
-  const onSubmit = async (data: NotificationsFormData) => {
+  const onSubmit = (data: NotificationsFormData) => {
     if (!userProfileRef) return;
-    try {
-      setDocumentNonBlocking(userProfileRef, { notificationSettings: data }, { merge: true });
-      toast({
-        title: "Preferences Saved",
-        description: "Your notification settings have been updated.",
-      });
-    } catch (error) {
-      console.error("Failed to save preferences", error);
-      toast({
-        title: "Update Failed",
-        description: "Could not save your preferences. Please try again.",
-        variant: 'destructive',
-      });
-    }
+    setDocumentNonBlocking(userProfileRef, { notificationSettings: data }, { merge: true });
+    toast({
+      title: "Preferences Saved",
+      description: "Your notification settings have been updated.",
+    });
   };
 
   if (isUserLoading || isProfileLoading) {

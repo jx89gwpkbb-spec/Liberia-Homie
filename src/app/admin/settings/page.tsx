@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useEffect } from 'react';
 import { useFirestore, useDoc, useMemoFirebase, setDocumentNonBlocking } from '@/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -45,22 +45,13 @@ export default function AdminSettingsPage() {
     }
   }, [settings, reset]);
   
-  const onSubmit = async (data: SettingsFormData) => {
+  const onSubmit = (data: SettingsFormData) => {
     if (!settingsRef) return;
-    try {
-      setDocumentNonBlocking(settingsRef, data, { merge: true });
-      toast({
-        title: "Settings Saved",
-        description: "Global application settings have been updated.",
-      });
-    } catch(error) {
-        console.error("Error saving settings:", error);
-        toast({
-            title: "Error",
-            description: "Failed to save settings.",
-            variant: "destructive",
-        })
-    }
+    setDocumentNonBlocking(settingsRef, data, { merge: true });
+    toast({
+      title: "Settings Saved",
+      description: "Global application settings have been updated.",
+    });
   };
   
   if (isLoading) {

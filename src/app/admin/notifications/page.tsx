@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
-import { collection, serverTimestamp, doc } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
+import { collection, serverTimestamp } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +32,7 @@ export default function AdminNotificationsPage() {
 
     const { data: announcements, isLoading: isLoadingAnnouncements } = useCollection<Announcement>(announcementsQuery);
 
-    const handleSave = async (status: 'draft' | 'published') => {
+    const handleSave = (status: 'draft' | 'published') => {
         if (!title || !content || !firestore) {
             toast({
                 title: "Missing fields",
@@ -44,37 +44,27 @@ export default function AdminNotificationsPage() {
 
         setIsLoading(true);
 
-        try {
-            const announcementsCollection = collection(firestore, 'announcements');
-            const newAnnouncement: Omit<Announcement, 'id'> = {
-                title,
-                content,
-                status,
-                targetAudience,
-                createdAt: serverTimestamp(),
-                ...(status === 'published' && { publishedAt: serverTimestamp() }),
-            };
-            
-            await addDocumentNonBlocking(announcementsCollection, newAnnouncement);
+        const announcementsCollection = collection(firestore, 'announcements');
+        const newAnnouncement: Omit<Announcement, 'id'> = {
+            title,
+            content,
+            status,
+            targetAudience,
+            createdAt: serverTimestamp(),
+            ...(status === 'published' && { publishedAt: serverTimestamp() }),
+        };
+        
+        addDocumentNonBlocking(announcementsCollection, newAnnouncement);
 
-            toast({
-                title: status === 'published' ? "Announcement Published!" : "Draft Saved!",
-                description: `Your announcement has been successfully ${status}.`,
-            });
+        toast({
+            title: status === 'published' ? "Announcement Published!" : "Draft Saved!",
+            description: `Your announcement has been successfully ${status}.`,
+        });
 
-            setTitle('');
-            setContent('');
-            setTargetAudience('all');
-        } catch (error) {
-            console.error("Error saving announcement: ", error);
-            toast({
-                title: "Error",
-                description: "There was an error saving the announcement.",
-                variant: "destructive"
-            });
-        } finally {
-            setIsLoading(false);
-        }
+        setTitle('');
+        setContent('');
+        setTargetAudience('all');
+        setIsLoading(false);
     };
 
     return (

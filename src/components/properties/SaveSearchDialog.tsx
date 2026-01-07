@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -32,7 +31,7 @@ export function SaveSearchDialog({ searchParams }: SaveSearchDialogProps) {
     const [searchName, setSearchName] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
-    const handleSave = async () => {
+    const handleSave = () => {
         if (!user || !firestore) {
             toast({ title: "Please log in to save searches.", variant: "destructive" });
             return;
@@ -43,46 +42,35 @@ export function SaveSearchDialog({ searchParams }: SaveSearchDialogProps) {
         }
 
         setIsSaving(true);
-        try {
-            const filters: any = {};
-            searchParams.forEach((value, key) => {
-                if (key === 'amenities') {
-                    filters.amenities = searchParams.getAll('amenities');
-                } else if (key === 'price' || key === 'bedrooms') {
-                    filters[key] = parseInt(value, 10);
-                } else if (key === 'petFriendly') {
-                    filters[key] = value === 'true';
-                } else {
-                    filters[key] = value;
-                }
-            });
+        const filters: any = {};
+        searchParams.forEach((value, key) => {
+            if (key === 'amenities') {
+                filters.amenities = searchParams.getAll('amenities');
+            } else if (key === 'price' || key === 'bedrooms') {
+                filters[key] = parseInt(value, 10);
+            } else if (key === 'petFriendly') {
+                filters[key] = value === 'true';
+            } else {
+                filters[key] = value;
+            }
+        });
 
-            const savedSearchesCollection = collection(firestore, `users/${user.uid}/savedSearches`);
-            const newSearch = {
-                name: searchName,
-                createdAt: serverTimestamp(),
-                filters,
-            };
+        const savedSearchesCollection = collection(firestore, `users/${user.uid}/savedSearches`);
+        const newSearch = {
+            name: searchName,
+            createdAt: serverTimestamp(),
+            filters,
+        };
 
-            await addDocumentNonBlocking(savedSearchesCollection, newSearch);
+        addDocumentNonBlocking(savedSearchesCollection, newSearch);
 
-            toast({
-                title: "Search Saved!",
-                description: `Your search "${searchName}" has been saved.`,
-            });
-            setIsOpen(false);
-            setSearchName('');
-
-        } catch (error) {
-            console.error("Failed to save search:", error);
-            toast({
-                title: "Save Failed",
-                description: "Could not save your search. Please try again.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsSaving(false);
-        }
+        toast({
+            title: "Search Saved!",
+            description: `Your search "${searchName}" has been saved.`,
+        });
+        setIsOpen(false);
+        setSearchName('');
+        setIsSaving(false);
     };
 
     return (
@@ -123,5 +111,3 @@ export function SaveSearchDialog({ searchParams }: SaveSearchDialogProps) {
         </Dialog>
     );
 }
-
-    

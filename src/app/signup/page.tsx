@@ -96,41 +96,32 @@ export default function SignupPage() {
     }
   };
 
-  const onSubmit = async (data: SignupFormData) => {
+  const onSubmit = (data: SignupFormData) => {
     setIsLoading(true);
     if (!userCredential || !firestore) {
       toast({ title: 'Error', description: 'An error occurred. Please try again.', variant: 'destructive' });
       setIsLoading(false);
       return;
     }
-    try {
-      const userProfileRef = doc(firestore, 'users', userCredential.uid);
-      const userProfileData = {
-        id: userCredential.uid,
-        name: data.fullName,
-        email: userCredential.email,
-        avatar: `https://picsum.photos/seed/${userCredential.uid}/40/40`,
-        createdAt: serverTimestamp(),
-        role: data.role,
-      };
+    
+    const userProfileRef = doc(firestore, 'users', userCredential.uid);
+    const userProfileData = {
+      id: userCredential.uid,
+      name: data.fullName,
+      email: userCredential.email,
+      avatar: `https://picsum.photos/seed/${userCredential.uid}/40/40`,
+      createdAt: serverTimestamp(),
+      role: data.role,
+    };
 
-      setDocumentNonBlocking(userProfileRef, userProfileData, { merge: true });
+    setDocumentNonBlocking(userProfileRef, userProfileData, { merge: true });
 
-      toast({
-        title: 'Account Created',
-        description: "You've successfully signed up! Please check your email to verify your account before logging in.",
-      });
-      router.push('/verify-email');
-    } catch (error: any) {
-      console.error(error);
-      toast({
-        title: 'Sign Up Failed',
-        description: error.message || 'An unexpected error occurred.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    toast({
+      title: 'Account Created',
+      description: "You've successfully signed up! Please check your email to verify your account before logging in.",
+    });
+    router.push('/verify-email');
+    setIsLoading(false);
   };
 
   return (

@@ -50,7 +50,7 @@ export default function MyProfilePage() {
   const t = useTranslations('MyProfile');
 
   const userProfileRef = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
+    if (!user || !firestore || !user.emailVerified) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
 
@@ -81,25 +81,15 @@ export default function MyProfilePage() {
       .join('');
   };
   
-  const onProfileSubmit = async (data: ProfileFormData) => {
+  const onProfileSubmit = (data: ProfileFormData) => {
     if (!userProfileRef) return;
     setIsSaving(true);
-    try {
-        setDocumentNonBlocking(userProfileRef, { name: data.name }, { merge: true });
-        toast({
-            title: t('toast.profileUpdatedTitle'),
-            description: t('toast.profileUpdatedDesc'),
-        });
-    } catch (error) {
-        console.error("Failed to update profile", error);
-        toast({
-            title: t('toast.updateFailedTitle'),
-            description: t('toast.updateFailedDesc'),
-            variant: 'destructive',
-        });
-    } finally {
-        setIsSaving(false);
-    }
+    setDocumentNonBlocking(userProfileRef, { name: data.name }, { merge: true });
+    toast({
+        title: t('toast.profileUpdatedTitle'),
+        description: t('toast.profileUpdatedDesc'),
+    });
+    setIsSaving(false);
   }
   
    const onPasswordSubmit = async (data: PasswordFormData) => {

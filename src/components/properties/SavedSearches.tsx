@@ -28,7 +28,7 @@ export function SavedSearches() {
     const { toast } = useToast();
 
     const savedSearchesQuery = useMemoFirebase(() => {
-        if (!user || !firestore) return null;
+        if (!user || !firestore || !user.emailVerified) return null;
         return collection(firestore, `users/${user.uid}/savedSearches`);
     }, [user, firestore]);
 

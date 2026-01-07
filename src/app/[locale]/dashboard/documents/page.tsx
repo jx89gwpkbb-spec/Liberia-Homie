@@ -59,14 +59,16 @@ export default function MyDocumentsPage() {
     setIsUploading(true);
     try {
       const storage = getStorage();
-      const documentId = doc(collection(firestore, `users/${user.uid}/documents`)).id;
+      // Generate a new document ID client-side for the file path
+      const documentId = doc(collection(firestore, 'a')).id; 
       const filePath = `documents/${user.uid}/${documentId}/${file.name}`;
       const storageRef = ref(storage, filePath);
 
       await uploadBytes(storageRef, file);
       const fileUrl = await getDownloadURL(storageRef);
-
-      const documentsCollection = collection(firestore, `users/${user.uid}/documents`);
+      
+      // Use the same ID to create the Firestore document
+      const docRef = doc(firestore, `users/${user.uid}/documents`, documentId);
       const newDocument = {
         userId: user.uid,
         fileName: file.name,
@@ -75,7 +77,7 @@ export default function MyDocumentsPage() {
         uploadedAt: serverTimestamp(),
       };
       
-      addDocumentNonBlocking(documentsCollection, newDocument);
+      setDocumentNonBlocking(docRef, newDocument, { merge: false });
 
       toast({ title: "Upload Successful", description: "Your document has been uploaded." });
       setFile(null);
