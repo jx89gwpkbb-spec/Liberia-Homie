@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -57,7 +58,7 @@ export function DateSuggestionClient({ property, onDateSelect }: DateSuggestionC
     return (
         <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1">
-                <AccordionTrigger asChild>
+                <AccordionTrigger>
                     <Button variant="outline" className="w-full" onClick={handleSuggestDates} disabled={isLoading}>
                         {isLoading ? (
                             <>
