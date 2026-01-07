@@ -190,7 +190,8 @@ service cloud.firestore {
     match /bookings/{bookingId} {
       // Admins and SuperAdmins have unconditional full access.
       // Regular users have no access to this global collection.
-      allow read, write, list: if isAdmin() || isSuperAdmin();
+      allow read, write: if isAdmin() || isSuperAdmin();
+      allow list: if isAdmin() || isSuperAdmin();
     }
     
     /**

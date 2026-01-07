@@ -78,29 +78,29 @@ export default function MyBookingsPage() {
   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
 
   const handleCancelBooking = async (bookingId: string) => {
-    if (!user || !bookingId || !firestore) return;
+    if (!user || !bookingId) return;
 
     try {
-        // The agent handles deleting the booking from the global /bookings collection
-        await homieStaysAgent({
+        // The agent handles deleting the booking from both the global /bookings collection
+        // and the user's /users/{uid}/bookings subcollection.
+        const response = await homieStaysAgent({
             question: `Cancel booking ${bookingId}`,
             userId: user.uid,
         });
 
-        // We only need to delete the user's copy of the booking record
-        const userBookingRef = doc(firestore, `users/${user.uid}/bookings`, bookingId);
-        await deleteDoc(userBookingRef);
-        
-
-        toast({
-            title: "Booking Cancelled",
-            description: "Your booking has been successfully cancelled and a full refund is being processed.",
-        });
-    } catch(e) {
+        if (response.answer.includes('Successfully')) {
+            toast({
+                title: "Booking Cancelled",
+                description: "Your booking has been successfully cancelled and a full refund is being processed.",
+            });
+        } else {
+             throw new Error(response.answer || "Agent failed to cancel booking.");
+        }
+    } catch(e: any) {
         console.error("Failed to cancel booking", e);
         toast({
             title: "Cancellation Failed",
-            description: "We were unable to cancel your booking. Please try again.",
+            description: e.message || "We were unable to cancel your booking. Please try again.",
             variant: "destructive",
         })
     }
