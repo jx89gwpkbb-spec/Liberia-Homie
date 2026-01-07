@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarIcon, Minus, Plus, Loader2 } from "lucide-react";
-import { format, addDays } from "date-fns";
+import { format, addDays, eachDayOfInterval, isWithinInterval } from "date-fns";
 import { cn } from "@/lib/utils";
-import type { Property, Booking } from "@/lib/types";
+import type { Property, Booking, SeasonalRate } from "@/lib/types";
 import { DateRange } from "react-day-picker";
 import { DateSuggestionClient } from "./DateSuggestionClient";
 import { useUser, useFirestore, addDocumentNonBlocking, useCollection, useMemoFirebase } from "@/firebase";
@@ -27,6 +27,54 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
+function calculateTotalPrice(
+  dateRange: DateRange,
+  basePrice: number,
+  seasonalRates?: SeasonalRate[],
+  isLongStay?: boolean
+): { total: number; nights: number, pricePerUnit: number } {
+  if (!dateRange.from || !dateRange.to) {
+    return { total: 0, nights: 0, pricePerUnit: basePrice };
+  }
+    
+  const nights = Math.round((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24));
+  if (nights <= 0) return { total: 0, nights: 0, pricePerUnit: basePrice };
+
+  if (isLongStay) {
+      const months = nights / 30;
+      return { total: months * basePrice, nights: nights, pricePerUnit: basePrice };
+  }
+
+  const interval = { start: dateRange.from, end: dateRange.to };
+  const daysInInterval = eachDayOfInterval(interval);
+
+  let totalCost = 0;
+  let hasSeasonalRate = false;
+
+  daysInInterval.slice(0, -1).forEach(day => {
+    let dayPrice = basePrice;
+    let rateApplied = false;
+    if (seasonalRates) {
+        for (const rate of seasonalRates) {
+            const seasonalInterval = { start: new Date(rate.startDate), end: new Date(rate.endDate) };
+            if (isWithinInterval(day, seasonalInterval)) {
+                dayPrice = rate.pricePerNight;
+                rateApplied = true;
+                break; 
+            }
+        }
+    }
+    if (rateApplied) hasSeasonalRate = true;
+    totalCost += dayPrice;
+  });
+  
+  const serviceFee = nights > 0 ? 50 : 0;
+  const effectivePricePerNight = hasSeasonalRate ? totalCost / nights : basePrice;
+
+  return { total: totalCost + serviceFee, nights, pricePerUnit: effectivePricePerNight };
+}
+
 
 export function BookingForm({ property }: { property: Property }) {
   const { user, isUserLoading } = useUser();
@@ -56,10 +104,15 @@ export function BookingForm({ property }: { property: Property }) {
     return dates;
   }, [bookings]);
 
-  const price = property.pricePerNight;
-  const nights = date?.to && date?.from ? Math.round((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+  const { total, nights, pricePerUnit } = calculateTotalPrice(
+    date || {},
+    property.pricePerNight,
+    property.seasonalRates,
+    property.longStay
+  );
+  
   const serviceFee = nights > 0 ? 50 : 0;
-  const total = nights * price + serviceFee;
+
 
   const showNotification = (title: string, body: string) => {
     if ('Notification' in window && Notification.permission === 'granted') {
@@ -69,7 +122,6 @@ export function BookingForm({ property }: { property: Property }) {
 
   const handleReserve = async () => {
     if (!user || !date?.from || !date?.to || !firestore) {
-        // This case should ideally be prevented by disabling the button.
         return;
     }
 
@@ -121,7 +173,7 @@ export function BookingForm({ property }: { property: Property }) {
     <Card className="shadow-lg">
       <CardHeader>
         <CardTitle>
-          <span className="text-2xl font-bold">${price}</span>
+          <span className="text-2xl font-bold">${pricePerUnit}</span>
           <span className="text-base font-normal text-muted-foreground">/{property.longStay ? 'month' : 'day'}</span>
         </CardTitle>
       </CardHeader>
@@ -183,8 +235,8 @@ export function BookingForm({ property }: { property: Property }) {
         {nights > 0 && (
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span>${price} x {nights} nights</span>
-              <span>${(price * nights).toLocaleString()}</span>
+              <span>${pricePerUnit.toFixed(0)} x {nights} {property.longStay ? 'days' : 'nights'}</span>
+              <span>${(pricePerUnit * (property.longStay ? (nights/30) : nights)).toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
               <span>Service fee</span>
@@ -245,3 +297,5 @@ export function BookingForm({ property }: { property: Property }) {
 function Label({ children }: { children: React.ReactNode }) {
     return <p className="text-sm font-medium mb-2">{children}</p>;
 }
+
+    

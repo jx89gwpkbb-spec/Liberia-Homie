@@ -43,6 +43,20 @@
           "type": "string",
           "enum": ["pending", "approved", "rejected"],
           "description": "The approval status of the property listing."
+        },
+        "seasonalRates": {
+          "type": "array",
+          "description": "Seasonal pricing rules for the property.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Name of the season (e.g., 'Peak Season', 'Holidays')." },
+              "startDate": { "type": "string", "format": "date" },
+              "endDate": { "type": "string", "format": "date" },
+              "pricePerNight": { "type": "number" }
+            },
+            "required": ["name", "startDate", "endDate", "pricePerNight"]
+          }
         }
       },
       "required": [

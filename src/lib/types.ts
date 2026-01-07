@@ -1,5 +1,12 @@
 
 
+export type SeasonalRate = {
+  name: string;
+  startDate: string;
+  endDate: string;
+  pricePerNight: number;
+};
+
 export type Property = {
   id: string;
   name: string;
@@ -28,6 +35,7 @@ export type Property = {
   };
   virtualTourUrl?: string;
   status: 'pending' | 'approved' | 'rejected';
+  seasonalRates?: SeasonalRate[];
 };
 
 export type NotificationSettings = {
@@ -155,4 +163,5 @@ export type SupportTicket = {
 };
     
 
+    
     
