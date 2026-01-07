@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { format } from "date-fns";
-import { Users as UsersIcon, Home, BookOpenCheck } from "lucide-react";
+import { Users as UsersIcon, Home, BookOpenCheck, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "@/components/ui/chart";
@@ -19,6 +19,13 @@ const bookingsChartConfig: ChartConfig = {
   bookings: {
     label: "Bookings",
     color: "hsl(var(--primary))",
+  },
+};
+
+const revenueChartConfig: ChartConfig = {
+  revenue: {
+    label: "Revenue",
+    color: "hsl(var(--accent))",
   },
 };
 
@@ -49,17 +56,26 @@ export default function AdminDashboardPage() {
   const { data: recentBookings, isLoading: recentBookingsLoading } = useCollection<Booking>(recentBookingsQuery);
 
   const isLoading = usersLoading || propertiesLoading || bookingsLoading || recentUsersLoading || recentPropertiesLoading || recentBookingsLoading;
+
+  const totalRevenue = useMemoFirebase(() => {
+      if (!bookings) return 0;
+      return bookings.reduce((acc, booking) => acc + booking.totalPrice, 0);
+  }, [bookings]);
   
    const bookingsChartData = useMemoFirebase(() => {
     if (!bookings) return [];
-    const monthlyBookings: {[key: string]: number} = {};
+    const monthlyData: {[key: string]: { bookings: number; revenue: number }} = {};
     bookings.forEach(booking => {
         if(booking.createdAt?.toDate) {
             const month = format(booking.createdAt.toDate(), 'MMMM');
-            monthlyBookings[month] = (monthlyBookings[month] || 0) + 1;
+            if (!monthlyData[month]) {
+                monthlyData[month] = { bookings: 0, revenue: 0 };
+            }
+            monthlyData[month].bookings += 1;
+            monthlyData[month].revenue += booking.totalPrice;
         }
     });
-    return Object.keys(monthlyBookings).map(month => ({ month, bookings: monthlyBookings[month] }));
+    return Object.keys(monthlyData).map(month => ({ month, bookings: monthlyData[month].bookings, revenue: monthlyData[month].revenue }));
   }, [bookings]);
   
   const usersChartData = useMemoFirebase(() => {
@@ -82,7 +98,17 @@ export default function AdminDashboardPage() {
         <p className="text-muted-foreground">A summary of your platform's activity.</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {bookingsLoading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">${totalRevenue.toLocaleString()}</div>}
+            <p className="text-xs text-muted-foreground">From all bookings</p>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -118,11 +144,11 @@ export default function AdminDashboardPage() {
        <div className="grid gap-8 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Bookings This Year</CardTitle>
-            <CardDescription>A summary of bookings per month.</CardDescription>
+            <CardTitle>Revenue This Year</CardTitle>
+            <CardDescription>A summary of revenue per month.</CardDescription>
           </CardHeader>
           <CardContent>
-             <ChartContainer config={bookingsChartConfig} className="h-[250px] w-full">
+             <ChartContainer config={revenueChartConfig} className="h-[250px] w-full">
               {bookingsLoading ? <Skeleton className="w-full h-full" /> : (
                 <BarChart accessibilityLayer data={bookingsChartData}>
                     <CartesianGrid vertical={false} />
@@ -133,12 +159,12 @@ export default function AdminDashboardPage() {
                     axisLine={false}
                     tickFormatter={(value) => value.slice(0, 3)}
                     />
-                    <YAxis />
+                    <YAxis tickFormatter={(value) => `$${value / 1000}k`} />
                     <ChartTooltip
                     cursor={false}
                     content={<ChartTooltipContent indicator="dashed" />}
                     />
-                    <Bar dataKey="bookings" fill="var(--color-bookings)" radius={4} />
+                    <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
                 </BarChart>
               )}
             </ChartContainer>
