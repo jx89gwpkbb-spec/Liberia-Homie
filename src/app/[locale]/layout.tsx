@@ -3,7 +3,6 @@ import { getMessages } from 'next-intl/server';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/toaster';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { ChatWidget } from '@/components/chatbot/ChatWidget';
 import { NotificationManager } from '@/components/notifications/NotificationManager';
 
@@ -19,17 +18,15 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <FirebaseClientProvider>
-      <NextIntlClientProvider locale={locale} messages={messages}>
-        <div className="flex min-h-screen flex-col">
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
-        <ChatWidget />
-        <Toaster />
-        <NotificationManager />
-      </NextIntlClientProvider>
-    </FirebaseClientProvider>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1">{children}</main>
+        <Footer />
+      </div>
+      <ChatWidget />
+      <Toaster />
+      <NotificationManager />
+    </NextIntlClientProvider>
   );
 }
