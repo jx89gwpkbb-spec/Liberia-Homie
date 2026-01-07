@@ -15,6 +15,17 @@ import { useUser, useFirestore, addDocumentNonBlocking } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { collection, serverTimestamp } from "firebase/firestore";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export function BookingForm({ property }: { property: Property }) {
   const { user, isUserLoading } = useUser();
@@ -37,11 +48,7 @@ export function BookingForm({ property }: { property: Property }) {
 
   const handleReserve = async () => {
     if (!user || !date?.from || !date?.to || !firestore) {
-        toast({
-            title: "Reservation Failed",
-            description: "You must be logged in and select valid dates to book a property.",
-            variant: "destructive",
-        });
+        // This case should ideally be prevented by disabling the button.
         return;
     }
 
@@ -151,38 +158,64 @@ export function BookingForm({ property }: { property: Property }) {
         </div>
 
         <DateSuggestionClient property={property} onDateSelect={(range) => setDate(range)} />
-
-        {isUserLoading ? (
-            <Button className="w-full" size="lg" disabled>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Loading...
-            </Button>
-        ) : user ? (
-            <Button className="w-full" size="lg" onClick={handleReserve} disabled={isBooking || !date?.from || !date.to}>
-                {isBooking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Reserve'}
-            </Button>
-        ): (
-            <Button className="w-full" size="lg" asChild>
-                <Link href="/login">Login to Reserve</Link>
-            </Button>
-        )}
-
+        
         {nights > 0 && (
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span>${price} x {nights} nights</span>
-              <span>${price * nights}</span>
+              <span>${(price * nights).toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
               <span>Service fee</span>
-              <span>${serviceFee}</span>
+              <span>${serviceFee.toLocaleString()}</span>
             </div>
             <div className="flex justify-between font-bold text-base border-t pt-2 mt-2">
               <span>Total</span>
-              <span>${total}</span>
+              <span>${total.toLocaleString()}</span>
             </div>
           </div>
         )}
+
+        <AlertDialog>
+           <AlertDialogTrigger asChild>
+                {isUserLoading ? (
+                    <Button className="w-full" size="lg" disabled>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading...
+                    </Button>
+                ) : user ? (
+                    <Button className="w-full" size="lg" disabled={isBooking || !date?.from || !date.to}>
+                        {isBooking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Reserve'}
+                    </Button>
+                ): (
+                    <Button className="w-full" size="lg" asChild>
+                        <Link href="/login">Login to Reserve</Link>
+                    </Button>
+                )}
+           </AlertDialogTrigger>
+           <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Confirm Your Booking</AlertDialogTitle>
+                <AlertDialogDescription>
+                  You are about to book a stay at {property.name} from {date?.from ? format(date.from, 'MMM dd, yyyy') : ''} to {date?.to ? format(date.to, 'MMM dd, yyyy') : ''}.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="rounded-lg bg-muted p-4">
+                  <div className="flex justify-between font-bold text-lg">
+                      <span>Total Price:</span>
+                      <span>${total.toLocaleString()}</span>
+                  </div>
+                   <p className="text-sm text-muted-foreground mt-1">This is a placeholder for the payment step. No real payment will be processed.</p>
+              </div>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleReserve} disabled={isBooking}>
+                   {isBooking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Confirm and Pay'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
       </CardContent>
     </Card>
   );
