@@ -201,10 +201,6 @@ service cloud.firestore {
       // Admins and owners can read properties regardless of status. Public users can only see approved properties.
       allow get: if (isAdmin() || isSuperAdmin()) || (isVerified() && resource.data != null && isOwner(resource.data.owner.id)) || (resource.data != null && resource.data.status == 'approved');
       
-      // Admins can list all properties. Public users can only list approved properties (via query).
-      allow list: if isVerified() && (isAdmin() || isSuperAdmin());
-      
-
       // Users can create properties, but they must be 'pending'.
       allow create: if isVerified() && isOwner(request.resource.data.owner.id) && request.resource.data.status == 'pending';
       
