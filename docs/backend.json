@@ -208,6 +208,19 @@
         "guests",
         "createdAt"
       ]
+    },
+    "Message": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Message",
+      "description": "Represents a single message in a chat conversation.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "text": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "model"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "text", "role", "timestamp"]
     }
   },
   "auth": {

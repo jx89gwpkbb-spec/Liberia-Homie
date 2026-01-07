@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { ChatWidget } from '@/components/chatbot/ChatWidget';
 
 export const metadata: Metadata = {
   title: 'Homie Stays',
@@ -32,6 +33,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
+          <ChatWidget />
           <Toaster />
         </FirebaseClientProvider>
       </body>
