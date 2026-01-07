@@ -32,9 +32,9 @@ export const properties: Property[] = [
   {
     id: 'prop-2',
     name: 'Cozy Downtown Apartment',
-    location: 'New York, New York',
+    location: 'Paynesville, Liberia',
     pricePerNight: 250,
-    description: 'A charming and cozy apartment in the heart of the city. Perfect for solo travelers or couples looking to explore the city that never sleeps. Walking distance to major attractions.',
+    description: 'A charming and cozy apartment in the heart of the city. Perfect for solo travelers or couples looking to explore. Walking distance to major attractions.',
     longStay: false,
     bedrooms: 1,
     bathrooms: 1,
@@ -50,7 +50,7 @@ export const properties: Property[] = [
   {
     id: 'prop-3',
     name: 'Spacious Suburban Family Home',
-    location: 'Austin, Texas',
+    location: 'Ganta, Liberia',
     pricePerNight: 400,
     description: 'A beautiful and spacious home in a quiet suburban neighborhood. Features a large backyard with a grill, perfect for family gatherings. Close to parks and local eateries.',
     longStay: true,
@@ -68,7 +68,7 @@ export const properties: Property[] = [
   {
     id: 'prop-4',
     name: 'Luxury Penthouse with Cityscape',
-    location: 'Chicago, Illinois',
+    location: 'Buchanan, Liberia',
     pricePerNight: 1200,
     description: 'Indulge in the ultimate urban luxury. This penthouse offers panoramic city views, a private rooftop terrace, and exquisite modern design. An unforgettable experience.',
     longStay: false,
@@ -86,7 +86,7 @@ export const properties: Property[] = [
   {
     id: 'prop-5',
     name: 'Charming Beachfront Bungalow',
-    location: 'Key West, Florida',
+    location: 'Harper, Liberia',
     pricePerNight: 600,
     description: 'Wake up to the sound of waves in this charming bungalow right on the beach. Direct beach access and stunning sunsets await you. Ideal for a romantic escape.',
     longStay: false,
@@ -104,7 +104,7 @@ export const properties: Property[] = [
   {
     id: 'prop-6',
     name: 'Rustic Countryside Cottage',
-    location: 'Asheville, North Carolina',
+    location: 'Voinjama, Liberia',
     pricePerNight: 220,
     description: 'Escape to the peace and quiet of the countryside. This rustic cottage is surrounded by nature, offering a tranquil retreat with hiking trails and scenic beauty.',
     longStay: true,
@@ -173,7 +173,7 @@ export const bookings: Booking[] = [
         createdAt: new Date(),
         propertyName: 'Spacious Suburban Family Home',
         propertyImage: 'https://images.unsplash.com/photo-1625603736199-775425d2890a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdWJ1cmJhbiUyMGhvdXNlfGVufDB8fHx8MTc2NzY2Nzg1Mnww&ixlib=rb-4.1.0&q=80&w=1080',
-        propertyLocation: 'Austin, Texas',
+        propertyLocation: 'Ganta, Liberia',
     }
 ];
 
