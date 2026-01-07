@@ -35,6 +35,18 @@ export type User = {
   role?: 'renter' | 'vendor';
 };
 
+export type AdminProfile = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  creationDate: any;
+  lastLogin: any;
+  role: string;
+  permissions: string[];
+};
+
 export type Review = {
   id: string;
   propertyId: string;
