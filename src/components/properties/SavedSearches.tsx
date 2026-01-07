@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useUser, useFirestore, useCollection, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
@@ -98,4 +97,3 @@ export function SavedSearches() {
         </div>
     );
 }
-    

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -355,4 +354,3 @@ export function BookingForm({ property }: { property: Property }) {
     </Card>
   );
 }
-    

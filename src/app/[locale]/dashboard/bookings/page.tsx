@@ -1,4 +1,3 @@
-
 'use client';
 import { useMemo } from 'react';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
@@ -71,7 +70,6 @@ export default function MyBookingsPage() {
   const { toast } = useToast();
 
   const bookingsQuery = useMemoFirebase(() => {
-    // Only construct the query if the user is loaded, logged in, and their email is verified.
     if (!firestore || !user || !user.emailVerified) return null;
     return query(collection(firestore, 'bookings'), where('userId', '==', user.uid));
   }, [firestore, user]);
@@ -101,8 +99,6 @@ export default function MyBookingsPage() {
     }
   };
 
-  // The main dashboard layout already handles loading and redirection for unverified users.
-  // This page can safely render its loading state.
   const isLoading = isUserLoading || areBookingsLoading;
 
   return (

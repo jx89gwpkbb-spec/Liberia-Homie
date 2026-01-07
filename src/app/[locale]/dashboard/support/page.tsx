@@ -66,7 +66,7 @@ export default function MySupportPage() {
             createdAt: serverTimestamp(),
         };
         
-        await addDocumentNonBlocking(ticketsCollection, newTicket);
+        addDocumentNonBlocking(ticketsCollection, newTicket);
 
         toast({
             title: "Ticket Submitted!",
