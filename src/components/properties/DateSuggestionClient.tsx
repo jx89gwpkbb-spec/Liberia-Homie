@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/accordion";
 import { DateRange } from 'react-day-picker';
 import { addDays, format } from 'date-fns';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 type DateSuggestionClientProps = {
     property: Property;
@@ -58,20 +60,22 @@ export function DateSuggestionClient({ property, onDateSelect }: DateSuggestionC
     return (
         <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1">
-                <AccordionTrigger asChild>
-                     <Button variant="outline" className="w-full" onClick={handleSuggestDates} disabled={isLoading}>
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Suggesting Dates...
-                            </>
-                        ) : (
-                            <>
-                                <Wand2 className="mr-2 h-4 w-4" />
-                                Get AI Date Suggestions
-                            </>
-                        )}
-                    </Button>
+                <AccordionTrigger
+                    onClick={!suggestion ? handleSuggestDates : undefined}
+                    disabled={isLoading}
+                    className={cn(buttonVariants({ variant: 'outline' }), 'w-full no-underline hover:no-underline')}
+                >
+                    {isLoading ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Suggesting Dates...
+                        </>
+                    ) : (
+                        <>
+                            <Wand2 className="mr-2 h-4 w-4" />
+                            Get AI Date Suggestions
+                        </>
+                    )}
                 </AccordionTrigger>
                 <AccordionContent>
                     {suggestion && (
