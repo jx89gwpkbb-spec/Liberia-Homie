@@ -1,9 +1,9 @@
 
 
-import { properties } from "@/lib/data";
+import { properties, properties as allProperties } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Star, MapPin, Users, BedDouble, Bath, Wifi, ParkingCircle, Utensils, Wind, Tv, PlayCircle, Clock, PawPrint, Maximize } from "lucide-react";
+import { Star, MapPin, Users, BedDouble, Bath, Wifi, ParkingCircle, Utensils, Wind, Tv, PlayCircle, Clock, PawPrint, Maximize, BadgeCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BookingForm } from "@/components/properties/BookingForm";
 import { ReviewSection } from "@/components/properties/ReviewSection";
@@ -40,6 +40,10 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
   if (!property) {
     notFound();
   }
+  
+  const ownerPropertyCount = allProperties.filter(p => p.owner.id === property.owner.id).length;
+  const isOwnerVerified = ownerPropertyCount > 1 || property.owner.name === 'Alice Johnson';
+
 
   const mainImage = property.images[0];
   const secondaryImages = property.images.slice(1, 3);
@@ -143,7 +147,10 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
           <div className="border-b pb-6">
              <div className="flex justify-between items-start">
                 <div>
-                    <h2 className="text-2xl font-semibold">{property.propertyType} hosted by {property.owner.name}</h2>
+                    <h2 className="text-2xl font-semibold flex items-center gap-2">
+                        {property.propertyType} hosted by {property.owner.name}
+                        {isOwnerVerified && <BadgeCheck className="h-6 w-6 text-primary" />}
+                    </h2>
                     <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground">
                         <span><Users className="inline h-4 w-4 mr-1"/>{property.maxGuests} guests</span>
                         <span><BedDouble className="inline h-4 w-4 mr-1"/>{property.bedrooms} bedrooms</span>
