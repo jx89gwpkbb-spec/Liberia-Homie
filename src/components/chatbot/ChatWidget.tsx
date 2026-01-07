@@ -34,7 +34,7 @@ export function ChatWidget() {
   const initialMessage: Message = {
     id: '1',
     role: 'model',
-    text: 'Hi there! I am Agent231. How can I help you with Homie Stays today? You can ask me about properties, check availability, or manage your bookings.',
+    text: 'Hi there! I am Agent231. How can I help you with Homie Liberia today? You can ask me about properties, check availability, or manage your bookings.',
   };
 
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
@@ -117,7 +117,7 @@ export function ChatWidget() {
           <SheetHeader className="pr-10">
             <SheetTitle>Chat with Agent231</SheetTitle>
             <SheetDescription>
-              Your personal AI assistant for Homie Stays.
+              Your personal AI assistant for Homie Liberia.
             </SheetDescription>
           </SheetHeader>
           <div className="flex-1 overflow-hidden">

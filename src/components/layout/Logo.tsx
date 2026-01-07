@@ -13,7 +13,7 @@ export function Logo({ className }: LogoProps) {
         <Home className="h-6 w-6 text-primary-foreground" />
       </div>
       <span className="text-xl font-bold tracking-tight text-primary">
-        Homie Stays
+        Homie Liberia
       </span>
     </Link>
   );

@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview A simple FAQ chatbot flow for Homie Stays.
+ * @fileOverview A simple FAQ chatbot flow for Homie Liberia.
  *
  * - faqChatbot - A function that takes a user's question and returns a response.
  * - FaqChatbotInput - The input type for the faqChatbot function.
@@ -31,7 +31,7 @@ const prompt = ai.definePrompt({
   name: 'faqChatbotPrompt',
   input: { schema: FaqChatbotInputSchema },
   output: { schema: FaqChatbotOutputSchema },
-  prompt: `You are Agent231, a friendly and helpful AI support agent for Homie Stays, a property rental platform.
+  prompt: `You are Agent231, a friendly and helpful AI support agent for Homie Liberia, a property rental platform.
   Your goal is to answer user questions about booking, payments, listing properties, and general platform use.
   
   Answer the user's question clearly and concisely. If the question is complex or you don't know the answer,

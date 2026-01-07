@@ -82,7 +82,7 @@ export default function AdminSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Application Settings</CardTitle>
-            <CardDescription>Manage site-wide settings for Homie Stays.</CardDescription>
+            <CardDescription>Manage site-wide settings for Homie Liberia.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">

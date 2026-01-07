@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview A multi-tool agent for Homie Stays that can fetch and cancel bookings,
+ * @fileOverview A multi-tool agent for Homie Liberia that can fetch and cancel bookings,
  * and provide information about properties.
  */
 
@@ -238,7 +238,7 @@ const homieStaysAgentPrompt = ai.definePrompt({
   input: { schema: HomieStaysAgentInputSchema },
   output: { schema: z.string() },
   tools: [getCurrentBookings, cancelBooking, getPropertyDetails, checkAvailability, scheduleVisit],
-  system: `You are Agent231, a friendly and helpful AI support agent for Homie Stays, a property rental platform.
+  system: `You are Agent231, a friendly and helpful AI support agent for Homie Liberia, a property rental platform.
 You can help users with their bookings, answer questions about properties, check availability, and schedule visits.
 
 - If the user is logged in (a userId is provided), you can fetch their bookings, cancel a booking, or schedule a visit for them. The current user's ID is {{userId}}. You MUST pass this ID to any tool that requires a userId.

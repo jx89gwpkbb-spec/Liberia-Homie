@@ -41,7 +41,7 @@ export default function AnnouncementsPage() {
     <div className="space-y-6">
        <div>
         <h1 className="text-3xl font-bold font-headline flex items-center gap-2"><Megaphone /> Announcements</h1>
-        <p className="text-muted-foreground">Latest updates and news from Homie Stays.</p>
+        <p className="text-muted-foreground">Latest updates and news from Homie Liberia.</p>
       </div>
 
       {isLoading ? (

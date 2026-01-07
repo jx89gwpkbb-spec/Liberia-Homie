@@ -3,7 +3,7 @@
     "Property": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Property",
-      "description": "Represents a property listing in the Homie Stays application.",
+      "description": "Represents a property listing in the Homie Liberia application.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -67,7 +67,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "AdminProfile",
       "type": "object",
-      "description": "Represents an administrator profile within the Homie Stays application.",
+      "description": "Represents an administrator profile within the Homie Liberia application.",
       "properties": {
         "id": {
           "type": "string",
@@ -126,7 +126,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "UserProfile",
       "type": "object",
-      "description": "Represents a user profile within the Homie Stays application.",
+      "description": "Represents a user profile within the Homie Liberia application.",
       "properties": {
         "id": {
           "type": "string",

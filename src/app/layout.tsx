@@ -8,8 +8,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Homie Stays',
-  description: 'Find your next home, for a short or long stay.',
+  title: 'Homie Liberia',
+  description: 'Find your next home, for a short or long stay in Liberia.',
   manifest: '/manifest.json',
   themeColor: '#5D28D2',
 };
