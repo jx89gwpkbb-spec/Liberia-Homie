@@ -165,14 +165,8 @@ service cloud.firestore {
       allow delete: if isAdmin() && resource != null;
     }
 
-    /**
-     * @description Manages property bookings.
-     * @path /bookings/{bookingId}
-     * @allow (create) A signed-in user can create a booking for themselves.
-     * @allow (read) A user can read their own bookings. Admins can read all bookings.
-     * @deny (update, delete) Bookings are immutable once created for this example.
-     */
-    match /bookings/{bookingId} {
+    // Secure bookings collection
+    match /bookings/{docId} {
       // Allow read (get, list, query) only if:
       allow read: if request.auth != null 
                   && request.auth.token.email_verified == true;
