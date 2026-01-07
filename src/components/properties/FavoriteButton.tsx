@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUser, useFirestore, useMemoFirebase } from '@/firebase';
-import { doc, onSnapshot, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, deleteDoc, serverTimestamp, collection, getDocs, query, limit } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -65,11 +65,21 @@ export function FavoriteButton({ propertyId, size = 'default' }: FavoriteButtonP
         await deleteDoc(favoriteRef);
         toast({ title: 'Removed from favorites.' });
       } else {
+        // Milestone Gamification: Check if this is the first favorite
+        const favoritesCollection = collection(firestore, `users/${user.uid}/favorites`);
+        const q = query(favoritesCollection, limit(1));
+        const snapshot = await getDocs(q);
+
         await setDoc(favoriteRef, {
           propertyId,
           createdAt: serverTimestamp(),
         });
-        toast({ title: 'Added to favorites!' });
+
+        if (snapshot.empty) {
+          toast({ title: 'Congrats on your first saved property! 🎉' });
+        } else {
+          toast({ title: 'Added to favorites!' });
+        }
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
