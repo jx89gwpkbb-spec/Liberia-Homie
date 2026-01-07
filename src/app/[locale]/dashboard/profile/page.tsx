@@ -17,16 +17,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Camera } from 'lucide-react';
 import type { UserProfile } from '@/lib/types';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+import { getAuth, updatePassword, updateProfile, type User as FirebaseUser } from 'firebase/auth';
 import { useTranslations } from 'next-intl';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Name is required'),
+  whatsappNumber: z.string().optional(),
+  country: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -47,6 +50,7 @@ export default function MyProfilePage() {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const t = useTranslations('MyProfile');
 
   const userProfileRef = useMemoFirebase(() => {
@@ -61,6 +65,8 @@ export default function MyProfilePage() {
     resolver: zodResolver(profileSchema),
     values: {
       name: userProfile?.name || '',
+      whatsappNumber: userProfile?.whatsappNumber || '',
+      country: userProfile?.country || '',
     },
   });
   
@@ -84,7 +90,11 @@ export default function MyProfilePage() {
   const onProfileSubmit = (data: ProfileFormData) => {
     if (!userProfileRef) return;
     setIsSaving(true);
-    setDocumentNonBlocking(userProfileRef, { name: data.name }, { merge: true });
+    setDocumentNonBlocking(userProfileRef, { 
+      name: data.name,
+      whatsappNumber: data.whatsappNumber,
+      country: data.country,
+    }, { merge: true });
     toast({
         title: t('toast.profileUpdatedTitle'),
         description: t('toast.profileUpdatedDesc'),
@@ -120,6 +130,44 @@ export default function MyProfilePage() {
         setIsSavingPassword(false);
     }
   };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+
+    if (!file || !currentUser || !firestore) return;
+
+    setIsUploading(true);
+    try {
+      const storage = getStorage();
+      const filePath = `avatars/${currentUser.uid}/${file.name}`;
+      const storageRef = ref(storage, filePath);
+      
+      const snapshot = await uploadBytes(storageRef, file);
+      const photoURL = await getDownloadURL(snapshot.ref);
+
+      await updateProfile(currentUser, { photoURL });
+      
+      const userDocRef = doc(firestore, 'users', currentUser.uid);
+      setDocumentNonBlocking(userDocRef, { avatar: photoURL }, { merge: true });
+      
+      toast({
+        title: "Avatar Updated",
+        description: "Your profile picture has been changed.",
+      });
+
+    } catch (error) {
+      console.error("Avatar upload failed:", error);
+      toast({
+        title: "Upload Failed",
+        description: "Could not update your profile picture. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  }
 
 
   if (isUserLoading || isProfileLoading) {
@@ -161,13 +209,19 @@ export default function MyProfilePage() {
       <Card>
         <form onSubmit={profileForm.handleSubmit(onProfileSubmit)}>
           <CardHeader>
-             <div className="flex items-center gap-4">
-              <Avatar className="h-20 w-20">
-                <AvatarImage src={userProfile?.avatar} alt={userProfile?.name} />
-                <AvatarFallback>
-                  {getInitials(userProfile?.name || '')}
-                </AvatarFallback>
-              </Avatar>
+             <div className="flex items-center gap-6">
+               <div className="relative group">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={userProfile?.avatar || user?.photoURL || ''} alt={userProfile?.name} />
+                  <AvatarFallback>
+                    {getInitials(userProfile?.name || '')}
+                  </AvatarFallback>
+                </Avatar>
+                <Label htmlFor="avatar-upload" className="absolute inset-0 bg-black/50 flex items-center justify-center text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                  {isUploading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
+                </Label>
+                <Input id="avatar-upload" type="file" accept="image/*" className="sr-only" onChange={handleAvatarUpload} disabled={isUploading} />
+              </div>
               <div>
                 <CardTitle>{t('personalInfo.title')}</CardTitle>
                 <CardDescription>{t('personalInfo.description')}</CardDescription>
@@ -175,17 +229,27 @@ export default function MyProfilePage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">{t('personalInfo.nameLabel')}</Label>
-              <Input id="name" {...profileForm.register('name')} />
-              {profileForm.formState.errors.name && (
-                <p className="text-sm text-destructive">{profileForm.formState.errors.name.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="email">{t('personalInfo.emailLabel')}</Label>
-                <Input id="email" type="email" value={userProfile?.email || ''} disabled />
-                 <p className="text-xs text-muted-foreground">{t('personalInfo.emailHint')}</p>
+            <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                <Label htmlFor="name">{t('personalInfo.nameLabel')}</Label>
+                <Input id="name" {...profileForm.register('name')} />
+                {profileForm.formState.errors.name && (
+                    <p className="text-sm text-destructive">{profileForm.formState.errors.name.message}</p>
+                )}
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="email">{t('personalInfo.emailLabel')}</Label>
+                    <Input id="email" type="email" value={userProfile?.email || ''} disabled />
+                    <p className="text-xs text-muted-foreground">{t('personalInfo.emailHint')}</p>
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="whatsappNumber">{t('personalInfo.whatsappLabel')}</Label>
+                    <Input id="whatsappNumber" {...profileForm.register('whatsappNumber')} placeholder="+123456789" />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="country">{t('personalInfo.countryLabel')}</Label>
+                    <Input id="country" {...profileForm.register('country')} placeholder="e.g. Liberia" />
+                </div>
             </div>
           </CardContent>
            <CardFooter className="flex justify-end">

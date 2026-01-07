@@ -32,6 +32,8 @@
       "nameLabel": "Nombre Completo",
       "emailLabel": "Correo Electrónico",
       "emailHint": "La dirección de correo electrónico no se puede cambiar.",
+      "whatsappLabel": "Número de WhatsApp",
+      "countryLabel": "País",
       "saveButton": "Guardar Cambios"
     },
     "changePassword": {
@@ -43,7 +45,7 @@
     },
     "toast": {
       "profileUpdatedTitle": "Perfil Actualizado",
-      "profileUpdatedDesc": "Tu nombre ha sido actualizado exitosamente.",
+      "profileUpdatedDesc": "Tu perfil ha sido actualizado exitosamente.",
       "updateFailedTitle": "Actualización Fallida",
       "updateFailedDesc": "No se pudo actualizar tu perfil. Por favor, inténtalo de nuevo.",
       "notAuthenticatedTitle": "No autenticado",

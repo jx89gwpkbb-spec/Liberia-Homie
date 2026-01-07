@@ -51,6 +51,8 @@ export type UserProfile = {
   name:string;
   email: string;
   avatar: string;
+  whatsappNumber?: string;
+  country?: string;
   createdAt?: any;
   role?: 'renter' | 'vendor';
   notificationSettings?: NotificationSettings;
@@ -178,6 +180,7 @@ export type SupportTicket = {
     
 
     
+
 
 
 

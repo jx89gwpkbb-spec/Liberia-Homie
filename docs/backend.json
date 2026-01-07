@@ -146,6 +146,14 @@
           "description": "URL to the user's avatar image.",
           "format": "uri"
         },
+        "whatsappNumber": {
+          "type": "string",
+          "description": "User's WhatsApp phone number."
+        },
+        "country": {
+          "type": "string",
+          "description": "User's country of residence."
+        },
         "createdAt": {
           "type": "string",
           "description": "Date and time the user profile was created.",
