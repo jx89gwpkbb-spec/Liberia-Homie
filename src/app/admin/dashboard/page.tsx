@@ -29,17 +29,24 @@ export default function AdminDashboardPage() {
 
   const usersCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
   const propertiesCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'properties') : null, [firestore]);
+  const bookingsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'bookings') : null, [firestore]);
   
   const recentUsersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users'), orderBy('createdAt', 'desc'), limit(5)) : null, [firestore]);
   const recentPropertiesQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'properties'), orderBy('reviewCount', 'desc'), limit(3)) : null, [firestore]);
   
   const { data: users, isLoading: usersLoading } = useCollection<User>(usersCollectionRef);
   const { data: properties, isLoading: propertiesLoading } = useCollection<Property>(propertiesCollectionRef);
+  const { data: bookings, isLoading: bookingsLoading } = useCollection<Booking>(bookingsCollectionRef);
 
   const { data: recentUsers, isLoading: recentUsersLoading } = useCollection<User>(recentUsersQuery);
   const { data: recentProperties, isLoading: recentPropertiesLoading } = useCollection<Property>(recentPropertiesQuery);
 
-  const isLoading = usersLoading || propertiesLoading || recentUsersLoading || recentPropertiesLoading;
+  const totalRevenue = useMemo(() => {
+    if (!bookings) return 0;
+    return bookings.reduce((acc, booking) => acc + booking.totalPrice, 0);
+  }, [bookings]);
+
+  const isLoading = usersLoading || propertiesLoading || bookingsLoading || recentUsersLoading || recentPropertiesLoading;
   
   const usersChartData = useMemo(() => {
     if (!users) return [];
@@ -80,6 +87,26 @@ export default function AdminDashboardPage() {
           <CardContent>
             {propertiesLoading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{properties?.length || 0}</div>}
             <p className="text-xs text-muted-foreground">All listed properties</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+            <BookOpenCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {bookingsLoading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{bookings?.length || 0}</div>}
+            <p className="text-xs text-muted-foreground">All time bookings</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {bookingsLoading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">${totalRevenue.toLocaleString()}</div>}
+            <p className="text-xs text-muted-foreground">All time revenue</p>
           </CardContent>
         </Card>
       </div>
