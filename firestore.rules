@@ -109,7 +109,7 @@ service cloud.firestore {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId);
+      allow update: if isOwner(userId) && request.resource.data.id == userId;
       allow delete: if isExistingOwner(userId);
       
       /**
@@ -180,7 +180,7 @@ service cloud.firestore {
     match /bookings/{bookingId} {
         allow read: if isVerified() && (isAdmin() || isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId));
         // Admins can list all bookings. Other users must query by their own UID.
-        allow list: if isVerified() && (isAdmin() || (request.query.where.size() > 0 && request.query.where[0][2] == request.auth.uid));
+        allow list: if isAdmin() || (isVerified() && request.query.where.size() > 0 && request.query.where[0][2] == request.auth.uid);
         allow create: if isVerified() && isOwner(request.resource.data.userId);
         allow update, delete: if isVerified() && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId));
     }
@@ -195,10 +195,8 @@ service cloud.firestore {
       // Admins and owners can read properties regardless of status.
       allow read: if isAdmin() || (isVerified() && isOwner(resource.data.owner.id));
 
-      // Public users can only list approved properties.
-      allow list: if request.query.where.size() > 0 && request.query.where[0][0] == 'status' && request.query.where[0][2] == 'approved';
-      // Admins can list all properties without constraints.
-      allow list: if isAdmin();
+      // Public users can only list approved properties. Admins can list all.
+      allow list: if isAdmin() || (request.query.where.size() > 0 && request.query.where[0][0] == 'status' && request.query.where[0][2] == 'approved');
       // Verified users can list properties they own.
       allow list: if isVerified() && request.query.where.size() > 0 && request.query.where[0][2] == request.auth.uid;
       
