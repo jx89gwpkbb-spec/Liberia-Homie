@@ -1,7 +1,7 @@
 "use client"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, PlusCircle, BookOpenCheck, Heart, FileText, UserCircle, Briefcase, CalendarCheck, Bell, Megaphone } from 'lucide-react';
+import { LayoutDashboard, Package, PlusCircle, BookOpenCheck, Heart, FileText, UserCircle, Briefcase, CalendarCheck, Bell, Megaphone, LifeBuoy } from 'lucide-react';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 
 const userNavItems = [
@@ -19,6 +19,7 @@ const vendorNavItems = [
 const sharedNavItems = [
     { href: '/dashboard/announcements', label: 'Announcements', icon: Megaphone },
     { href: '/dashboard/notifications', label: 'Notifications', icon: Bell },
+    { href: '/dashboard/support', label: 'My Support', icon: LifeBuoy },
     { href: '/dashboard/profile', label: 'My Profile', icon: UserCircle },
 ];
 
