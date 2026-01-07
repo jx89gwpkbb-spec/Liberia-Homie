@@ -178,13 +178,13 @@ service cloud.firestore {
      * @path /bookings/{bookingId}
      */
     match /bookings/{bookingId} {
-        allow get: if isVerified() && 
-                    ((isAdmin() || isSuperAdmin()) || 
-                     (resource.data != null && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId))));
+        // Admins can read/list all bookings unconditionally.
+        allow get: if isVerified() && (isAdmin() || isSuperAdmin());
+        allow list: if isVerified() && (isAdmin() || isSuperAdmin());
 
-        // Admins can list bookings, but only via a query with ordering.
-        // Broad, unconstrained list queries are denied.
-        allow list: if isVerified() && (isAdmin() || isSuperAdmin()) && request.query.orderBy.size() > 0;
+        // Users can only get their own bookings or bookings for properties they own.
+        allow get: if isVerified() && resource.data != null && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId));
+
         allow create: if isVerified() && isOwner(request.resource.data.userId);
         allow update, delete: if isVerified() && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId) || isAdmin() || isSuperAdmin());
     }
