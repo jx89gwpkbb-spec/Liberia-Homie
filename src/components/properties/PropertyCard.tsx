@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, Users, BedDouble, Bath } from "lucide-react";
+import { FavoriteButton } from "./FavoriteButton";
 
 type PropertyCardProps = {
   property: Property;
@@ -11,9 +12,9 @@ type PropertyCardProps = {
 
 export function PropertyCard({ property }: PropertyCardProps) {
   return (
-    <Link href={`/properties/${property.id}`} className="group">
-      <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col">
-        <CardHeader className="p-0">
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col group">
+      <CardHeader className="p-0 relative">
+        <Link href={`/properties/${property.id}`} className="block">
           <div className="relative h-60 w-full">
             <Image
               src={property.images[0]}
@@ -21,11 +22,16 @@ export function PropertyCard({ property }: PropertyCardProps) {
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
-            <Badge className="absolute right-3 top-3 bg-accent text-accent-foreground shadow-md">
-              {property.longStay ? "Long Stay" : "Short Stay"}
-            </Badge>
           </div>
-        </CardHeader>
+        </Link>
+        <div className="absolute top-3 right-3 z-10">
+          <FavoriteButton propertyId={property.id} />
+        </div>
+        <Badge className="absolute left-3 top-3 bg-accent text-accent-foreground shadow-md">
+          {property.longStay ? "Long Stay" : "Short Stay"}
+        </Badge>
+      </CardHeader>
+      <Link href={`/properties/${property.id}`} className="flex flex-col flex-grow">
         <CardContent className="p-4 flex-grow">
           <p className="text-sm text-muted-foreground">{property.propertyType} in {property.location.split(',')[0]}</p>
           <h3 className="text-lg font-bold leading-tight mt-1 truncate group-hover:text-primary">{property.name}</h3>
@@ -47,7 +53,9 @@ export function PropertyCard({ property }: PropertyCardProps) {
             <span className="ml-1 text-sm text-muted-foreground">({property.reviewCount})</span>
           </div>
         </CardFooter>
-      </Card>
-    </Link>
+      </Link>
+    </Card>
   );
 }
+
+    

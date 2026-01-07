@@ -17,6 +17,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import placeholderImages from '@/lib/placeholder-images.json';
+import { FavoriteButton } from "@/components/properties/FavoriteButton";
 
 const amenityIcons: { [key: string]: React.ElementType } = {
   'WiFi': Wifi,
@@ -46,22 +47,27 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
   return (
     <div className="container mx-auto py-8">
       <div className="mb-4">
-        <h1 className="text-4xl font-bold font-headline">{property.name}</h1>
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground">
-          <div className="flex items-center">
-            <Star className="h-5 w-5 text-primary" />
-            <span className="ml-1 font-semibold text-foreground">{property.rating} ({property.reviewCount} reviews)</span>
-          </div>
-          <div className="flex items-center">
-            <MapPin className="h-5 w-5 text-primary" />
-            <span className="ml-1 text-foreground">{property.location}</span>
-          </div>
-           {property.longStay && (
-            <Badge variant="secondary" className="flex items-center">
-              <Clock className="h-4 w-4 mr-1.5" />
-              Long Stay Available
-            </Badge>
-          )}
+        <div className="flex justify-between items-start">
+            <div>
+                <h1 className="text-4xl font-bold font-headline">{property.name}</h1>
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground">
+                <div className="flex items-center">
+                    <Star className="h-5 w-5 text-primary" />
+                    <span className="ml-1 font-semibold text-foreground">{property.rating} ({property.reviewCount} reviews)</span>
+                </div>
+                <div className="flex items-center">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    <span className="ml-1 text-foreground">{property.location}</span>
+                </div>
+                {property.longStay && (
+                    <Badge variant="secondary" className="flex items-center">
+                    <Clock className="h-4 w-4 mr-1.5" />
+                    Long Stay Available
+                    </Badge>
+                )}
+                </div>
+            </div>
+            <FavoriteButton propertyId={property.id} size="lg" />
         </div>
       </div>
       
@@ -178,3 +184,4 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
   );
 }
 
+    

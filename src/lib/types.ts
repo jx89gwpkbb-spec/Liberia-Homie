@@ -56,3 +56,10 @@ export type Booking = {
   propertyImage: string;
   propertyLocation: string;
 };
+
+export type Favorite = {
+  propertyId: string;
+  createdAt: any;
+};
+
+    
