@@ -19,7 +19,7 @@ import { useAuth, initiateEmailSignUp, setDocumentNonBlocking, useFirestore } fr
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { updateProfile, type User as FirebaseUser } from 'firebase/auth';
+import { updateProfile, type User as FirebaseUser, sendEmailVerification } from 'firebase/auth';
 import { doc, serverTimestamp } from 'firebase/firestore';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
@@ -74,6 +74,13 @@ export default function SignupPage() {
         const { email, password, fullName } = getValues();
         const userCred = await initiateEmailSignUp(auth, email, password);
         await updateProfile(userCred.user, { displayName: fullName });
+        await sendEmailVerification(userCred.user);
+        
+        toast({
+          title: 'Verification Email Sent',
+          description: 'A verification link has been sent to your email address. Please check your inbox.',
+        });
+
         setUserCredential(userCred.user);
         setStep(2);
       } catch (error: any) {
@@ -111,9 +118,9 @@ export default function SignupPage() {
 
       toast({
         title: 'Account Created',
-        description: "You've successfully signed up.",
+        description: "You've successfully signed up. Please verify your email before logging in.",
       });
-      router.push('/dashboard');
+      router.push('/login');
     } catch (error: any) {
       console.error(error);
       toast({
