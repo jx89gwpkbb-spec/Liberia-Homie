@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
 
 function calculateTotalPrice(dateRange: DateRange, pricePerNight: number, isLongStay?: boolean) {
   if (!dateRange.from || !dateRange.to) {
@@ -66,7 +67,7 @@ export function BookingForm({ property }: { property: Property }) {
     bookings.forEach(booking => {
       const start = booking.checkInDate.toDate();
       const end = booking.checkOutDate.toDate();
-      for (let d = start; d < end; d.setDate(d.getDate() + 1)) {
+      for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
         dates.push(new Date(d));
       }
     });
@@ -74,9 +75,9 @@ export function BookingForm({ property }: { property: Property }) {
   }, [bookings]);
 
   const { total, nights } = calculateTotalPrice(date || {}, property.pricePerNight, property.longStay);
-  const serviceFee = nights > 0 ? 50 : 0;
-  const pricePerNight = property.longStay ? total / (nights/30) : property.pricePerNight;
-
+  const serviceFee = nights > 0 && !property.longStay ? 50 : 0;
+  const pricePerNight = property.pricePerNight;
+  const priceCalc = property.longStay ? (total / (nights/30)) : (nights * pricePerNight);
 
   const showNotification = (title: string, body: string) => {
     if ('Notification' in window && Notification.permission === 'granted') {
@@ -106,7 +107,7 @@ export function BookingForm({ property }: { property: Property }) {
             propertyLocation: property.location,
         };
 
-        addDocumentNonBlocking(bookingsCollection, newBooking);
+        await addDocumentNonBlocking(bookingsCollection, newBooking);
 
         toast({
             title: "Booking Successful!",
@@ -120,11 +121,11 @@ export function BookingForm({ property }: { property: Property }) {
 
         setDate(undefined);
         setGuests(1);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Booking failed:", error);
         toast({
             title: "Booking Failed",
-            description: "Something went wrong. Please try again.",
+            description: error.message || "Something went wrong. Please try again.",
             variant: "destructive",
         });
     } finally {
@@ -138,7 +139,7 @@ export function BookingForm({ property }: { property: Property }) {
       <CardHeader>
         <CardTitle>
           <span className="text-2xl font-bold">${property.pricePerNight}</span>
-          <span className="text-base font-normal text-muted-foreground">/{property.longStay ? 'month' : 'day'}</span>
+          <span className="text-base font-normal text-muted-foreground">/{property.longStay ? 'month' : 'night'}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -194,18 +195,22 @@ export function BookingForm({ property }: { property: Property }) {
           </div>
         </div>
 
-        <DateSuggestionClient property={property} onDateSelect={(range) => setDate(range)} />
+        {!property.longStay && <DateSuggestionClient property={property} onDateSelect={(range) => setDate(range)} />}
         
         {nights > 0 && (
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span>${pricePerNight.toFixed(0)} x {nights} {property.longStay ? 'days' : 'nights'}</span>
-              <span>${(pricePerNight * (property.longStay ? (nights/30) : nights)).toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Service fee</span>
-              <span>${serviceFee.toLocaleString()}</span>
-            </div>
+             {!property.longStay && (
+                <>
+                    <div className="flex justify-between">
+                        <span>${pricePerNight.toFixed(0)} x {nights} nights</span>
+                        <span>${priceCalc.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span>Service fee</span>
+                        <span>${serviceFee.toLocaleString()}</span>
+                    </div>
+                </>
+             )}
             <div className="flex justify-between font-bold text-base border-t pt-2 mt-2">
               <span>Total</span>
               <span>${total.toLocaleString()}</span>
@@ -257,9 +262,3 @@ export function BookingForm({ property }: { property: Property }) {
     </Card>
   );
 }
-
-function Label({ children }: { children: React.ReactNode }) {
-    return <p className="text-sm font-medium mb-2">{children}</p>;
-}
-
-    
