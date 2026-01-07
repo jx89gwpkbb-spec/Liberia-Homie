@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
@@ -17,7 +18,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { properties } from "@/lib/data"; // For mock images
 
 const propertySchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -30,6 +30,9 @@ const propertySchema = z.object({
     bedrooms: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
     bathrooms: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
     maxGuests: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
+    image1: z.string().url("Must be a valid URL"),
+    image2: z.string().url("Must be a valid URL").optional(),
+    image3: z.string().url("Must be a valid URL").optional(),
 });
 
 type PropertyFormData = z.infer<typeof propertySchema>;
@@ -57,26 +60,30 @@ export function PropertyForm() {
         setIsSaving(true);
         try {
             const propertiesCollection = collection(firestore, 'properties');
+
+            const images = [data.image1, data.image2, data.image3].filter(Boolean) as string[];
+
             const newProperty = {
-                ...data,
+                name: data.name,
+                location: data.location,
                 pricePerNight: parseFloat(data.price),
                 bedrooms: parseInt(data.bedrooms, 10),
                 bathrooms: parseInt(data.bathrooms, 10),
                 maxGuests: parseInt(data.maxGuests, 10),
                 longStay: data.stayDuration === 'long',
                 amenities: data.keyFeatures.split(',').map(s => s.trim()),
+                description: data.description,
+                propertyType: data.propertyType,
                 owner: {
                     id: user.uid,
                     name: user.displayName || 'Anonymous',
                     avatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
                 },
+                images: images,
                 // Mock data for fields not in form
                 rating: Math.random() * 2 + 3, // 3.0 to 5.0
                 reviewCount: Math.floor(Math.random() * 100),
-                images: [properties[0].images[0], properties[1].images[0], properties[2].images[0]],
             };
-            
-            delete (newProperty as any).price; // remove original price string
             
             await addDocumentNonBlocking(propertiesCollection, newProperty);
             
@@ -183,6 +190,16 @@ export function PropertyForm() {
                         <Input id="keyFeatures" {...register("keyFeatures")} placeholder="e.g., Private Pool, Ocean View, Gym"/>
                         {errors.keyFeatures && <p className="text-destructive text-sm">{errors.keyFeatures.message}</p>}
                     </div>
+                    
+                    <div className="md:col-span-2 space-y-2">
+                        <Label>Image URLs</Label>
+                        <Input id="image1" {...register("image1")} placeholder="Main image URL"/>
+                        {errors.image1 && <p className="text-destructive text-sm">{errors.image1.message}</p>}
+                         <Input id="image2" {...register("image2")} placeholder="Optional: Second image URL"/>
+                        {errors.image2 && <p className="text-destructive text-sm">{errors.image2.message}</p>}
+                         <Input id="image3" {...register("image3")} placeholder="Optional: Third image URL"/>
+                        {errors.image3 && <p className="text-destructive text-sm">{errors.image3.message}</p>}
+                    </div>
 
                     <div className="md:col-span-2 space-y-2">
                         <div className="flex justify-between items-center">
@@ -203,3 +220,5 @@ export function PropertyForm() {
         </form>
     );
 }
+
+    
