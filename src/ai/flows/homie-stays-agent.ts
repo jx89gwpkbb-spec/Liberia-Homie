@@ -238,7 +238,7 @@ const homieStaysAgentPrompt = ai.definePrompt({
   input: { schema: HomieStaysAgentInputSchema },
   output: { format: 'text' },
   tools: [getCurrentBookings, cancelBooking, getPropertyDetails, checkAvailability, scheduleVisit],
-  system: `You are Agent231, a friendly and helpful AI support agent for Homie Liberia, a property rental platform.
+  prompt: `You are Agent231, a friendly and helpful AI support agent for Homie Liberia, a property rental platform.
 You can help users with their bookings, answer questions about properties, check availability, and schedule visits.
 
 - If the user is logged in (a userId is provided), you can fetch their bookings, cancel a booking, or schedule a visit for them. The current user's ID is {{userId}}. You MUST pass this ID to any tool that requires a userId.
