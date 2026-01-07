@@ -171,10 +171,10 @@ service cloud.firestore {
      * @path /bookings/{bookingId}
      */
     match /bookings/{bookingId} {
-        allow read: if isVerified() && (isAdmin() || isOwner(resource.data.userId));
-        allow list: if isVerified() && isAdmin();
+        allow read: if isVerified() && (isAdmin() || isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId));
+        allow list: if isVerified() && (isAdmin() || isOwner(request.query.where[0][2]));
         allow create: if isVerified() && isOwner(request.resource.data.userId);
-        allow update, delete: if isVerified() && isOwner(resource.data.userId);
+        allow update, delete: if isVerified() && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId));
     }
     
     /**
@@ -251,5 +251,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
