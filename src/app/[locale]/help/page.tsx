@@ -1,171 +1,109 @@
 'use client';
 
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-import { Mail, Phone, LifeBuoy, Loader2, Send } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useUser, useFirestore, addDocumentNonBlocking } from "@/firebase";
-import { collection, serverTimestamp } from "firebase/firestore";
-import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
+  Building,
+  Users,
+  Calendar,
+  Lock,
+  Smartphone,
+  ChevronRight,
+  LifeBuoy,
+} from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
-const contactFormSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email address'),
-  subject: z.string().min(1, 'Subject is required'),
-  message: z.string().min(1, 'Message is required'),
-});
-
-type ContactFormData = z.infer<typeof contactFormSchema>;
+const features = [
+  {
+    icon: Building,
+    title: 'Housing & Rentals',
+    description: 'Find or list apartments, homes, and shared spaces.',
+  },
+  {
+    icon: Users,
+    title: 'Local Services',
+    description:
+      'Connect with professionals offering repairs, tutoring, transport, and more.',
+  },
+  {
+    icon: Calendar,
+    title: 'Community Events',
+    description:
+      'Stay updated on cultural, educational, and social activities near you.',
+  },
+  {
+    icon: Lock,
+    title: 'Secure Access',
+    description:
+      'Built with Firebase authentication and Firestore rules to protect your data.',
+  },
+  {
+    icon: Smartphone,
+    title: 'Easy to Use',
+    description: 'Simple interface designed for mobile-first users in Liberia.',
+  },
+];
 
 export default function HelpPage() {
-  const { user } = useUser();
-  const firestore = useFirestore();
-  const { toast } = useToast();
-
-  const form = useForm<ContactFormData>({
-    resolver: zodResolver(contactFormSchema),
-    defaultValues: { name: '', email: '', subject: '', message: '' },
-  });
-
-  useEffect(() => {
-    if (user) {
-      form.reset({
-        name: user.displayName || '',
-        email: user.email || '',
-        subject: '',
-        message: '',
-      });
-    }
-  }, [user, form]);
-
-  const { formState: { isSubmitting } } = form;
-
-  const faqs = [
-    {
-      question: "How do I book a property?",
-      answer: "To book a property, simply navigate to the property's page, select your desired dates on the calendar, choose the number of guests, and click the 'Reserve' button. You'll be guided through a confirmation process."
-    },
-    {
-      question: "What is the cancellation policy?",
-      answer: "Cancellation policies vary by property. You can find the specific cancellation policy for a listing in the 'About this place' section on the property details page. For most properties, you can cancel up to 5 days before check-in for a full refund."
-    },
-    {
-      question: "How do I become a vendor and list my property?",
-      answer: "During the signup process, choose the 'I want to list my property' option. Once your account is created, you will find an 'Add New' button in your dashboard under 'My Properties' to start creating your listing."
-    },
-    {
-      question: "How are properties verified?",
-      answer: "Our admin team reviews every new property submission to ensure it meets our quality and safety standards. Listings only go live after being approved by an administrator."
-    },
-    {
-      question: "How does payment work?",
-      answer: "For this demonstration application, no real payment is processed. You can simulate a booking by clicking 'Confirm and Pay' without any financial transaction. In a real-world scenario, we would integrate a secure payment gateway like Stripe or Braintree."
-    }
-  ];
-
-  const onSubmit = (data: ContactFormData) => {
-    if (!firestore) {
-      toast({ title: 'Error', description: 'Could not connect to our services.', variant: 'destructive'});
-      return;
-    }
-    
-    const ticketsCollection = collection(firestore, 'tickets');
-    const newTicket = {
-        ...data,
-        userId: user?.uid || null,
-        status: 'New' as const,
-        priority: 'Medium' as const,
-        createdAt: serverTimestamp(),
-    };
-    
-    addDocumentNonBlocking(ticketsCollection, newTicket);
-
-    toast({
-        title: "Message Sent!",
-        description: "Thanks for reaching out. A support ticket has been created and our team will get back to you shortly."
-    });
-    form.reset();
-  };
-
   return (
     <div className="container mx-auto py-12">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold font-headline">Help Center</h1>
-            <p className="mt-2 text-lg text-muted-foreground">
-                Find answers to your questions or get in touch with our support team.
-            </p>
+          <h1 className="text-4xl font-bold font-headline text-primary">
+            Welcome to Homie Liberia
+          </h1>
+          <p className="mt-4 text-lg text-muted-foreground">
+            Your trusted digital companion for everyday living in Liberia. We
+            connect people, services, and opportunities to help you find what
+            you need, when you need it.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12">
-            <div className="mb-12 md:mb-0">
-                <h2 className="text-2xl font-semibold mb-6">Frequently Asked Questions</h2>
-                <Accordion type="single" collapsible className="w-full">
-                  {faqs.map((faq, index) => (
-                     <AccordionItem key={index} value={`item-${index}`}>
-                        <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
-                        <AccordionContent>
-                            {faq.answer}
-                        </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-            </div>
+        <Card className="mb-12 shadow-lg">
+           <CardHeader>
+                <CardTitle className="flex items-center gap-2"><LifeBuoy /> Our Mission</CardTitle>
+                <CardDescription>
+                Homie Liberia is a community-driven platform designed to connect people, services, and opportunities across Liberia. Whether you’re looking for housing, local services, or community events, Homie Liberia makes it easy to discover and share what matters most in your area.
+                </CardDescription>
+            </CardHeader>
+        </Card>
 
-            <div>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><LifeBuoy /> Contact Support</CardTitle>
-                    <CardDescription>
-                      If you can't find an answer, submit a support ticket below.
-                    </CardDescription>
-                  </CardHeader>
-                  <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Name</Label>
-                            <Input id="name" {...form.register('name')} />
-                             {form.formState.errors.name && <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>}
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input id="email" type="email" {...form.register('email')} />
-                            {form.formState.errors.email && <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>}
-                        </div>
-                      </div>
-                       <div className="space-y-2">
-                          <Label htmlFor="subject">Subject</Label>
-                          <Input id="subject" {...form.register('subject')} />
-                           {form.formState.errors.subject && <p className="text-sm text-destructive">{form.formState.errors.subject.message}</p>}
-                      </div>
-                       <div className="space-y-2">
-                          <Label htmlFor="message">Message</Label>
-                          <Textarea id="message" rows={5} {...form.register('message')} />
-                           {form.formState.errors.message && <p className="text-sm text-destructive">{form.formState.errors.message.message}</p>}
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                       <Button type="submit" className="w-full" disabled={isSubmitting}>
-                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                         Submit Ticket
-                      </Button>
-                    </CardFooter>
-                  </form>
-                </Card>
-            </div>
+        <div>
+          <h2 className="text-3xl font-semibold text-center mb-8">
+            Key Features
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <feature.icon className="h-6 w-6" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">{feature.title}</h3>
+                  <p className="mt-1 text-muted-foreground">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="text-center mt-16">
+          <h2 className="text-2xl font-semibold">Ready to get started?</h2>
+          <p className="text-muted-foreground mt-2">
+            Explore listings or create one of your own.
+          </p>
+          <div className="mt-6 flex justify-center gap-4">
+            <Button asChild size="lg">
+              <Link href="/properties">Explore Properties</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link href="/signup">Join the Community</Link>
+            </Button>
+          </div>
         </div>
       </div>
     </div>
