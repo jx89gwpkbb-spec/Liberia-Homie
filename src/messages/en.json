@@ -22,5 +22,35 @@
   "RootLayout": {
     "title": "Homie Stays",
     "description": "Find your next home, for a short or long stay."
+  },
+  "MyProfile": {
+    "title": "My Profile",
+    "subtitle": "View and update your personal details.",
+    "personalInfo": {
+      "title": "Personal Information",
+      "description": "Update your name and view your email.",
+      "nameLabel": "Full Name",
+      "emailLabel": "Email",
+      "emailHint": "Email address cannot be changed.",
+      "saveButton": "Save Changes"
+    },
+    "changePassword": {
+      "title": "Change Password",
+      "description": "Enter a new password for your account.",
+      "newPasswordLabel": "New Password",
+      "confirmPasswordLabel": "Confirm New Password",
+      "updateButton": "Update Password"
+    },
+    "toast": {
+      "profileUpdatedTitle": "Profile Updated",
+      "profileUpdatedDesc": "Your name has been successfully updated.",
+      "updateFailedTitle": "Update Failed",
+      "updateFailedDesc": "Could not update your profile. Please try again.",
+      "notAuthenticatedTitle": "Not authenticated",
+      "notAuthenticatedDesc": "Please log in again.",
+      "passwordUpdatedTitle": "Password Updated",
+      "passwordUpdatedDesc": "Your password has been changed successfully.",
+      "passwordUpdateFailedDesc": "Could not update your password. For security, you may need to log out and log back in before changing your password."
+    }
   }
 }

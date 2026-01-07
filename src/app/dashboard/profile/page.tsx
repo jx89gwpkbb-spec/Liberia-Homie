@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -24,6 +23,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+import { useTranslations } from 'next-intl';
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -47,6 +47,7 @@ export default function MyProfilePage() {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const t = useTranslations('MyProfile');
 
   const userProfileRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -86,14 +87,14 @@ export default function MyProfilePage() {
     try {
         setDocumentNonBlocking(userProfileRef, { name: data.name }, { merge: true });
         toast({
-            title: 'Profile Updated',
-            description: 'Your name has been successfully updated.',
+            title: t('toast.profileUpdatedTitle'),
+            description: t('toast.profileUpdatedDesc'),
         });
     } catch (error) {
         console.error("Failed to update profile", error);
         toast({
-            title: 'Update Failed',
-            description: 'Could not update your profile. Please try again.',
+            title: t('toast.updateFailedTitle'),
+            description: t('toast.updateFailedDesc'),
             variant: 'destructive',
         });
     } finally {
@@ -106,7 +107,7 @@ export default function MyProfilePage() {
     const currentUser = auth.currentUser;
 
     if (!currentUser) {
-        toast({ title: 'Not authenticated', description: 'Please log in again.', variant: 'destructive'});
+        toast({ title: t('toast.notAuthenticatedTitle'), description: t('toast.notAuthenticatedDesc'), variant: 'destructive'});
         return;
     }
 
@@ -114,15 +115,15 @@ export default function MyProfilePage() {
     try {
         await updatePassword(currentUser, data.password);
         toast({
-            title: 'Password Updated',
-            description: 'Your password has been changed successfully.',
+            title: t('toast.passwordUpdatedTitle'),
+            description: t('toast.passwordUpdatedDesc'),
         });
         passwordForm.reset();
     } catch (error: any) {
         console.error('Password update failed', error);
         toast({
-            title: 'Update Failed',
-            description: 'Could not update your password. For security, you may need to log out and log back in before changing your password.',
+            title: t('toast.updateFailedTitle'),
+            description: t('toast.passwordUpdateFailedDesc'),
             variant: 'destructive',
         });
     } finally {
@@ -135,9 +136,9 @@ export default function MyProfilePage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold font-headline">My Profile</h1>
+          <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
           <p className="text-muted-foreground">
-            View and update your personal details.
+            {t('subtitle')}
           </p>
         </div>
         <Card>
@@ -162,9 +163,9 @@ export default function MyProfilePage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold font-headline">My Profile</h1>
+        <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
         <p className="text-muted-foreground">
-          View and update your personal details.
+          {t('subtitle')}
         </p>
       </div>
       <Card>
@@ -178,29 +179,29 @@ export default function MyProfilePage() {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle>Personal Information</CardTitle>
-                <CardDescription>Update your name and view your email.</CardDescription>
+                <CardTitle>{t('personalInfo.title')}</CardTitle>
+                <CardDescription>{t('personalInfo.description')}</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">{t('personalInfo.nameLabel')}</Label>
               <Input id="name" {...profileForm.register('name')} />
               {profileForm.formState.errors.name && (
                 <p className="text-sm text-destructive">{profileForm.formState.errors.name.message}</p>
               )}
             </div>
             <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('personalInfo.emailLabel')}</Label>
                 <Input id="email" type="email" value={userProfile?.email || ''} disabled />
-                 <p className="text-xs text-muted-foreground">Email address cannot be changed.</p>
+                 <p className="text-xs text-muted-foreground">{t('personalInfo.emailHint')}</p>
             </div>
           </CardContent>
            <CardFooter className="flex justify-end">
                 <Button type="submit" disabled={isSaving}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save Changes
+                    {t('personalInfo.saveButton')}
                 </Button>
             </CardFooter>
         </form>
@@ -209,19 +210,19 @@ export default function MyProfilePage() {
        <Card>
         <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}>
           <CardHeader>
-            <CardTitle>Change Password</CardTitle>
-            <CardDescription>Enter a new password for your account.</CardDescription>
+            <CardTitle>{t('changePassword.title')}</CardTitle>
+            <CardDescription>{t('changePassword.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password">New Password</Label>
+              <Label htmlFor="password">{t('changePassword.newPasswordLabel')}</Label>
               <Input id="password" type="password" {...passwordForm.register('password')} />
               {passwordForm.formState.errors.password && (
                 <p className="text-sm text-destructive">{passwordForm.formState.errors.password.message}</p>
               )}
             </div>
              <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Label htmlFor="confirmPassword">{t('changePassword.confirmPasswordLabel')}</Label>
               <Input id="confirmPassword" type="password" {...passwordForm.register('confirmPassword')} />
               {passwordForm.formState.errors.confirmPassword && (
                 <p className="text-sm text-destructive">{passwordForm.formState.errors.confirmPassword.message}</p>
@@ -231,7 +232,7 @@ export default function MyProfilePage() {
            <CardFooter className="flex justify-end">
                 <Button type="submit" variant="secondary" disabled={isSavingPassword}>
                     {isSavingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Update Password
+                    {t('changePassword.updateButton')}
                 </Button>
             </CardFooter>
         </form>

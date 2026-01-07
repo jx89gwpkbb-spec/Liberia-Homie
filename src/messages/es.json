@@ -22,5 +22,35 @@
   "RootLayout": {
     "title": "Homie Stays",
     "description": "Encuentra tu próximo hogar, para una estancia corta o larga."
+  },
+  "MyProfile": {
+    "title": "Mi Perfil",
+    "subtitle": "Ve y actualiza tus datos personales.",
+    "personalInfo": {
+      "title": "Información Personal",
+      "description": "Actualiza tu nombre y ve tu correo electrónico.",
+      "nameLabel": "Nombre Completo",
+      "emailLabel": "Correo Electrónico",
+      "emailHint": "La dirección de correo electrónico no se puede cambiar.",
+      "saveButton": "Guardar Cambios"
+    },
+    "changePassword": {
+      "title": "Cambiar Contraseña",
+      "description": "Introduce una nueva contraseña para tu cuenta.",
+      "newPasswordLabel": "Nueva Contraseña",
+      "confirmPasswordLabel": "Confirmar Nueva Contraseña",
+      "updateButton": "Actualizar Contraseña"
+    },
+    "toast": {
+      "profileUpdatedTitle": "Perfil Actualizado",
+      "profileUpdatedDesc": "Tu nombre ha sido actualizado exitosamente.",
+      "updateFailedTitle": "Actualización Fallida",
+      "updateFailedDesc": "No se pudo actualizar tu perfil. Por favor, inténtalo de nuevo.",
+      "notAuthenticatedTitle": "No autenticado",
+      "notAuthenticatedDesc": "Por favor, inicia sesión de nuevo.",
+      "passwordUpdatedTitle": "Contraseña Actualizada",
+      "passwordUpdatedDesc": "Tu contraseña ha sido cambiada exitosamente.",
+      "passwordUpdateFailedDesc": "No se pudo actualizar tu contraseña. Por seguridad, es posible que necesites cerrar sesión y volver a iniciarla antes de cambiar tu contraseña."
+    }
   }
 }
