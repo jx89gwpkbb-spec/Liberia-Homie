@@ -84,3 +84,17 @@ export type Document = {
   documentType: 'ID Proof' | 'Rental Agreement' | 'Other';
   uploadedAt: any;
 };
+
+export type SavedSearch = {
+    id?: string;
+    name: string;
+    createdAt: any;
+    filters: {
+        location?: string;
+        price?: number;
+        duration?: string;
+        amenities?: string[];
+        bedrooms?: number;
+        petFriendly?: boolean;
+    }
+};

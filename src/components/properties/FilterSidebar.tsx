@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -10,12 +10,17 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { amenities as availableAmenities } from "@/lib/data";
+import { SaveSearchDialog } from "./SaveSearchDialog";
+import { useUser } from "@/firebase";
+import { SavedSearches } from "./SavedSearches";
+import { Separator } from "../ui/separator";
 
 
 export function FilterSidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { user } = useUser();
 
   // Initialize state from URL params
   const [price, setPrice] = useState(searchParams.get('price') ? parseInt(searchParams.get('price') as string) : 2000);
@@ -123,7 +128,17 @@ export function FilterSidebar() {
           </div>
         </div>
         
-        <Button className="w-full" onClick={handleApplyFilters}>Apply Filters</Button>
+        <div className="flex flex-col gap-2">
+          <Button className="w-full" onClick={handleApplyFilters}>Apply Filters</Button>
+          {user && <SaveSearchDialog searchParams={searchParams} />}
+        </div>
+        
+        {user && (
+            <>
+                <Separator />
+                <SavedSearches />
+            </>
+        )}
       </CardContent>
     </Card>
   );
