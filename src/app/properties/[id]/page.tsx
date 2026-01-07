@@ -1,8 +1,9 @@
 
+
 import { properties } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Star, MapPin, Users, BedDouble, Bath, Wifi, ParkingCircle, Utensils, Wind, Tv, PlayCircle, Clock, PawPrint } from "lucide-react";
+import { Star, MapPin, Users, BedDouble, Bath, Wifi, ParkingCircle, Utensils, Wind, Tv, PlayCircle, Clock, PawPrint, Maximize } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BookingForm } from "@/components/properties/BookingForm";
 import { ReviewSection } from "@/components/properties/ReviewSection";
@@ -39,6 +40,9 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
     notFound();
   }
 
+  const mainImage = property.images[0];
+  const secondaryImages = property.images.slice(1, 3);
+
   return (
     <div className="container mx-auto py-8">
       <div className="mb-4">
@@ -61,24 +65,48 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
         </div>
       </div>
       
-       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="relative h-[300px] md:h-[500px] lg:col-span-2">
-            <Carousel className="w-full h-full rounded-xl overflow-hidden shadow-lg">
-                <CarouselContent>
-                    {property.images.map((img, index) => (
-                    <CarouselItem key={index}>
-                        <div className="relative h-[300px] md:h-[500px]">
-                            <Image src={img} alt={`${property.name} view ${index + 1}`} fill className="object-cover" priority={index === 0} />
-                        </div>
-                    </CarouselItem>
-                    ))}
-                </CarouselContent>
-                <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-10" />
-                <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10" />
-            </Carousel>
-             <Dialog>
+       <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-2 h-[500px] rounded-xl overflow-hidden shadow-lg">
+          <div className="col-span-2 row-span-2 h-full">
+            {mainImage && (
+              <div className="relative w-full h-full">
+                 <Image src={mainImage} alt={`${property.name} main view`} fill className="object-cover" priority />
+              </div>
+            )}
+          </div>
+          {secondaryImages.map((img, index) => (
+            <div key={index} className="h-full">
+              <div className="relative w-full h-full">
+                <Image src={img} alt={`${property.name} view ${index + 2}`} fill className="object-cover" />
+              </div>
+            </div>
+          ))}
+          <div className="absolute bottom-4 right-4 z-10 flex gap-2">
+            <Dialog>
               <DialogTrigger asChild>
-                <Button variant="secondary" className="absolute bottom-4 right-4 z-10 shadow-lg">
+                <Button variant="secondary" className="shadow-lg">
+                  <Maximize className="mr-2 h-5 w-5" />
+                  Show all photos
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                 <Carousel className="w-full">
+                    <CarouselContent>
+                        {property.images.map((img, index) => (
+                        <CarouselItem key={index}>
+                            <div className="relative h-[60vh]">
+                                <Image src={img} alt={`${property.name} view ${index + 1}`} fill className="object-contain" priority={index === 0} />
+                            </div>
+                        </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+                </Carousel>
+              </DialogContent>
+            </Dialog>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="secondary" className="shadow-lg">
                   <PlayCircle className="mr-2 h-5 w-5" />
                   Virtual Tour
                 </Button>
@@ -101,7 +129,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
                 </div>
               </DialogContent>
             </Dialog>
-        </div>
+          </div>
       </div>
 
       <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-3">
@@ -149,3 +177,4 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
     </div>
   );
 }
+
