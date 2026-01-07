@@ -26,13 +26,31 @@ export default function VerifyEmailPage() {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
+    const interval = setInterval(async () => {
+      if (user) {
+        await user.reload();
+        if (user.emailVerified) {
+          clearInterval(interval);
+          toast({
+            title: "Email Verified!",
+            description: "You can now access the full application.",
+          });
+          router.push('/dashboard');
+        }
+      }
+    }, 3000);
+
     if (isUserLoading) return;
+    
     if (user && user.emailVerified) {
+      clearInterval(interval);
       router.push('/dashboard');
     } else {
       setIsChecking(false);
     }
-  }, [user, isUserLoading, router]);
+    
+    return () => clearInterval(interval);
+  }, [user, isUserLoading, router, toast]);
 
   const handleResend = async () => {
     if (!user) {
@@ -81,13 +99,10 @@ export default function VerifyEmailPage() {
           <CardDescription>
             A verification link has been sent to{' '}
             <span className="font-bold text-foreground">{user?.email}</span>.
-            Please check your inbox (and spam folder) to continue.
+            Please check your inbox (and spam folder) to continue. This page will automatically redirect after you verify.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-           <Button className="w-full" onClick={() => window.location.reload()}>
-            I've verified my email
-          </Button>
           <p className="text-xs text-muted-foreground">
             Didn&apos;t receive the email?
           </p>

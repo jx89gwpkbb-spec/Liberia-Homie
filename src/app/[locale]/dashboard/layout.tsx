@@ -1,4 +1,3 @@
-
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
@@ -38,11 +37,11 @@ export default function DashboardLayout({
     }
   }, [user, isUserLoading, router]);
 
-  // While loading auth state, show a loader
+  // While loading auth state, or if user is unverified, show a loader
   if (isUserLoading || !user || (user && !user.emailVerified)) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }

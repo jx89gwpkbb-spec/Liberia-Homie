@@ -43,7 +43,15 @@ export function LoginForm() {
       const user = userCredential.user;
 
       if (!user.emailVerified) {
+        // Send a verification email just in case they lost the first one.
         await sendEmailVerification(user);
+        
+        toast({
+            title: 'Email Not Verified',
+            description: "A new verification link has been sent. Please check your email.",
+        });
+
+        // Redirect to a dedicated verification page
         router.push('/verify-email');
       } else {
          toast({

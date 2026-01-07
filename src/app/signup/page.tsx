@@ -118,9 +118,9 @@ export default function SignupPage() {
 
       toast({
         title: 'Account Created',
-        description: "You've successfully signed up. Please verify your email before logging in.",
+        description: "You've successfully signed up! Please check your email to verify your account before logging in.",
       });
-      router.push('/login');
+      router.push('/verify-email');
     } catch (error: any) {
       console.error(error);
       toast({
