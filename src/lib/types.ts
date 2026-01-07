@@ -104,3 +104,5 @@ export type SavedSearch = {
 };
 
 export type User = UserProfile;
+
+    
