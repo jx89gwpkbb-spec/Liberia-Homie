@@ -16,10 +16,11 @@ import { useUser, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking }
 import { collection, doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { Loader2, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { Property } from "@/lib/types";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import Image from "next/image";
 
 const propertySchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -65,8 +66,13 @@ export function PropertyForm({ property }: PropertyFormProps) {
     const [isSaving, setIsSaving] = useState(false);
     
     const isEditMode = !!property;
-    const [imageFiles, setImageFiles] = useState<File[]>([]);
-    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    
+    // For edit mode, existing image URLs from Firebase Storage
+    const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
+    // For new file uploads
+    const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+    // For generating temporary previews
+    const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
 
     const { register, handleSubmit, control, formState: { errors }, getValues, setValue, reset } = useForm<PropertyFormData>({
@@ -90,7 +96,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
             reset({
                 name: property.name,
                 location: property.location,
-                pricePerNight: property.pricePerNight.toString(),
+                price: property.pricePerNight.toString(),
                 propertyType: property.propertyType,
                 stayDuration: property.longStay ? 'long' : 'short',
                 keyFeatures: property.amenities.join(', '),
@@ -99,7 +105,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 bathrooms: property.bathrooms.toString(),
                 maxGuests: property.maxGuests.toString(),
             });
-            setImagePreviews(property.images || []);
+            const imageUrls = property.images || [];
+            setExistingImageUrls(imageUrls);
+            setPreviewUrls(imageUrls);
+
         }
     }, [property, isEditMode, reset]);
 
@@ -107,19 +116,40 @@ export function PropertyForm({ property }: PropertyFormProps) {
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const files = Array.from(e.target.files);
-            setImageFiles(prev => [...prev, ...files]);
+            setNewImageFiles(prev => [...prev, ...files]);
 
             const newPreviews = files.map(file => URL.createObjectURL(file));
-            setImagePreviews(prev => [...prev, ...newPreviews]);
+            setPreviewUrls(prev => [...prev, ...newPreviews]);
         }
     };
     
-    const removeImage = (index: number, isPreview: boolean) => {
-        if (isPreview) {
-            setImagePreviews(prev => prev.filter((_, i) => i !== index));
-            setImageFiles(prev => prev.filter((_, i) => i !== (index - (imagePreviews.length - imageFiles.length))));
+    const removeImage = (index: number) => {
+        const removedUrl = previewUrls[index];
+        setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+
+        // Check if the removed URL was an existing image URL
+        const existingIndex = existingImageUrls.indexOf(removedUrl);
+        if (existingIndex > -1) {
+            setExistingImageUrls(prev => prev.filter(url => url !== removedUrl));
         } else {
-             setImagePreviews(prev => prev.filter((_, i) => i !== index));
+            // If it's not an existing URL, it must be a new file preview
+            // We need to find the corresponding file in newImageFiles and remove it
+            // This is tricky if filenames aren't unique. A more robust way is to use an object with an ID.
+            // For now, we assume the order of addition is maintained.
+            let newFileIndex = -1;
+            let fileCounter = 0;
+            for(let i = 0; i < previewUrls.length; i++) {
+                if(!existingImageUrls.includes(previewUrls[i])) {
+                    if (i === index) {
+                        newFileIndex = fileCounter;
+                        break;
+                    }
+                    fileCounter++;
+                }
+            }
+            if (newFileIndex > -1) {
+                 setNewImageFiles(prev => prev.filter((_, i) => i !== newFileIndex));
+            }
         }
     };
 
@@ -129,38 +159,25 @@ export function PropertyForm({ property }: PropertyFormProps) {
             toast({ title: "Error", description: "You must be logged in to modify a property.", variant: "destructive" });
             return;
         }
-        if (imagePreviews.length === 0) {
+        if (previewUrls.length === 0) {
             toast({ title: "Error", description: "You must upload at least one image.", variant: "destructive" });
             return;
         }
 
         setIsSaving(true);
         try {
-            const propertyId = property?.id || doc(collection(firestore, '_')).id;
-            let finalImageUrls = property?.images || [];
+            const propertyId = property?.id || doc(collection(firestore, 'properties')).id;
+            let uploadedUrls: string[] = [];
 
-            if (imageFiles.length > 0) {
-                const uploadedUrls = await uploadImages(user.uid, propertyId, imageFiles);
-                // In edit mode, we replace old images with new ones. A more complex UI could allow re-ordering/selective deletion.
-                // For now, new uploads replace existing images.
-                finalImageUrls = isEditMode ? uploadedUrls : [...(property?.images || []), ...uploadedUrls];
+            if (newImageFiles.length > 0) {
+                uploadedUrls = await uploadImages(user.uid, propertyId, newImageFiles);
             }
-             
-            if (isEditMode) {
-                // Filter out removed previews if they were existing images
-                finalImageUrls = property.images.filter(url => imagePreviews.includes(url));
-                 if (imageFiles.length > 0) {
-                    const uploadedUrls = await uploadImages(user.uid, property.id, imageFiles);
-                    finalImageUrls = [...finalImageUrls, ...uploadedUrls];
-                }
-            } else {
-                 if (imageFiles.length > 0) {
-                    finalImageUrls = await uploadImages(user.uid, propertyId, imageFiles);
-                }
-            }
+            
+            const finalImageUrls = [...existingImageUrls, ...uploadedUrls];
 
 
             const propertyData = {
+                id: propertyId,
                 name: data.name,
                 location: data.location,
                 pricePerNight: parseFloat(data.price),
@@ -177,20 +194,20 @@ export function PropertyForm({ property }: PropertyFormProps) {
                     name: user.displayName || 'Anonymous',
                     avatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
                 },
-                rating: property?.rating || Math.random() * 2 + 3,
+                rating: property?.rating || Math.round((Math.random() * 2 + 3) * 10) / 10,
                 reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
             };
 
-            if (isEditMode && property.id) {
-                const propertyRef = doc(firestore, 'properties', property.id);
+            const propertyRef = doc(firestore, 'properties', propertyId);
+
+            if (isEditMode) {
                 setDocumentNonBlocking(propertyRef, propertyData, { merge: true });
                  toast({
                     title: "Property Updated!",
                     description: `${data.name} has been updated successfully.`,
                 });
             } else {
-                const propertiesCollection = collection(firestore, 'properties');
-                await addDocumentNonBlocking(propertiesCollection, propertyData);
+                setDocumentNonBlocking(propertyRef, propertyData, { merge: false });
                 toast({
                     title: "Property Added!",
                     description: `${data.name} has been listed successfully.`,
@@ -300,21 +317,21 @@ export function PropertyForm({ property }: PropertyFormProps) {
                     <div className="md:col-span-2 space-y-2">
                         <Label>Images</Label>
                         <div className="grid grid-cols-3 gap-4">
-                            {imagePreviews.map((src, index) => (
+                            {previewUrls.map((src, index) => (
                                 <div key={index} className="relative group aspect-video">
-                                    <img src={src} alt={`Preview ${index + 1}`} className="w-full h-full object-cover rounded-md" />
+                                    <Image src={src} alt={`Preview ${index + 1}`} width={200} height={112} className="w-full h-full object-cover rounded-md" />
                                     <Button
                                         type="button"
                                         variant="destructive"
                                         size="icon"
                                         className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100"
-                                        onClick={() => removeImage(index, true)}
+                                        onClick={() => removeImage(index)}
                                     >
                                         <X className="h-4 w-4" />
                                     </Button>
                                 </div>
                             ))}
-                            {imagePreviews.length < 5 && (
+                            {previewUrls.length < 5 && (
                                 <Label htmlFor="image-upload" className="cursor-pointer aspect-video flex flex-col items-center justify-center rounded-md border-2 border-dashed border-muted-foreground/50 hover:bg-muted/50">
                                     <Upload className="h-8 w-8 text-muted-foreground" />
                                     <span className="mt-2 text-sm text-muted-foreground">Upload</span>
@@ -344,7 +361,5 @@ export function PropertyForm({ property }: PropertyFormProps) {
         </form>
     );
 }
-
-    
 
     
