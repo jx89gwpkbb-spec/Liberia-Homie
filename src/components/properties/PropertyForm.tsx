@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { DescriptionGenerator } from "./DescriptionGenerator";
-import { useUser, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase";
-import { collection, doc } from "firebase/firestore";
+import { useUser, useFirestore } from "@/firebase";
+import { collection, doc, setDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2, Upload, X, MapPin } from "lucide-react";
@@ -166,6 +166,14 @@ export function PropertyForm({ property }: PropertyFormProps) {
         const processSubmit = async (uploadedUrls: string[]) => {
             try {
                 const finalImageUrls = [...existingImageUrls, ...uploadedUrls];
+                
+                // Construct the owner object, which is needed for the security rule
+                const ownerInfo = isEditMode ? property.owner : {
+                    id: user.uid,
+                    name: user.displayName || 'Anonymous',
+                    avatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
+                };
+                
                 const propertyData = {
                     id: propertyId,
                     name: data.name,
@@ -180,31 +188,31 @@ export function PropertyForm({ property }: PropertyFormProps) {
                     propertyType: data.propertyType,
                     images: finalImageUrls,
                     petFriendly: data.petFriendly,
-                    owner: property?.owner || {
-                        id: user.uid,
-                        name: user.displayName || 'Anonymous',
-                        avatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
-                    },
+                    owner: ownerInfo,
                     rating: property?.rating || Math.round((Math.random() * 2 + 3) * 10) / 10,
                     reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
-                    viewCount: property?.viewCount || Math.floor(Math.random() * 2000),
+                    viewCount: property?.viewCount || 0,
                     gps: gpsCoords,
                     status: property?.status || 'pending',
                 };
     
                 const propertyRef = doc(firestore, 'properties', propertyId);
                 
-                if (isEditMode) {
-                    await setDoc(propertyRef, propertyData, { merge: true });
-                    toast({ title: "Property Updated!", description: `${data.name} has been updated successfully.` });
-                } else {
-                    await setDoc(propertyRef, propertyData, { merge: false });
-                    toast({ title: "Property Submitted!", description: `${data.name} has been submitted for review.` });
-                }
+                await setDoc(propertyRef, propertyData, { merge: isEditMode });
+                
+                toast({ 
+                    title: isEditMode ? "Property Updated!" : "Property Submitted!",
+                    description: `${data.name} has been ${isEditMode ? 'updated' : 'submitted for review'}.` 
+                });
                 router.push('/dashboard/properties');
-            } catch (error) {
+
+            } catch (error: any) {
                 console.error("Firestore operation failed", error);
-                toast({ title: "Submission Failed", description: "Could not save the property. Please check your connection and security rules.", variant: "destructive" });
+                toast({ 
+                    title: "Submission Failed", 
+                    description: error.message || "Could not save the property. Please check your connection and security rules.", 
+                    variant: "destructive" 
+                });
             } finally {
                 setIsSaving(false);
             }
