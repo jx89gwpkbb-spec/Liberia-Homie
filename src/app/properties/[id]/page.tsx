@@ -1,7 +1,8 @@
+
 import { properties } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Star, MapPin, Users, BedDouble, Bath, Wifi, ParkingCircle, Utensils, Wind, Tv, PlayCircle } from "lucide-react";
+import { Star, MapPin, Users, BedDouble, Bath, Wifi, ParkingCircle, Utensils, Wind, Tv, PlayCircle, Clock, PawPrint } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BookingForm } from "@/components/properties/BookingForm";
 import { ReviewSection } from "@/components/properties/ReviewSection";
@@ -25,6 +26,8 @@ const amenityIcons: { [key: string]: React.ElementType } = {
   'Private Pool': () => <span className="text-lg">🏊</span>,
   'Ocean View': () => <span className="text-lg">🌊</span>,
   'Gym': () => <span className="text-lg">🏋️</span>,
+  'Hot Tub': () => <span className="text-lg">🛁</span>,
+  'Pet Friendly': PawPrint,
 };
 
 
@@ -40,7 +43,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
     <div className="container mx-auto py-8">
       <div className="mb-4">
         <h1 className="text-4xl font-bold font-headline">{property.name}</h1>
-        <div className="mt-2 flex items-center gap-4 text-muted-foreground">
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground">
           <div className="flex items-center">
             <Star className="h-5 w-5 text-primary" />
             <span className="ml-1 font-semibold text-foreground">{property.rating} ({property.reviewCount} reviews)</span>
@@ -49,25 +52,31 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
             <MapPin className="h-5 w-5 text-primary" />
             <span className="ml-1 text-foreground">{property.location}</span>
           </div>
+           {property.longStay && (
+            <Badge variant="secondary" className="flex items-center">
+              <Clock className="h-4 w-4 mr-1.5" />
+              Long Stay Available
+            </Badge>
+          )}
         </div>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 relative">
-            <Carousel className="w-full rounded-xl overflow-hidden shadow-lg">
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="relative h-[300px] md:h-[500px] lg:col-span-2">
+            <Carousel className="w-full h-full rounded-xl overflow-hidden shadow-lg">
                 <CarouselContent>
                     {property.images.map((img, index) => (
                     <CarouselItem key={index}>
-                        <div className="relative h-[500px]">
-                            <Image src={img} alt={`${property.name} view ${index + 1}`} fill className="object-cover" />
+                        <div className="relative h-[300px] md:h-[500px]">
+                            <Image src={img} alt={`${property.name} view ${index + 1}`} fill className="object-cover" priority={index === 0} />
                         </div>
                     </CarouselItem>
                     ))}
                 </CarouselContent>
-                <CarouselPrevious className="left-4" />
-                <CarouselNext className="right-4" />
+                <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-10" />
+                <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10" />
             </Carousel>
-            <Dialog>
+             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="secondary" className="absolute bottom-4 right-4 z-10 shadow-lg">
                   <PlayCircle className="mr-2 h-5 w-5" />
@@ -93,29 +102,21 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
               </DialogContent>
             </Dialog>
         </div>
-        <div className="hidden lg:grid grid-rows-2 gap-4">
-            <div className="relative rounded-xl overflow-hidden shadow-lg">
-                <Image src={property.images[1] || property.images[0]} alt={`${property.name} view 2`} fill className="object-cover" />
-            </div>
-             <div className="relative rounded-xl overflow-hidden shadow-lg">
-                <Image src={property.images[2] || property.images[0]} alt={`${property.name} view 3`} fill className="object-cover" />
-            </div>
-        </div>
       </div>
 
       <div className="mt-12 grid grid-cols-1 gap-12 md:grid-cols-3">
         <div className="md:col-span-2">
           <div className="border-b pb-6">
-             <div className="flex justify-between items-center">
+             <div className="flex justify-between items-start">
                 <div>
                     <h2 className="text-2xl font-semibold">{property.propertyType} hosted by {property.owner.name}</h2>
-                    <div className="mt-2 flex items-center gap-4 text-muted-foreground">
+                    <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground">
                         <span><Users className="inline h-4 w-4 mr-1"/>{property.maxGuests} guests</span>
                         <span><BedDouble className="inline h-4 w-4 mr-1"/>{property.bedrooms} bedrooms</span>
                         <span><Bath className="inline h-4 w-4 mr-1"/>{property.bathrooms} bathrooms</span>
                     </div>
                 </div>
-                <Image src={property.owner.avatar} alt={property.owner.name} width={64} height={64} className="rounded-full" data-ai-hint="person portrait" />
+                <Image src={property.owner.avatar} alt={property.owner.name} width={64} height={64} className="rounded-full flex-shrink-0" data-ai-hint="person portrait" />
              </div>
           </div>
           <div className="py-8 border-b">
