@@ -1,3 +1,4 @@
+
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
@@ -19,35 +20,37 @@ export default function DashboardLayout({
   const router = useRouter();
 
   useEffect(() => {
-    // Wait until the auth state is loaded
+    // This effect handles the redirection logic.
+    // It runs after the initial render and whenever the user's auth state changes.
     if (isUserLoading) {
-      return;
+      return; // Do nothing while we are waiting for the auth state.
     }
 
-    // If there's no user, redirect to login
     if (!user) {
+      // If there is no user after loading, redirect to login.
       router.push('/login');
       return;
     }
 
-    // If the user exists but their email is not verified, redirect to verification page
     if (user && !user.emailVerified) {
+      // If there is a user but their email is not verified, redirect.
       router.push('/verify-email');
       return;
     }
   }, [user, isUserLoading, router]);
 
-  // While loading auth state, or if user is unverified, show a loader
-  // This prevents child components from rendering and making premature Firestore queries
+  // This is the crucial part. We block rendering of the children (the dashboard pages)
+  // until we are certain the user is loaded AND verified.
+  // This prevents any child component from making a Firestore query prematurely.
   if (isUserLoading || !user || !user.emailVerified) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
+      <div className="flex h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  // Once verified, render the dashboard
+  // Only if the user is loaded and verified, we render the full dashboard layout.
   return (
     <SidebarProvider>
       <Sidebar>
