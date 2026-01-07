@@ -369,6 +369,22 @@
         "contactEmail": { "type": "string", "format": "email" }
       },
       "required": ["siteName", "contactEmail"]
+    },
+    "Announcement": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Announcement",
+      "description": "Represents a system-wide announcement or newsletter.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "targetAudience": { "type": "string", "enum": ["all", "renters", "vendors"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "publishedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "status", "targetAudience", "createdAt"]
     }
   },
   "auth": {
@@ -563,8 +579,26 @@
           "description": "Stores global application settings. Only admins can read and write.",
           "params": []
         }
+      },
+      {
+        "path": "/announcements/{announcementId}",
+        "definition": {
+          "entityName": "Announcement",
+          "schema": {
+            "$ref": "#/backend/entities/Announcement"
+          },
+          "description": "Stores system-wide announcements. Only admins can read and write.",
+          "params": [
+            {
+              "name": "announcementId",
+              "description": "The unique identifier for the announcement."
+            }
+          ]
+        }
       }
     ],
     "reasoning": "The Firestore structure is designed to securely manage admin and user profiles using a path-based ownership model. This approach provides authorization independence and facilitates secure list operations.\n\n**Authorization Independence:** Admin profiles are stored under the `/admin_profiles/{adminId}` path. Authorization is based solely on the `adminId` matching the `request.auth.uid`. There's no reliance on data from other documents to determine access.\n\n**Structural Segregation:** Admin profiles are stored in a dedicated collection (`/admin_profiles`), ensuring a homogeneous security posture. All documents in this collection share the same security requirements (only the admin can access their profile).\n\n**Access Modeling:** Path-based ownership is used for user data (`/users/{userId}`), admin data (`/admin_profiles/{adminId}`), and user-specific subcollections like favorites (`/users/{userId}/favorites`), documents (`/users/{userId}/documents`), and saved searches (`/users/{userId}/savedSearches`).\n\n**QAPs:**\n*   Secure `list` operations for user profiles are enabled for admins, while non-admins can only read their own profile.\n*   The structure avoids using rules as filters, ensuring that list operations are secure and efficient."
   }
 }
+
+    

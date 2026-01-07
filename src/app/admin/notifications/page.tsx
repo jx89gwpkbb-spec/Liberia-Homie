@@ -1,40 +1,42 @@
 'use client';
 
 import { useState } from 'react';
+import { useFirestore, useCollection, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
+import { collection, serverTimestamp, doc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, Save, Megaphone } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-
-type Notification = {
-    id: string;
-    title: string;
-    message: string;
-    status: 'Sent' | 'Draft';
-    createdAt: Date;
-    sentAt?: Date;
-}
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { Announcement } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminNotificationsPage() {
     const { toast } = useToast();
+    const firestore = useFirestore();
     const [isLoading, setIsLoading] = useState(false);
     const [title, setTitle] = useState('');
-    const [message, setMessage] = useState('');
-    
-    // Placeholder for sent notifications
-    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [content, setContent] = useState('');
+    const [targetAudience, setTargetAudience] = useState<'all' | 'renters' | 'vendors'>('all');
 
-    const handleSendNotification = async () => {
-        if (!title || !message) {
+    const announcementsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return collection(firestore, 'announcements');
+    }, [firestore]);
+
+    const { data: announcements, isLoading: isLoadingAnnouncements } = useCollection<Announcement>(announcementsQuery);
+
+    const handleSave = async (status: 'draft' | 'published') => {
+        if (!title || !content || !firestore) {
             toast({
                 title: "Missing fields",
-                description: "Please provide a title and message.",
+                description: "Please provide a title and content.",
                 variant: "destructive",
             });
             return;
@@ -42,43 +44,51 @@ export default function AdminNotificationsPage() {
 
         setIsLoading(true);
 
-        // In a real application, you would have a backend service to handle sending notifications.
-        // For this demo, we'll simulate it and add it to our local state.
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        try {
+            const announcementsCollection = collection(firestore, 'announcements');
+            const newAnnouncement: Omit<Announcement, 'id'> = {
+                title,
+                content,
+                status,
+                targetAudience,
+                createdAt: serverTimestamp(),
+                ...(status === 'published' && { publishedAt: serverTimestamp() }),
+            };
+            
+            await addDocumentNonBlocking(announcementsCollection, newAnnouncement);
 
-        const newNotification: Notification = {
-            id: `notif-${Date.now()}`,
-            title,
-            message,
-            status: 'Sent',
-            createdAt: new Date(),
-            sentAt: new Date(),
-        };
+            toast({
+                title: status === 'published' ? "Announcement Published!" : "Draft Saved!",
+                description: `Your announcement has been successfully ${status}.`,
+            });
 
-        setNotifications(prev => [newNotification, ...prev]);
-
-        toast({
-            title: "Notification Sent!",
-            description: "Your notification has been sent to all users.",
-        });
-
-        setTitle('');
-        setMessage('');
-        setIsLoading(false);
+            setTitle('');
+            setContent('');
+            setTargetAudience('all');
+        } catch (error) {
+            console.error("Error saving announcement: ", error);
+            toast({
+                title: "Error",
+                description: "There was an error saving the announcement.",
+                variant: "destructive"
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Notifications Center</h1>
-                <p className="text-muted-foreground">Create and send announcements to your users.</p>
+                <h1 className="text-3xl font-bold font-headline flex items-center gap-2"><Megaphone /> Announcements</h1>
+                <p className="text-muted-foreground">Create and publish announcements for your users.</p>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Compose Notification</CardTitle>
+                    <CardTitle>Compose Announcement</CardTitle>
                     <CardDescription>
-                        Write a new notification to be sent to all users via push notifications.
+                        Write a new announcement to be published.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -92,29 +102,45 @@ export default function AdminNotificationsPage() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="message">Message</Label>
+                        <Label htmlFor="content">Content</Label>
                         <Textarea 
-                            id="message" 
+                            id="content" 
                             placeholder="Describe your announcement..."
                             rows={5}
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
                         />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="targetAudience">Target Audience</Label>
+                        <Select value={targetAudience} onValueChange={(v) => setTargetAudience(v as any)}>
+                            <SelectTrigger id="targetAudience" className="w-[180px]">
+                                <SelectValue placeholder="Select audience" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Users</SelectItem>
+                                <SelectItem value="renters">Renters Only</SelectItem>
+                                <SelectItem value="vendors">Vendors Only</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </CardContent>
                 <CardFooter className="flex justify-end gap-2">
-                     <Button variant="outline" disabled={isLoading}>Save as Draft</Button>
-                     <Button onClick={handleSendNotification} disabled={isLoading}>
+                     <Button variant="outline" onClick={() => handleSave('draft')} disabled={isLoading}>
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        Save as Draft
+                    </Button>
+                     <Button onClick={() => handleSave('published')} disabled={isLoading}>
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                        Send Notification
+                        Publish Now
                     </Button>
                 </CardFooter>
             </Card>
 
              <Card>
                 <CardHeader>
-                    <CardTitle>Sent Notifications</CardTitle>
-                    <CardDescription>A history of all previously sent notifications.</CardDescription>
+                    <CardTitle>Announcement History</CardTitle>
+                    <CardDescription>A log of all past announcements.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -122,26 +148,39 @@ export default function AdminNotificationsPage() {
                             <TableRow>
                                 <TableHead>Title</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead>Sent At</TableHead>
+                                <TableHead>Audience</TableHead>
+                                <TableHead>Date</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {notifications.length > 0 ? (
-                                notifications.map(notif => (
+                            {isLoadingAnnouncements ? (
+                                Array.from({length: 3}).map((_, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                                    </TableRow>
+                                ))
+                            ) : announcements && announcements.length > 0 ? (
+                                announcements.map(notif => (
                                     <TableRow key={notif.id}>
                                         <TableCell className="font-medium">{notif.title}</TableCell>
                                         <TableCell>
-                                            <Badge variant={notif.status === 'Sent' ? 'default': 'secondary'}>{notif.status}</Badge>
+                                            <Badge variant={notif.status === 'published' ? 'default': 'secondary'}>{notif.status}</Badge>
                                         </TableCell>
                                         <TableCell>
-                                            {notif.sentAt ? format(notif.sentAt, "MMM dd, yyyy 'at' h:mm a") : 'N/A'}
+                                            <Badge variant="outline">{notif.targetAudience}</Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            {notif.publishedAt ? format(notif.publishedAt.toDate(), "MMM dd, yyyy 'at' h:mm a") : format(notif.createdAt.toDate(), "MMM dd, yyyy")}
                                         </TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={3} className="h-24 text-center">
-                                        No notifications have been sent yet.
+                                    <TableCell colSpan={4} className="h-24 text-center">
+                                        No announcements have been created yet.
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -152,3 +191,5 @@ export default function AdminNotificationsPage() {
         </div>
     );
 }
+
+    

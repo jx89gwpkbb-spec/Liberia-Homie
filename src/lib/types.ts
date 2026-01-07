@@ -1,4 +1,5 @@
 
+
 export type Property = {
   id: string;
   name: string;
@@ -130,5 +131,16 @@ export type Setting = {
     siteName: string;
     contactEmail: string;
 };
+
+export type Announcement = {
+  id: string;
+  title: string;
+  content: string;
+  status: 'draft' | 'published';
+  targetAudience: 'all' | 'renters' | 'vendors';
+  createdAt: any;
+  publishedAt?: any;
+}
+    
 
     

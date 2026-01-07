@@ -18,6 +18,7 @@
  * - /bookings/{bookingId}: Contains booking details.
  * - /properties/{propertyId}: Contains property details.
  * - /visits/{visitId}: Contains visit request details.
+ * - /announcements/{announcementId}: Contains system-wide announcements.
  *
  * Key Security Decisions:
  * - Admin Listing Disabled for Non-Admins: Non-administrative users cannot list
@@ -33,6 +34,7 @@
  * - Saved Search Ownership: Users can only manage their own saved searches.
  * - Visit Ownership: Users can create visits. They can view their own visits.
  *   Property owners can view and manage visits for their properties.
+ * - Announcement Management: Only admins can create, read, and manage announcements.
  *
  * Denormalization for Authorization:
  * The `/roles_admin` collection is a classic example of denormalization for
@@ -219,6 +221,14 @@ service cloud.firestore {
      * @path /settings/global
      */
     match /settings/global {
+      allow read, write: if isAdmin();
+    }
+
+    /**
+     * @description Manages system-wide announcements.
+     * @path /announcements/{announcementId}
+     */
+    match /announcements/{announcementId} {
       allow read, write: if isAdmin();
     }
   }
