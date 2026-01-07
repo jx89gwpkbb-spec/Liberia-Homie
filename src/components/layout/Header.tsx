@@ -30,7 +30,7 @@ export function Header() {
               {t('contact')}
             </Link>
           </nav>
-          <div className="flex items-center gap-2" suppressHydrationWarning>
+          <div className="flex items-center gap-2">
             <LanguageSwitcher />
             {isUserLoading ? (
               <div className="h-8 w-20 rounded-md bg-muted animate-pulse" />
