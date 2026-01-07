@@ -42,7 +42,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
   }
   
   const ownerPropertyCount = allProperties.filter(p => p.owner.id === property.owner.id).length;
-  const isOwnerVerified = ownerPropertyCount > 1 || property.owner.name === 'Alice Johnson';
+  const isOwnerVerified = ownerPropertyCount > 1;
 
 
   const mainImage = property.images[0];
@@ -120,31 +120,33 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
                 </Carousel>
               </DialogContent>
             </Dialog>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="secondary" className="shadow-lg">
-                  <Video className="mr-2 h-5 w-5" />
-                  Virtual Tour
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl">
-                <DialogHeader>
-                  <DialogTitle>360° Virtual Tour</DialogTitle>
-                  <DialogDescription>
-                    Explore every corner of {property.name}.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="relative h-[60vh] w-full mt-4 rounded-lg bg-muted flex items-center justify-center">
-                  {virtualTourImage ? (
-                    <Image src={virtualTourImage.imageUrl} alt={virtualTourImage.description} fill className="object-contain" data-ai-hint={virtualTourImage.imageHint} />
-                  ) : <p>Virtual tour loading...</p>}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 text-white p-4">
-                    <h3 className="text-2xl font-bold">Interactive Tour Placeholder</h3>
-                    <p className="mt-2 text-center">A full 360° virtual tour experience will be available here soon.</p>
+            {property.virtualTourUrl && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="secondary" className="shadow-lg">
+                    <Video className="mr-2 h-5 w-5" />
+                    Virtual Tour
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl">
+                  <DialogHeader>
+                    <DialogTitle>360° Virtual Tour</DialogTitle>
+                    <DialogDescription>
+                      Explore every corner of {property.name}.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="relative h-[60vh] w-full mt-4 rounded-lg bg-muted flex items-center justify-center">
+                    {virtualTourImage ? (
+                      <Image src={property.virtualTourUrl} alt="Virtual Tour" fill className="object-contain" />
+                    ) : <p>Virtual tour loading...</p>}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 text-white p-4">
+                      <h3 className="text-2xl font-bold">Interactive Tour Placeholder</h3>
+                      <p className="mt-2 text-center">A full 360° virtual tour experience will be available here soon.</p>
+                    </div>
                   </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
       </div>
 
