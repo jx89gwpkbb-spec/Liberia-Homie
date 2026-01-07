@@ -1,6 +1,8 @@
+
 'use server';
 /**
- * @fileOverview A multi-tool agent for Homie Stays that can fetch and cancel bookings.
+ * @fileOverview A multi-tool agent for Homie Stays that can fetch and cancel bookings,
+ * and provide information about properties.
  */
 
 import { ai } from '@/ai/genkit';
@@ -13,9 +15,12 @@ import {
   getDocs,
   deleteDoc,
   doc,
+  getDoc,
+  Timestamp,
 } from 'firebase/firestore';
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { firebaseConfig } from '@/firebase/config';
+import type { Property, Booking } from '@/lib/types';
 
 // Server-side Firebase initialization
 let firestore: ReturnType<typeof getFirestore>;
@@ -27,7 +32,7 @@ if (!getApps().length) {
   firestore = getFirestore();
 }
 
-
+// Input Schemas for Tools
 const GetCurrentBookingsInputSchema = z.object({
   userId: z.string().describe('The ID of the user to fetch bookings for.'),
 });
@@ -36,20 +41,31 @@ const CancelBookingInputSchema = z.object({
   bookingId: z.string().describe('The ID of the booking to cancel.'),
 });
 
+const GetPropertyDetailsInputSchema = z.object({
+  propertyName: z.string().describe('The name of the property to fetch details for.'),
+});
+
+const CheckAvailabilityInputSchema = z.object({
+  propertyId: z.string().describe("The ID of the property to check."),
+  checkInDate: z.string().describe("The check-in date in YYYY-MM-DD format."),
+  checkOutDate: z.string().describe("The check-out date in YYYY-MM-DD format."),
+});
+
+
+// Tool Definitions
 /**
  * Genkit Tool: Fetches current bookings for a given user.
  */
 const getCurrentBookings = ai.defineTool(
   {
     name: 'getCurrentBookings',
-    description: 'Retrieves a list of current and upcoming bookings for a user.',
+    description: 'Retrieves a list of current and upcoming bookings for a user. Requires a userId.',
     inputSchema: GetCurrentBookingsInputSchema,
-    outputSchema: z.any(),
+    outputSchema: z.array(z.any()),
   },
   async ({ userId }) => {
-    if (!firestore) {
-      throw new Error('Firestore is not initialized.');
-    }
+    if (!firestore) throw new Error('Firestore is not initialized.');
+    
     const bookings: any[] = [];
     const bookingsRef = collection(firestore, 'bookings');
     const q = query(bookingsRef, where('userId', '==', userId));
@@ -68,38 +84,90 @@ const getCurrentBookings = ai.defineTool(
 const cancelBooking = ai.defineTool(
   {
     name: 'cancelBooking',
-    description: 'Cancels a booking with the given ID.',
+    description: 'Cancels a booking with the given ID. Requires a bookingId.',
     inputSchema: CancelBookingInputSchema,
-    outputSchema: z.object({
-      success: z.boolean(),
-      message: z.string(),
-    }),
+    outputSchema: z.object({ success: z.boolean(), message: z.string() }),
   },
   async ({ bookingId }) => {
-    if (!firestore) {
-      throw new Error('Firestore is not initialized.');
-    }
+    if (!firestore) throw new Error('Firestore is not initialized.');
+
     try {
       const bookingRef = doc(firestore, 'bookings', bookingId);
       await deleteDoc(bookingRef);
-      return {
-        success: true,
-        message: `Successfully canceled booking ${bookingId}.`,
-      };
+      return { success: true, message: `Successfully canceled booking ${bookingId}.` };
     } catch (error: any) {
-      return {
-        success: false,
-        message: `Failed to cancel booking: ${error.message}`,
-      };
+      return { success: false, message: `Failed to cancel booking: ${error.message}` };
     }
   }
 );
 
+/**
+ * Genkit Tool: Fetches details for a specific property by name.
+ */
+const getPropertyDetails = ai.defineTool(
+  {
+    name: 'getPropertyDetails',
+    description: 'Retrieves detailed information about a specific property by its name.',
+    inputSchema: GetPropertyDetailsInputSchema,
+    outputSchema: z.nullable(z.any()),
+  },
+  async ({ propertyName }) => {
+    if (!firestore) throw new Error('Firestore is not initialized.');
+
+    const propertiesRef = collection(firestore, 'properties');
+    const q = query(propertiesRef, where('name', '==', propertyName), where('status', '==', 'approved'));
+    
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      return null;
+    }
+    const propDoc = querySnapshot.docs[0];
+    return { id: propDoc.id, ...propDoc.data() };
+  }
+);
+
+/**
+ * Genkit Tool: Checks if a property is available for a given date range.
+ */
+const checkAvailability = ai.defineTool(
+  {
+    name: "checkAvailability",
+    description: "Checks if a property is available for booking between two dates.",
+    inputSchema: CheckAvailabilityInputSchema,
+    outputSchema: z.object({ isAvailable: z.boolean(), reason: z.string() }),
+  },
+  async ({ propertyId, checkInDate, checkOutDate }) => {
+    if (!firestore) throw new Error("Firestore not initialized");
+
+    const start = Timestamp.fromDate(new Date(checkInDate));
+    const end = Timestamp.fromDate(new Date(checkOutDate));
+
+    const bookingsRef = collection(firestore, "bookings");
+    const q = query(
+      bookingsRef,
+      where("propertyId", "==", propertyId),
+      where("checkOutDate", ">", start)
+    );
+
+    const snapshot = await getDocs(q);
+    const conflictingBookings = snapshot.docs.filter(doc => {
+      const booking = doc.data() as Booking;
+      return booking.checkInDate < end;
+    });
+
+    if (conflictingBookings.length > 0) {
+      return { isAvailable: false, reason: "The property is already booked for some or all of the selected dates." };
+    }
+    return { isAvailable: true, reason: "The property is available for the selected dates." };
+  }
+);
+
+
+// Main Agent Flow
 const HomieStaysAgentInputSchema = z.object({
-  userId: z.string(),
+  userId: z.string().optional(),
   question: z.string(),
 });
-
 export type HomieStaysAgentInput = z.infer<typeof HomieStaysAgentInputSchema>;
 
 export type HomieStaysAgentOutput = {
@@ -117,13 +185,15 @@ const homieStaysAgentPrompt = ai.definePrompt({
   name: 'homieStaysAgentPrompt',
   input: { schema: HomieStaysAgentInputSchema },
   output: { schema: z.string() },
-  tools: [getCurrentBookings, cancelBooking],
-  system: `You are Agent231, a friendly and helpful AI support agent for Homie Stays.
-You can help users with their bookings, including fetching their booking details and canceling bookings.
-The current user's ID is {{userId}}. You must pass this ID to any tool that requires a userId.
-If you are asked to cancel a booking and you have the booking ID, use the cancelBooking tool.
-If a user asks about their bookings, use the getCurrentBookings tool to fetch them.
-For all other questions, answer them concisely and clearly. Maintain a warm and professional tone.
+  tools: [getCurrentBookings, cancelBooking, getPropertyDetails, checkAvailability],
+  system: `You are Agent231, a friendly and helpful AI support agent for Homie Stays, a property rental platform.
+You can help users with their bookings, answer questions about properties, and check availability.
+
+- If the user is logged in (a userId is provided), you can fetch their bookings or cancel a booking for them. The current user's ID is {{userId}}. You MUST pass this ID to any tool that requires a userId.
+- If a user asks about a specific property by name, use the 'getPropertyDetails' tool to find information about it.
+- If a user asks about availability for a property, you MUST first use 'getPropertyDetails' to get the property's ID, and then use the 'checkAvailability' tool.
+- For all other questions, answer them clearly and concisely based on your general knowledge of a rental platform.
+- Maintain a warm, professional, and encouraging tone.
 
 User Question: {{question}}
 `,

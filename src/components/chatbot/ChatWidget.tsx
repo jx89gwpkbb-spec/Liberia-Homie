@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -14,7 +14,6 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageSquare, Send, X, Loader2 } from 'lucide-react';
 import { ChatBubble } from './ChatBubble';
-import { faqChatbot } from '@/ai/flows/faq-chatbot';
 import { homieStaysAgent } from '@/ai/flows/homie-stays-agent';
 import { useUser } from '@/firebase';
 
@@ -29,11 +28,12 @@ export function ChatWidget() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useUser();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const initialMessage: Message = {
     id: '1',
     role: 'model',
-    text: 'Hi there! I am Agent231. How can I help you with Homie Stays today?',
+    text: 'Hi there! I am Agent231. How can I help you with Homie Stays today? You can ask me about properties, check availability, or manage your bookings.',
   };
 
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
@@ -44,6 +44,16 @@ export function ChatWidget() {
       setTimeout(() => setMessages([initialMessage]), 300);
     }
   }, [isOpen]);
+  
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+        scrollAreaRef.current.scrollTo({
+            top: scrollAreaRef.current.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+  }, [messages]);
+
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,14 +70,10 @@ export function ChatWidget() {
     setIsLoading(true);
 
     try {
-      let response;
-      // If the user is logged in, use the more powerful agent.
-      // Otherwise, use the simple FAQ bot.
-      if (user) {
-        response = await homieStaysAgent({ question: currentInput, userId: user.uid });
-      } else {
-        response = await faqChatbot({ question: currentInput });
-      }
+      const response = await homieStaysAgent({ 
+        question: currentInput, 
+        userId: user?.uid 
+      });
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -114,7 +120,7 @@ export function ChatWidget() {
             </SheetDescription>
           </SheetHeader>
           <div className="flex-1 overflow-hidden">
-            <ScrollArea className="h-full">
+            <ScrollArea className="h-full" ref={scrollAreaRef}>
               <div className="space-y-4 p-4">
                 {messages.map((message) => (
                   <ChatBubble key={message.id} {...message} />
@@ -135,7 +141,7 @@ export function ChatWidget() {
                 placeholder="Ask a question..."
                 disabled={isLoading}
               />
-              <Button type="submit" size="icon" disabled={isLoading}>
+              <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
                 {isLoading ? <Loader2 className="animate-spin" /> : <Send />}
               </Button>
             </form>
