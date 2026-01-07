@@ -53,6 +53,13 @@ service cloud.firestore {
     function isSignedIn() {
       return request.auth != null;
     }
+    
+    /**
+     * Checks if the user is authenticated and has a verified email.
+     */
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
 
     /**
      * Checks if the requesting user's UID matches the document's owner ID.
@@ -167,8 +174,8 @@ service cloud.firestore {
      */
     match /bookings/{bookingId} {
       allow create: if request.auth.uid == request.resource.data.userId;
-      allow read: if request.auth.uid == resource.data.userId || isAdmin() || isPropertyOwner(resource.data.propertyId);
-      allow list: if isAdmin() || (request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid);
+      allow read: if isVerified() && (request.auth.uid == resource.data.userId || isAdmin() || isPropertyOwner(resource.data.propertyId));
+      allow list: if isVerified() && (isAdmin() || (request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid) || (request.query.where[0][0] == 'propertyId' && isPropertyOwner(request.query.where[0][2])));
       allow update, delete: if false;
     }
     
