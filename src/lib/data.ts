@@ -29,6 +29,7 @@ export const properties: Property[] = [
     owner: { id: users[0].id, name: users[0].name, avatar: users[0].avatar },
     propertyType: 'Villa',
     petFriendly: false,
+    status: 'approved',
   },
   {
     id: 'prop-2',
@@ -47,6 +48,7 @@ export const properties: Property[] = [
     owner: { id: users[1].id, name: users[1].name, avatar: users[1].avatar },
     propertyType: 'Apartment',
     petFriendly: true,
+    status: 'approved',
   },
   {
     id: 'prop-3',
@@ -65,6 +67,7 @@ export const properties: Property[] = [
     owner: { id: users[2].id, name: users[2].name, avatar: users[2].avatar },
     propertyType: 'House',
     petFriendly: true,
+    status: 'approved',
   },
   {
     id: 'prop-4',
@@ -83,6 +86,7 @@ export const properties: Property[] = [
     owner: { id: users[0].id, name: users[0].name, avatar: users[0].avatar },
     propertyType: 'Condo',
     petFriendly: false,
+    status: 'pending',
   },
   {
     id: 'prop-5',
@@ -101,6 +105,7 @@ export const properties: Property[] = [
     owner: { id: users[3].id, name: users[3].name, avatar: users[3].avatar },
     propertyType: 'House',
     petFriendly: true,
+    status: 'approved',
   },
   {
     id: 'prop-6',
@@ -119,6 +124,7 @@ export const properties: Property[] = [
     owner: { id: users[1].id, name: users[1].name, avatar: users[1].avatar },
     propertyType: 'House',
     petFriendly: false,
+    status: 'rejected',
   },
 ];
 

@@ -24,6 +24,7 @@ export type Property = {
     lng: number;
   };
   virtualTourUrl?: string;
+  status: 'pending' | 'approved' | 'rejected';
 };
 
 export type User = {

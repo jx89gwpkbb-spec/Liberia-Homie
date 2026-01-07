@@ -149,14 +149,27 @@ service cloud.firestore {
     /**
      * @description Manages property listings.
      * @path /properties/{propertyId}
-     * @allow (read) Anyone can read property listings.
-     * @allow (list) Anyone can list property listings.
-     * @allow (write) Users can create/update/delete their own properties. Admins have full write access.
      */
     match /properties/{propertyId} {
-      allow read, list: if true;
-      allow create: if isOwner(request.resource.data.owner.id);
-      allow update: if isOwner(resource.data.owner.id) || isAdmin();
+      // Public users can only see approved properties.
+      allow read, list: if resource.data.status == 'approved' || (request.query.where[0][0] == 'status' && request.query.where[0][2] == 'approved');
+      
+      // Admins can see all properties regardless of status.
+      allow read, list: if isAdmin();
+      
+      // Owners can view their own properties regardless of status.
+      allow read, list: if isOwner(resource.data.owner.id);
+
+      // Users can create properties, but they must be 'pending'.
+      allow create: if isOwner(request.resource.data.owner.id) && request.resource.data.status == 'pending';
+      
+      // Owners can update their own properties, but cannot change the status.
+      allow update: if isOwner(resource.data.owner.id) && request.resource.data.status == resource.data.status;
+      
+      // Admins can update any field, including changing the status.
+      allow update: if isAdmin();
+      
+      // Owners or Admins can delete.
       allow delete: if isOwner(resource.data.owner.id) || isAdmin();
     }
   }

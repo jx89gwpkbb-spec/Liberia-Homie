@@ -229,6 +229,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 rating: property?.rating || Math.round((Math.random() * 2 + 3) * 10) / 10,
                 reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
                 gps: gpsCoords,
+                status: property?.status || 'pending',
             };
 
             const propertyRef = doc(firestore, 'properties', propertyId);
@@ -242,8 +243,8 @@ export function PropertyForm({ property }: PropertyFormProps) {
             } else {
                 setDocumentNonBlocking(propertyRef, propertyData, { merge: false });
                 toast({
-                    title: "Property Added!",
-                    description: `${data.name} has been listed successfully.`,
+                    title: "Property Submitted!",
+                    description: `${data.name} has been submitted for review.`,
                 });
             }
             
@@ -418,7 +419,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                     <div className="md:col-span-3 text-right">
                         <Button type="submit" disabled={isSaving}>
                             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {isEditMode ? 'Update Property' : 'Save Property'}
+                            {isEditMode ? 'Update Property' : 'Submit for Review'}
                         </Button>
                     </div>
                 </CardContent>
