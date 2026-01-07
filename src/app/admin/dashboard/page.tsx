@@ -1,6 +1,5 @@
 'use client';
 
-import { users, properties, bookings } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -11,25 +10,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart } from "recharts";
-
-const bookingsChartData = [
-  { month: "January", bookings: 186 },
-  { month: "February", bookings: 305 },
-  { month: "March", bookings: 237 },
-  { month: "April", bookings: 273 },
-  { month: "May", bookings: 209 },
-  { month: "June", bookings: 214 },
-];
-
-const usersChartData = [
-  { date: "2024-07-01", users: 12 },
-  { date: "2024-07-02", users: 15 },
-  { date: "2024-07-03", users: 10 },
-  { date: "2024-07-04", users: 22 },
-  { date: "2024-07-05", users: 18 },
-  { date: "2024-07-06", users: 25 },
-  { date: "2024-07-07", users: 30 },
-];
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
+import type { User, Property, Booking } from '@/lib/types';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const bookingsChartConfig: ChartConfig = {
   bookings: {
@@ -46,9 +30,46 @@ const usersChartConfig: ChartConfig = {
   };
 
 export default function AdminDashboardPage() {
-  const recentUsers = users.slice(0, 5);
-  const recentProperties = properties.slice(0, 3);
-  const recentBookings = bookings.slice(0, 5);
+  const firestore = useFirestore();
+
+  const usersCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const propertiesCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'properties') : null, [firestore]);
+  const bookingsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'bookings') : null, [firestore]);
+
+  const recentUsersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users'), orderBy('createdAt', 'desc'), limit(5)) : null, [firestore]);
+  const recentPropertiesQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'properties'), limit(3)) : null, [firestore]);
+  const recentBookingsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'bookings'), orderBy('createdAt', 'desc'), limit(5)) : null, [firestore]);
+  
+  const { data: users, isLoading: usersLoading } = useCollection<User>(usersCollectionRef);
+  const { data: properties, isLoading: propertiesLoading } = useCollection<Property>(propertiesCollectionRef);
+  const { data: bookings, isLoading: bookingsLoading } = useCollection<Booking>(bookingsCollectionRef);
+
+  const { data: recentUsers, isLoading: recentUsersLoading } = useCollection<User>(recentUsersQuery);
+  const { data: recentProperties, isLoading: recentPropertiesLoading } = useCollection<Property>(recentPropertiesQuery);
+  const { data: recentBookings, isLoading: recentBookingsLoading } = useCollection<Booking>(recentBookingsQuery);
+
+  const isLoading = usersLoading || propertiesLoading || bookingsLoading || recentUsersLoading || recentPropertiesLoading || recentBookingsLoading;
+  
+   const bookingsChartData = useMemoFirebase(() => {
+    if (!bookings) return [];
+    const monthlyBookings: {[key: string]: number} = {};
+    bookings.forEach(booking => {
+      const month = format(booking.createdAt.toDate(), 'MMMM');
+      monthlyBookings[month] = (monthlyBookings[month] || 0) + 1;
+    });
+    return Object.keys(monthlyBookings).map(month => ({ month, bookings: monthlyBookings[month] }));
+  }, [bookings]);
+  
+  const usersChartData = useMemoFirebase(() => {
+    if (!users) return [];
+    const dailyUsers: {[key: string]: number} = {};
+     users.slice(-7).forEach(user => {
+      const date = format(user.createdAt.toDate(), 'yyyy-MM-dd');
+      dailyUsers[date] = (dailyUsers[date] || 0) + 1;
+    });
+    return Object.keys(dailyUsers).map(date => ({ date, users: dailyUsers[date] }));
+  }, [users]);
+
 
   return (
     <div className="space-y-8">
@@ -64,7 +85,7 @@ export default function AdminDashboardPage() {
             <UsersIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{users.length}</div>
+            {usersLoading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{users?.length || 0}</div>}
             <p className="text-xs text-muted-foreground">All registered users</p>
           </CardContent>
         </Card>
@@ -74,7 +95,7 @@ export default function AdminDashboardPage() {
             <Home className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{properties.length}</div>
+            {propertiesLoading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{properties?.length || 0}</div>}
             <p className="text-xs text-muted-foreground">All listed properties</p>
           </CardContent>
         </Card>
@@ -84,7 +105,7 @@ export default function AdminDashboardPage() {
             <BookOpenCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{bookings.length}</div>
+            {bookingsLoading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{bookings?.length || 0}</div>}
             <p className="text-xs text-muted-foreground">Completed and upcoming</p>
           </CardContent>
         </Card>
@@ -98,22 +119,24 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
              <ChartContainer config={bookingsChartConfig} className="h-[250px] w-full">
-              <BarChart accessibilityLayer data={bookingsChartData}>
-                 <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                  tickFormatter={(value) => value.slice(0, 3)}
-                />
-                 <YAxis />
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="dashed" />}
-                />
-                <Bar dataKey="bookings" fill="var(--color-bookings)" radius={4} />
-              </BarChart>
+              {bookingsLoading ? <Skeleton className="w-full h-full" /> : (
+                <BarChart accessibilityLayer data={bookingsChartData}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                    dataKey="month"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    tickFormatter={(value) => value.slice(0, 3)}
+                    />
+                    <YAxis />
+                    <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent indicator="dashed" />}
+                    />
+                    <Bar dataKey="bookings" fill="var(--color-bookings)" radius={4} />
+                </BarChart>
+              )}
             </ChartContainer>
           </CardContent>
         </Card>
@@ -124,25 +147,27 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
              <ChartContainer config={usersChartConfig} className="h-[250px] w-full">
-              <LineChart accessibilityLayer data={usersChartData}>
-                 <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="date"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  tickFormatter={(value) => format(new Date(value), "MMM d")}
-                />
-                 <YAxis />
-                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                <Line
-                  dataKey="users"
-                  type="monotone"
-                  stroke="var(--color-users)"
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
+              {usersLoading ? <Skeleton className="w-full h-full" /> : (
+                <LineChart accessibilityLayer data={usersChartData}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    tickFormatter={(value) => format(new Date(value), "MMM d")}
+                    />
+                    <YAxis />
+                    <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                    <Line
+                    dataKey="users"
+                    type="monotone"
+                    stroke="var(--color-users)"
+                    strokeWidth={2}
+                    dot={false}
+                    />
+                </LineChart>
+              )}
             </ChartContainer>
           </CardContent>
         </Card>
@@ -166,7 +191,12 @@ export default function AdminDashboardPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {recentUsers.map(user => (
+                    {recentUsersLoading ? Array.from({length: 5}).map((_, i) => (
+                        <TableRow key={i}>
+                            <TableCell><div className="flex items-center gap-3"><Skeleton className="h-8 w-8 rounded-full" /><Skeleton className="h-4 w-24" /></div></TableCell>
+                            <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                        </TableRow>
+                    )) : recentUsers?.map(user => (
                          <TableRow key={user.id}>
                             <TableCell>
                                 <div className="flex items-center gap-3">
@@ -199,7 +229,12 @@ export default function AdminDashboardPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {recentProperties.map(prop => (
+                    {recentPropertiesLoading ? Array.from({length: 3}).map((_, i) => (
+                         <TableRow key={i}>
+                            <TableCell><div className="flex items-center gap-3"><Skeleton className="h-12 w-12 rounded-md" /><div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-3 w-16" /></div></div></TableCell>
+                            <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                        </TableRow>
+                    )) : recentProperties?.map(prop => (
                          <TableRow key={prop.id}>
                             <TableCell>
                                 <div className="flex items-center gap-3">
@@ -232,20 +267,27 @@ export default function AdminDashboardPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Property</TableHead>
-                <TableHead>User</TableHead>
+                <TableHead>User ID</TableHead>
                 <TableHead>Dates</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recentBookings.map((booking) => (
+              {recentBookingsLoading ? Array.from({length: 5}).map((_, i) => (
+                <TableRow key={i}>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                </TableRow>
+              )) : recentBookings?.map((booking) => (
                 <TableRow key={booking.id}>
-                  <TableCell className="font-medium">{booking.property.name}</TableCell>
-                  <TableCell>{booking.user.name}</TableCell>
-                  <TableCell>{format(new Date(booking.checkInDate), 'MMM dd')} - {format(new Date(booking.checkOutDate), 'MMM dd, yyyy')}</TableCell>
+                  <TableCell className="font-medium">{booking.propertyName}</TableCell>
+                  <TableCell className="text-xs font-mono">{booking.userId}</TableCell>
+                  <TableCell>{format(booking.checkInDate.toDate(), 'MMM dd')} - {format(booking.checkOutDate.toDate(), 'MMM dd, yyyy')}</TableCell>
                   <TableCell>
-                    <Badge variant={new Date(booking.checkOutDate) < new Date() ? 'secondary' : 'default'}>
-                      {new Date(booking.checkOutDate) < new Date() ? 'Completed' : 'Upcoming'}
+                    <Badge variant={booking.checkOutDate.toDate() < new Date() ? 'secondary' : 'default'}>
+                      {booking.checkOutDate.toDate() < new Date() ? 'Completed' : 'Upcoming'}
                     </Badge>
                   </TableCell>
                 </TableRow>
