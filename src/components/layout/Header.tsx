@@ -5,6 +5,7 @@ import Link from "next/link";
 import { UserNav } from "../auth/UserNav";
 import { useUser } from "@/firebase";
 import { useTranslations } from 'next-intl';
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Header() {
   const { user, isUserLoading } = useUser();
@@ -30,6 +31,7 @@ export function Header() {
             </Link>
           </nav>
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
             {isUserLoading ? (
               <div className="h-8 w-20 rounded-md bg-muted animate-pulse" />
             ) : user ? (
