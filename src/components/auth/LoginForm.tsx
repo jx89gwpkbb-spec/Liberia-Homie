@@ -43,12 +43,8 @@ export function LoginForm() {
       const user = userCredential.user;
 
       if (!user.emailVerified) {
-        toast({
-            title: 'Verification Required',
-            description: "Please verify your email before logging in. We've sent you another verification link.",
-            variant: 'destructive',
-        });
         await sendEmailVerification(user);
+        router.push('/verify-email');
       } else {
          toast({
             title: 'Login Successful',
