@@ -58,8 +58,8 @@ export function DateSuggestionClient({ property, onDateSelect }: DateSuggestionC
     return (
         <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1">
-                <AccordionTrigger>
-                    <Button variant="outline" className="w-full" onClick={handleSuggestDates} disabled={isLoading}>
+                <AccordionTrigger asChild>
+                     <Button variant="outline" className="w-full" onClick={handleSuggestDates} disabled={isLoading}>
                         {isLoading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
