@@ -29,7 +29,7 @@ export function NotificationManager() {
         if (permission === 'granted') {
           console.log('Notification permission granted.');
           // VAPID key is passed for web push authentication. You can generate one in Firebase Console.
-          const currentToken = await getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY_FROM_FIREBASE_CONSOLE' });
+          const currentToken = await getToken(messaging, { vapidKey: 'BIVYlyICxL9aV54JkvV2c2YxPQRx9gG2nTgP53r-2a-sLhjvOQUgY0a2b9kC7gRDbk1cEWQeYJc_sI6AINx58mU' });
           if (currentToken) {
             console.log('FCM Token:', currentToken);
             // TODO: Send this token to your server to send targeted notifications.

@@ -69,7 +69,7 @@ export function BookingForm({ property }: { property: Property }) {
             propertyLocation: property.location,
         };
 
-        await addDocumentNonBlocking(bookingsCollection, newBooking);
+        addDocumentNonBlocking(bookingsCollection, newBooking);
 
         toast({
             title: "Booking Successful!",
