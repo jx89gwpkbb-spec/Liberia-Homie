@@ -8,19 +8,21 @@ import { MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
 import type { Booking } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminBookingsPage() {
   const firestore = useFirestore();
 
-  const bookingsCollectionRef = useMemoFirebase(() => {
+  // Securely query for the last 50 bookings, ordered by creation date.
+  // This is a more scalable and secure pattern than a full collection scan.
+  const bookingsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return collection(firestore, 'bookings');
+    return query(collection(firestore, 'bookings'), orderBy('createdAt', 'desc'), limit(50));
   }, [firestore]);
 
-  const { data: bookings, isLoading } = useCollection<Booking>(bookingsCollectionRef);
+  const { data: bookings, isLoading } = useCollection<Booking>(bookingsQuery);
   
   return (
     <div className="space-y-6">
@@ -31,8 +33,8 @@ export default function AdminBookingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Bookings</CardTitle>
-          <CardDescription>A complete list of all bookings on the platform.</CardDescription>
+          <CardTitle>Recent Bookings</CardTitle>
+          <CardDescription>A list of the 50 most recent bookings on the platform.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
