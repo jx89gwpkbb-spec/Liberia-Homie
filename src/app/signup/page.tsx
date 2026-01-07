@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -15,12 +15,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
-import { useAuth, initiateEmailSignUp, useFirestore, setDocumentNonBlocking } from '@/firebase';
+import { useAuth, initiateEmailSignUp, setDocumentNonBlocking, useFirestore } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { updateProfile, User } from 'firebase/auth';
-import { doc } from 'firebase/firestore';
+import { updateProfile, type User as FirebaseUser } from 'firebase/auth';
+import { doc, serverTimestamp } from 'firebase/firestore';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const stepOneSchema = z.object({
@@ -46,7 +46,7 @@ export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [userCredential, setUserCredential] = useState<User | null>(null);
+  const [userCredential, setUserCredential] = useState<FirebaseUser | null>(null);
 
   const methods = useForm<SignupFormData>({
     resolver: zodResolver(step === 1 ? stepOneSchema : signupSchema),
@@ -57,6 +57,7 @@ export default function SignupPage() {
     handleSubmit,
     trigger,
     control,
+    getValues,
     formState: { errors },
   } = methods;
 
@@ -64,13 +65,13 @@ export default function SignupPage() {
     const isValid = await trigger(['fullName', 'email', 'password']);
     if (isValid) {
       setIsLoading(true);
-      if (!firestore) {
-        toast({ title: 'Error', description: 'Firestore not available.', variant: 'destructive' });
+      if (!firestore || !auth) {
+        toast({ title: 'Error', description: 'Services not available.', variant: 'destructive' });
         setIsLoading(false);
         return;
       }
       try {
-        const { email, password, fullName } = methods.getValues();
+        const { email, password, fullName } = getValues();
         const userCred = await initiateEmailSignUp(auth, email, password);
         await updateProfile(userCred.user, { displayName: fullName });
         setUserCredential(userCred.user);
@@ -102,7 +103,7 @@ export default function SignupPage() {
         name: data.fullName,
         email: userCredential.email,
         avatar: `https://picsum.photos/seed/${userCredential.uid}/40/40`,
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
         role: data.role,
       };
 
@@ -219,6 +220,9 @@ export default function SignupPage() {
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Create an account
                   </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setStep(1)}>
+                    Back
+                </Button>
                 </>
               )}
             </CardContent>
