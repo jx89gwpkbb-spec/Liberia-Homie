@@ -16,7 +16,6 @@ export const metadata: Metadata = {
   themeColor: '#5D28D2',
 };
 
-
 export default async function LocaleLayout({
   children,
   params: { locale },
@@ -24,20 +23,36 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  // Providing all messages to the client
-  // side is the easiest way to get started
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-        <div className="flex min-h-screen flex-col">
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
-        <ChatWidget />
-        <Toaster />
-        <NotificationManager />
-    </NextIntlClientProvider>
+    <html lang={locale} suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="font-body antialiased" suppressHydrationWarning={true}>
+        <FirebaseClientProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <div className="flex min-h-screen flex-col">
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+            <ChatWidget />
+            <Toaster />
+            <NotificationManager />
+          </NextIntlClientProvider>
+        </FirebaseClientProvider>
+      </body>
+    </html>
   );
 }
