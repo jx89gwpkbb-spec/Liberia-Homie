@@ -183,5 +183,3 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
     </div>
   );
 }
-
-    
