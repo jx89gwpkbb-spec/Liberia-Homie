@@ -40,6 +40,7 @@
  * The `/roles_admin` collection is a classic example of denormalization for
  * authorization. Instead of embedding a role field in a user profile and requiring
  * a slow `get()` call, we use a separate collection that allows for a fast and
+
  * efficient `exists()` check to determine a user's admin status from any rule.
  */
 rules_version = '2';
@@ -111,7 +112,7 @@ service cloud.firestore {
        * @deny (read, write) A user cannot access another user's favorites.
        */
       match /favorites/{propertyId} {
-        allow read, write: if isOwner(userId);
+        allow read, write: if isVerified() && isOwner(userId);
       }
       
       /**
@@ -121,7 +122,7 @@ service cloud.firestore {
        * @deny (read, write) A user cannot access another user's documents.
        */
       match /documents/{documentId} {
-        allow read, write: if isOwner(userId);
+        allow read, write: if isVerified() && isOwner(userId);
       }
       
       /**
@@ -131,7 +132,7 @@ service cloud.firestore {
        * @deny (read, write) A user cannot access another user's saved searches.
        */
       match /savedSearches/{searchId} {
-        allow read, write: if isOwner(userId);
+        allow read, write: if isVerified() && isOwner(userId);
       }
     }
 
@@ -188,20 +189,20 @@ service cloud.firestore {
       allow read, list: if isAdmin();
       
       // Owners can view their own properties regardless of status.
-      allow read: if isOwner(resource.data.owner.id);
-      allow list: if isOwner(request.resource.data.owner.id);
+      allow read: if isVerified() && isOwner(resource.data.owner.id);
+      allow list: if isVerified() && isOwner(request.resource.data.owner.id);
 
       // Users can create properties, but they must be 'pending'.
-      allow create: if isOwner(request.resource.data.owner.id) && request.resource.data.status == 'pending';
+      allow create: if isVerified() && isOwner(request.resource.data.owner.id) && request.resource.data.status == 'pending';
       
       // Owners can update their own properties, but cannot change the status.
-      allow update: if isOwner(resource.data.owner.id) && request.resource.data.status == resource.data.status;
+      allow update: if isVerified() && isOwner(resource.data.owner.id) && request.resource.data.status == resource.data.status;
       
       // Admins can update any field, including changing the status.
       allow update: if isAdmin();
       
       // Owners or Admins can delete.
-      allow delete: if isOwner(resource.data.owner.id) || isAdmin();
+      allow delete: if (isVerified() && isOwner(resource.data.owner.id)) || isAdmin();
     }
     
     /**
@@ -209,17 +210,17 @@ service cloud.firestore {
      * @path /visits/{visitId}
      */
     match /visits/{visitId} {
-        allow create: if isOwner(request.resource.data.userId);
+        allow create: if isVerified() && isOwner(request.resource.data.userId);
         
-        allow read: if isOwner(resource.data.userId) || isAdmin() || isPropertyOwner(resource.data.propertyId);
+        allow read: if isVerified() && (isOwner(resource.data.userId) || isAdmin() || isPropertyOwner(resource.data.propertyId));
         
-        allow list: if isAdmin() || 
+        allow list: if isVerified() && (isAdmin() || 
                        (request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid) ||
-                       (request.query.where[0][0] == 'propertyId' && isPropertyOwner(request.query.where[0][2]));
+                       (request.query.where[0][0] == 'propertyId' && isPropertyOwner(request.query.where[0][2])));
 
-        allow update: if isPropertyOwner(resource.data.propertyId) || isAdmin();
+        allow update: if (isVerified() && isPropertyOwner(resource.data.propertyId)) || isAdmin();
 
-        allow delete: if isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId) || isAdmin();
+        allow delete: if (isVerified() && isOwner(resource.data.userId)) || (isVerified() && isPropertyOwner(resource.data.propertyId)) || isAdmin();
     }
 
     /**
@@ -235,7 +236,8 @@ service cloud.firestore {
      * @path /announcements/{announcementId}
      */
     match /announcements/{announcementId} {
-      allow read, write: if isAdmin();
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
     }
 
     /**
@@ -245,6 +247,9 @@ service cloud.firestore {
     match /tickets/{ticketId} {
       allow create: if isSignedIn();
       allow read, write: if isAdmin();
+      allow list: if isAdmin();
     }
   }
 }
+
+    
