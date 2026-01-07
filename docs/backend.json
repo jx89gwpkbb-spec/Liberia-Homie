@@ -36,7 +36,9 @@
             "lng": { "type": "number" }
           },
           "required": ["lat", "lng"]
-        }
+        },
+        "petFriendly": { "type": "boolean" },
+        "virtualTourUrl": { "type": "string", "format": "uri" }
       },
       "required": [
         "id",

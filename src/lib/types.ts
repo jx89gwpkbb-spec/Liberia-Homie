@@ -23,6 +23,7 @@ export type Property = {
     lat: number;
     lng: number;
   };
+  virtualTourUrl?: string;
 };
 
 export type User = {

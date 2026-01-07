@@ -3,7 +3,7 @@
 import { properties, properties as allProperties } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Star, MapPin, Users, BedDouble, Bath, Wifi, ParkingCircle, Utensils, Wind, Tv, PlayCircle, Clock, PawPrint, Maximize, BadgeCheck } from "lucide-react";
+import { Star, MapPin, Users, BedDouble, Bath, Wifi, ParkingCircle, Utensils, Wind, Tv, PlayCircle, Clock, PawPrint, Maximize, BadgeCheck, Video } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BookingForm } from "@/components/properties/BookingForm";
 import { ReviewSection } from "@/components/properties/ReviewSection";
@@ -69,6 +69,12 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
                     Long Stay Available
                     </Badge>
                 )}
+                 {property.petFriendly && (
+                    <Badge variant="secondary" className="flex items-center">
+                    <PawPrint className="h-4 w-4 mr-1.5" />
+                    Pet Friendly
+                    </Badge>
+                )}
                 </div>
             </div>
             <FavoriteButton propertyId={property.id} size="lg" />
@@ -117,7 +123,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="secondary" className="shadow-lg">
-                  <PlayCircle className="mr-2 h-5 w-5" />
+                  <Video className="mr-2 h-5 w-5" />
                   Virtual Tour
                 </Button>
               </DialogTrigger>

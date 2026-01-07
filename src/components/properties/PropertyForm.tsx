@@ -21,6 +21,7 @@ import { useState, useEffect } from "react";
 import type { Property } from "@/lib/types";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Image from "next/image";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const propertySchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -33,6 +34,7 @@ const propertySchema = z.object({
     bedrooms: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
     bathrooms: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
     maxGuests: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
+    petFriendly: z.boolean().default(false),
     // Images and GPS are not part of the Zod schema as we handle them separately
 });
 
@@ -87,6 +89,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
             bedrooms: '',
             bathrooms: '',
             maxGuests: '',
+            petFriendly: false,
         }
     });
 
@@ -103,6 +106,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 bedrooms: property.bedrooms.toString(),
                 bathrooms: property.bathrooms.toString(),
                 maxGuests: property.maxGuests.toString(),
+                petFriendly: property.petFriendly || false,
             });
             const imageUrls = property.images || [];
             setExistingImageUrls(imageUrls);
@@ -216,6 +220,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 description: data.description,
                 propertyType: data.propertyType,
                 images: finalImageUrls,
+                petFriendly: data.petFriendly,
                 owner: property?.owner || {
                     id: user.uid,
                     name: user.displayName || 'Anonymous',
@@ -337,19 +342,35 @@ export function PropertyForm({ property }: PropertyFormProps) {
                     </div>
 
 
-                     <div className="space-y-2 md:col-span-3">
-                        <Label>Stay Duration</Label>
-                        <Controller
-                            name="stayDuration"
-                            control={control}
-                            render={({ field }) => (
-                                <RadioGroup onValueChange={field.onChange} value={field.value} className="flex gap-4 pt-2">
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="short" id="short" /><Label htmlFor="short">Short Stay</Label></div>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="long" id="long" /><Label htmlFor="long">Long Stay</Label></div>
-                                </RadioGroup>
-                            )}
-                        />
-                         {errors.stayDuration && <p className="text-destructive text-sm">{errors.stayDuration.message}</p>}
+                     <div className="space-y-2 md:col-span-3 flex items-center gap-8">
+                        <div className="space-y-2">
+                            <Label>Stay Duration</Label>
+                            <Controller
+                                name="stayDuration"
+                                control={control}
+                                render={({ field }) => (
+                                    <RadioGroup onValueChange={field.onChange} value={field.value} className="flex gap-4 pt-2">
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="short" id="short" /><Label htmlFor="short">Short Stay</Label></div>
+                                        <div className="flex items-center space-x-2"><RadioGroupItem value="long" id="long" /><Label htmlFor="long">Long Stay</Label></div>
+                                    </RadioGroup>
+                                )}
+                            />
+                            {errors.stayDuration && <p className="text-destructive text-sm">{errors.stayDuration.message}</p>}
+                        </div>
+                         <div className="flex items-center space-x-2 pt-6">
+                            <Controller
+                                name="petFriendly"
+                                control={control}
+                                render={({ field }) => (
+                                    <Checkbox
+                                        id="petFriendly"
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                    />
+                                )}
+                            />
+                            <Label htmlFor="petFriendly">Pet Friendly</Label>
+                        </div>
                     </div>
                     
                     <div className="md:col-span-3 space-y-2">
@@ -359,7 +380,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                     </div>
                     
                     <div className="md:col-span-3 space-y-2">
-                        <Label>Images</Label>
+                        <Label>Images (up to 5)</Label>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                             {previewUrls.map((src, index) => (
                                 <div key={index} className="relative group aspect-video">
