@@ -167,7 +167,7 @@ service cloud.firestore {
     match /bookings/{bookingId} {
       allow create: if request.auth.uid == request.resource.data.userId;
       allow read: if request.auth.uid == resource.data.userId || isAdmin();
-      allow list: if isAdmin() || (request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid) || (request.query.where[0][0] == 'propertyId' && isSignedIn());
+      allow list: if isAdmin() || (request.query.keys().hasOnly(['userId']) && request.query.userId == request.auth.uid) || (request.query.keys().hasOnly(['propertyId']) && isSignedIn());
       allow update, delete: if false;
     }
     
@@ -242,5 +242,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
