@@ -1,4 +1,5 @@
 
+
 import type { Property, User, Review, Booking } from "./types";
 import placeholderImages from './placeholder-images.json';
 
@@ -141,6 +142,14 @@ export const reviews: Review[] = [
         propertyId: 'prop-1',
         user: users[1],
         rating: 5,
+        detailedRatings: {
+            cleanliness: 5,
+            communication: 5,
+            checkIn: 5,
+            accuracy: 5,
+            location: 5,
+            value: 5,
+        },
         comment: "Absolutely stunning villa! The views were even better than the pictures. Everything was clean and the host was very responsive. Highly recommend!",
         createdAt: "2023-10-20T14:48:00.000Z",
     },
@@ -149,6 +158,14 @@ export const reviews: Review[] = [
         propertyId: 'prop-1',
         user: users[2],
         rating: 4,
+        detailedRatings: {
+            cleanliness: 4,
+            communication: 5,
+            checkIn: 5,
+            accuracy: 4,
+            location: 5,
+            value: 4,
+        },
         comment: "Great location and beautiful house. We had a minor issue with the pool heater but the owner fixed it quickly. Overall, a fantastic stay.",
         createdAt: "2023-09-15T10:30:00.000Z",
     },
@@ -157,6 +174,14 @@ export const reviews: Review[] = [
         propertyId: 'prop-2',
         user: users[3],
         rating: 5,
+        detailedRatings: {
+            cleanliness: 5,
+            communication: 5,
+            checkIn: 5,
+            accuracy: 5,
+            location: 5,
+            value: 5,
+        },
         comment: "The apartment was perfect for our city trip. It's small but has everything you need and the location is unbeatable. We would definitely stay here again.",
         createdAt: "2023-11-05T18:00:00.000Z",
     }
@@ -209,4 +234,5 @@ export const amenities: string[] = [
     'City View',
     'Ocean View',
 ];
+
 

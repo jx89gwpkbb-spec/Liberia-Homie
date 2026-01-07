@@ -417,6 +417,44 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["name", "email", "subject", "message", "status", "priority", "createdAt"]
+    },
+    "Review": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Review",
+      "description": "Represents a user review for a property.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "propertyId": { "type": "string" },
+        "userId": { "type": "string" },
+        "rating": { "type": "number", "minimum": 1, "maximum": 5 },
+        "comment": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "detailedRatings": {
+          "type": "object",
+          "properties": {
+            "cleanliness": { "type": "number", "minimum": 1, "maximum": 5 },
+            "communication": { "type": "number", "minimum": 1, "maximum": 5 },
+            "checkIn": { "type": "number", "minimum": 1, "maximum": 5 },
+            "accuracy": { "type": "number", "minimum": 1, "maximum": 5 },
+            "location": { "type": "number", "minimum": 1, "maximum": 5 },
+            "value": { "type": "number", "minimum": 1, "maximum": 5 }
+          }
+        }
+      },
+      "required": ["id", "propertyId", "userId", "rating", "comment", "createdAt"]
+    },
+    "Trip": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Trip",
+      "description": "Represents a user's trip, combining booking and property information.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "booking": { "$ref": "#/entities/Booking" },
+        "property": { "$ref": "#/entities/Property" }
+      },
+      "required": ["id", "booking", "property"]
     }
   },
   "auth": {
@@ -638,10 +676,32 @@
             { "name": "ticketId", "description": "The unique identifier for the ticket." }
           ]
         }
+      },
+      {
+        "path": "/properties/{propertyId}/reviews/{reviewId}",
+        "definition": {
+            "entityName": "Review",
+            "schema": { "$ref": "#/entities/Review" },
+            "description": "Stores reviews for a property.",
+            "params": [
+                { "name": "propertyId", "description": "The ID of the property being reviewed." },
+                { "name": "reviewId", "description": "The unique identifier for the review." }
+            ]
+        }
+      },
+      {
+        "path": "/users/{userId}/trips/{tripId}",
+        "definition": {
+            "entityName": "Trip",
+            "schema": { "$ref": "#/entities/Trip" },
+            "description": "Stores aggregated trip information for a user.",
+            "params": [
+                { "name": "userId", "description": "The ID of the user." },
+                { "name": "tripId", "description": "The unique identifier for the trip, often the booking ID." }
+            ]
+        }
       }
     ],
     "reasoning": "The Firestore structure is designed to securely manage admin and user profiles using a path-based ownership model. This approach provides authorization independence and facilitates secure list operations.\n\n**Authorization Independence:** Admin profiles are stored under the `/admin_profiles/{adminId}` path. Authorization is based solely on the `adminId` matching the `request.auth.uid`. There's no reliance on data from other documents to determine access.\n\n**Structural Segregation:** Admin profiles are stored in a dedicated collection (`/admin_profiles`), ensuring a homogeneous security posture. All documents in this collection share the same security requirements (only the admin can access their profile).\n\n**Access Modeling:** Path-based ownership is used for user data (`/users/{userId}`), admin data (`/admin_profiles/{adminId}`), and user-specific subcollections like favorites (`/users/{userId}/favorites`), documents (`/users/{userId}/documents`), and saved searches (`/users/{userId}/savedSearches`).\n\n**QAPs:**\n*   Secure `list` operations for user profiles are enabled for admins, while non-admins can only read their own profile.\n*   The structure avoids using rules as filters, ensuring that list operations are secure and efficient."
   }
 }
-
-    

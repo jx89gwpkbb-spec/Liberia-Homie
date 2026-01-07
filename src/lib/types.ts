@@ -1,5 +1,6 @@
 
 
+
 export type SeasonalRate = {
   name: string;
   startDate: string;
@@ -67,11 +68,21 @@ export type AdminProfile = {
   permissions: string[];
 };
 
+export type DetailedRating = {
+  cleanliness: number;
+  communication: number;
+  checkIn: number;
+  accuracy: number;
+  location: number;
+  value: number;
+};
+
 export type Review = {
   id: string;
   propertyId: string;
   user: UserProfile;
   rating: number;
+  detailedRatings?: DetailedRating;
   comment: string;
   createdAt: string;
 };
@@ -162,6 +173,10 @@ export type SupportTicket = {
   createdAt: any;
 };
     
-
+export type Trip = {
+    id: string;
+    property: Property;
+    booking: Booking;
+}
     
     
