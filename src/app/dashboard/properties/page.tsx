@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-import { MoreHorizontal, PlusCircle, Trash2 } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Trash2, CheckCircle, Clock, XCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -42,6 +42,26 @@ export default function DashboardPropertiesPage() {
     const propertyRef = doc(firestore, 'properties', propertyId);
     deleteDocumentNonBlocking(propertyRef);
   };
+
+  const statusConfig = {
+      approved: {
+          variant: "default",
+          icon: CheckCircle,
+          label: "Approved",
+          className: "bg-green-500 hover:bg-green-600",
+      },
+      pending: {
+          variant: "secondary",
+          icon: Clock,
+          label: "Pending",
+          className: "bg-yellow-500 hover:bg-yellow-600 text-white",
+      },
+      rejected: {
+          variant: "destructive",
+          icon: XCircle,
+          label: "Rejected"
+      }
+  }
 
 
   return (
@@ -85,14 +105,16 @@ export default function DashboardPropertiesPage() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-8" /></TableCell>
                     <TableCell><Skeleton className="h-8 w-8" /></TableCell>
                   </TableRow>
                 ))
               ) : userProperties && userProperties.length > 0 ? (
-                userProperties.map((property) => (
+                userProperties.map((property) => {
+                  const currentStatus = statusConfig[property.status || 'pending'];
+                  return (
                   <TableRow key={property.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
@@ -104,7 +126,10 @@ export default function DashboardPropertiesPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">Listed</Badge>
+                      <Badge variant={currentStatus.variant as any} className={currentStatus.className}>
+                        <currentStatus.icon className="mr-1.5 h-3 w-3" />
+                        {currentStatus.label}
+                      </Badge>
                     </TableCell>
                     <TableCell>${property.pricePerNight}</TableCell>
                     <TableCell>{property.reviewCount}</TableCell>
@@ -155,7 +180,8 @@ export default function DashboardPropertiesPage() {
                       </AlertDialog>
                     </TableCell>
                   </TableRow>
-                ))
+                  )
+                })
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
