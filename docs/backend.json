@@ -294,6 +294,24 @@
           ]
         }
       },
+       {
+        "path": "/admin_profiles/samuel-nimely-admin",
+        "definition": {
+          "entityName": "AdminProfile",
+          "schema": {
+            "id": "samuel-nimely-admin",
+            "firstName": "Samuel",
+            "lastName": "Nimely",
+            "email": "samuelknimelyjr@gmail.com",
+            "phoneNumber": "+1234567890",
+            "creationDate": "2024-01-01T00:00:00Z",
+            "role": "superadmin",
+            "permissions": ["manage_properties", "manage_users", "view_analytics", "full_system_management"]
+          },
+          "description": "Default admin profile for Samuel Nimely.",
+          "params": []
+        }
+      },
       {
         "path": "/roles_admin/{uid}",
         "definition": {

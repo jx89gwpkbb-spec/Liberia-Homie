@@ -8,6 +8,7 @@ export const users: User[] = [
   { id: 'user-2', name: 'Bob Williams', email: 'bob.w@example.com', avatar: findImage('user-2') },
   { id: 'user-3', name: 'Charlie Brown', email: 'charlie.b@example.com', avatar: findImage('user-3') },
   { id: 'user-4', name: 'Diana Miller', email: 'diana.m@example.com', avatar: findImage('user-4') },
+  { id: 'user-5', name: 'Samuel Nimely', email: 'samuelknimelyjr@gmail.com', avatar: findImage('user-2') },
 ];
 
 export const properties: Property[] = [
@@ -172,7 +173,7 @@ export const bookings: Booking[] = [
         guests: 2,
         createdAt: new Date(),
         propertyName: 'Spacious Suburban Family Home',
-        propertyImage: 'https://images.unsplash.com/photo-1625603736199-775425d2890a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdWJ1cmJhbiUyMGhvdXNlfGVufDB8fHx8MTc2NzY2Nzg1Mnww&ixlib=rb-4.1.0&q=80&w=1080',
+        propertyImage: 'https://images.unsplash.com/photo-1625603736199-775425d2890a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdWJ1cmJhbiUyMGhvdXNlfGVufDB8fHx8MTc2NzY2Nzg1Mnww&ixlib-rb-4.1.0&q=80&w=1080',
         propertyLocation: 'Ganta, Liberia',
     }
 ];
