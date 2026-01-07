@@ -1,30 +1,64 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Database, Lock, UserCheck, Info } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { UserCheck, Activity, Smartphone, MapPin, Share2, ShieldCheck, UserCog, AlertCircle, Mail, Phone, User, Map } from "lucide-react";
 import Link from "next/link";
 
 export default function PrivacyPage() {
   const sections = [
     {
-      icon: Info,
-      title: "Introduction",
-      content: "This Privacy Policy outlines how Homie Liberia collects, uses, and protects your personal information when you use our application. Your privacy is important to us, and we are committed to safeguarding your data."
-    },
-    {
-      icon: Database,
-      title: "Information We Collect",
-      content: "We collect information you provide directly, such as your name, email, and any content you post. We also use Firebase services which may collect data for authentication and analytics purposes as outlined in their own privacy policies."
-    },
-    {
       icon: UserCheck,
-      title: "How We Use Your Information",
-      content: "Your information is used to provide and improve our services, facilitate communication between users, and ensure the security of our platform. We do not sell your personal data to third parties."
+      title: "1. Information We Collect",
+      points: [
+        "Personal Information: Name, email address, phone number, and account details when you sign up.",
+        "Usage Data: How you interact with the app, including searches, clicks, and preferences.",
+        "Device Information: Device type, operating system, and app version.",
+        "Location Data: If you enable location services, we may collect your approximate location to improve recommendations."
+      ]
     },
     {
-      icon: Lock,
-      title: "Data Security",
-      content: "We rely on Firebase's robust security infrastructure, including Firestore Security Rules and Firebase Authentication, to protect your data from unauthorized access. While no system is perfectly secure, we take all reasonable measures to protect your information."
+      icon: Activity,
+      title: "2. How We Use Your Information",
+      points: [
+        "Provide and improve our services.",
+        "Authenticate users and secure accounts.",
+        "Enable communication between users (e.g., housing listings, service providers).",
+        "Send important updates, including verification emails.",
+        "Comply with legal obligations."
+      ]
+    },
+    {
+      icon: Share2,
+      title: "3. Sharing of Information",
+      points: [
+        "With service providers who help us operate the app.",
+        "If required by law or to protect safety.",
+        "With your consent, for specific features (e.g., sharing listings)."
+      ]
+    },
+    {
+      icon: ShieldCheck,
+      title: "4. Data Security",
+       points: [
+        "We use Firebase Authentication and Firestore to secure user data.",
+        "Access is restricted by Firestore Security Rules, ensuring only verified users can access sensitive data.",
+        "While we take strong measures, no system is 100% secure."
+      ]
+    },
+     {
+      icon: UserCog,
+      title: "5. Your Rights",
+       points: [
+        "Access and update your personal information.",
+        "Request deletion of your account and data.",
+        "Control email notifications and communication preferences."
+      ]
+    },
+     {
+      icon: AlertCircle,
+      title: "6. Children’s Privacy",
+       points: [
+        "Homie Liberia is not intended for children under 13. We do not knowingly collect data from minors."
+      ]
     },
   ];
 
@@ -36,31 +70,67 @@ export default function PrivacyPage() {
             Privacy Policy
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            Effective Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
 
-        <Alert variant="default" className="mb-8">
-          <AlertTitle>External Privacy Information</AlertTitle>
-          <AlertDescription>
-            This app is built using Firebase services. For more details on how data is handled by the underlying platform, you can refer to the <Link href="https://firebase.google.com/support/privacy" className="font-semibold underline" target="_blank">Firebase Privacy Policy</Link>.
-          </AlertDescription>
-        </Alert>
-
         <div className="space-y-8">
+          <p className="text-center text-muted-foreground">Homie Liberia values your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our app.</p>
           {sections.map(section => (
             <Card key={section.title}>
-              <CardHeader className="flex flex-row items-center gap-4">
-                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <CardHeader className="flex flex-row items-start gap-4">
+                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
                     <section.icon className="h-6 w-6" />
                   </div>
-                <CardTitle>{section.title}</CardTitle>
+                  <div>
+                    <CardTitle>{section.title}</CardTitle>
+                     <CardDescription className="pt-2">
+                        <ul className="list-disc pl-5 space-y-1">
+                          {section.points.map((point, index) => (
+                            <li key={index}>{point}</li>
+                          ))}
+                        </ul>
+                    </CardDescription>
+                  </div>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">{section.content}</p>
-              </CardContent>
             </Card>
           ))}
+           <Card>
+              <CardHeader>
+                <CardTitle>7. Changes to This Policy</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">We may update this Privacy Policy from time to time. Updates will be posted in the app with a revised “Effective Date.”</p>
+              </CardContent>
+            </Card>
+
+             <Card>
+                <CardHeader>
+                    <CardTitle>8. Contact Us</CardTitle>
+                    <CardDescription>If you have questions or concerns about this Privacy Policy, contact us at:</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center gap-4">
+                        <User className="h-5 w-5 text-primary"/>
+                        <p className="text-muted-foreground">CEO: Samuel Nimely</p>
+                    </div>
+                     <div className="flex items-center gap-4">
+                        <Mail className="h-5 w-5 text-primary"/>
+                        <a href="mailto:samuelknimelyjr@gmail.com" className="text-muted-foreground hover:text-primary">samuelknimelyjr@gmail.com</a>
+                    </div>
+                     <div className="flex items-center gap-4">
+                        <Phone className="h-5 w-5 text-primary"/>
+                        <div className="text-muted-foreground">
+                            <p>(+91) 8923274502</p>
+                            <p>(+231) 770321127</p>
+                        </div>
+                    </div>
+                     <div className="flex items-center gap-4">
+                        <Map className="h-5 w-5 text-primary"/>
+                        <p className="text-muted-foreground">Buchanan City, Monrovia, Liberia</p>
+                    </div>
+                </CardContent>
+             </Card>
         </div>
       </div>
     </div>
