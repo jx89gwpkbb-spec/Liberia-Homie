@@ -284,7 +284,7 @@
         },
         "documentType": {
           "type": "string",
-          "enum": ["ID Proof", "Rental Agreement", "Other"],
+          "enum": ["ID Proof", "Rental Agreement", "Receipt", "Other"],
           "description": "The type of the document."
         },
         "uploadedAt": {

@@ -34,7 +34,7 @@ export default function MyDocumentsPage() {
   const { toast } = useToast();
   
   const [file, setFile] = useState<File | null>(null);
-  const [documentType, setDocumentType] = useState<'ID Proof' | 'Rental Agreement' | 'Other'>('Other');
+  const [documentType, setDocumentType] = useState<'ID Proof' | 'Rental Agreement' | 'Receipt' | 'Other'>('Other');
   const [isUploading, setIsUploading] = useState(false);
 
   const documentsQuery = useMemoFirebase(() => {
@@ -124,6 +124,7 @@ export default function MyDocumentsPage() {
               <SelectContent>
                 <SelectItem value="ID Proof">ID Proof</SelectItem>
                 <SelectItem value="Rental Agreement">Rental Agreement</SelectItem>
+                <SelectItem value="Receipt">Receipt</SelectItem>
                 <SelectItem value="Other">Other</SelectItem>
               </SelectContent>
             </Select>

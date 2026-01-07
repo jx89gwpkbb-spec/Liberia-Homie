@@ -85,7 +85,7 @@ export type Document = {
   userId: string;
   fileName: string;
   fileUrl: string;
-  documentType: 'ID Proof' | 'Rental Agreement' | 'Other';
+  documentType: 'ID Proof' | 'Rental Agreement' | 'Receipt' | 'Other';
   uploadedAt: any;
 };
 
