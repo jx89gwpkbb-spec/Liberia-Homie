@@ -189,7 +189,7 @@ service cloud.firestore {
      */
     match /bookings/{bookingId} {
       // Admins and SuperAdmins have full read/list access.
-      allow read, list: if isVerified() && (isAdmin() || isSuperAdmin());
+      allow read, list: if isAdmin() || isSuperAdmin();
 
       // Only authenticated users can create bookings.
       allow create: if isVerified();
