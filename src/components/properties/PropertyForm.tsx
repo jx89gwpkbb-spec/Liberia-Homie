@@ -12,12 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { DescriptionGenerator } from "./DescriptionGenerator";
-import { useUser, useFirestore, addDocumentNonBlocking } from "@/firebase";
-import { collection } from "firebase/firestore";
+import { useUser, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase";
+import { collection, doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { Property } from "@/lib/types";
 
 const propertySchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -31,39 +32,75 @@ const propertySchema = z.object({
     bathrooms: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
     maxGuests: z.string().refine((val) => !isNaN(parseInt(val, 10)) && parseInt(val, 10) > 0, { message: "Must be a positive number" }),
     image1: z.string().url("Must be a valid URL"),
-    image2: z.string().url("Must be a valid URL").optional(),
-    image3: z.string().url("Must be a valid URL").optional(),
+    image2: z.string().url("Must be a valid URL").optional().or(z.literal('')),
+    image3: z.string().url("Must be a valid URL").optional().or(z.literal('')),
 });
 
 type PropertyFormData = z.infer<typeof propertySchema>;
 
-export function PropertyForm() {
+type PropertyFormProps = {
+    property?: Property;
+};
+
+export function PropertyForm({ property }: PropertyFormProps) {
     const { user } = useUser();
     const firestore = useFirestore();
     const { toast } = useToast();
     const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
+    
+    const isEditMode = !!property;
 
-    const { register, handleSubmit, control, formState: { errors }, getValues, setValue } = useForm<PropertyFormData>({
+    const { register, handleSubmit, control, formState: { errors }, getValues, setValue, reset } = useForm<PropertyFormData>({
         resolver: zodResolver(propertySchema),
         defaultValues: {
+            name: '',
+            location: '',
+            price: '',
             propertyType: "House",
             stayDuration: "short",
+            keyFeatures: '',
+            description: '',
+            bedrooms: '',
+            bathrooms: '',
+            maxGuests: '',
+            image1: '',
+            image2: '',
+            image3: '',
         }
     });
 
+    useEffect(() => {
+        if (isEditMode && property) {
+            reset({
+                name: property.name,
+                location: property.location,
+                price: property.pricePerNight.toString(),
+                propertyType: property.propertyType,
+                stayDuration: property.longStay ? 'long' : 'short',
+                keyFeatures: property.amenities.join(', '),
+                description: property.description,
+                bedrooms: property.bedrooms.toString(),
+                bathrooms: property.bathrooms.toString(),
+                maxGuests: property.maxGuests.toString(),
+                image1: property.images[0] || '',
+                image2: property.images[1] || '',
+                image3: property.images[2] || '',
+            });
+        }
+    }, [property, isEditMode, reset]);
+
+
     const onSubmit = async (data: PropertyFormData) => {
         if (!user || !firestore) {
-            toast({ title: "Error", description: "You must be logged in to create a property.", variant: "destructive" });
+            toast({ title: "Error", description: "You must be logged in to modify a property.", variant: "destructive" });
             return;
         }
         setIsSaving(true);
         try {
-            const propertiesCollection = collection(firestore, 'properties');
-
             const images = [data.image1, data.image2, data.image3].filter(Boolean) as string[];
 
-            const newProperty = {
+            const propertyData = {
                 name: data.name,
                 location: data.location,
                 pricePerNight: parseFloat(data.price),
@@ -74,27 +111,36 @@ export function PropertyForm() {
                 amenities: data.keyFeatures.split(',').map(s => s.trim()),
                 description: data.description,
                 propertyType: data.propertyType,
-                owner: {
+                images: images,
+                owner: property?.owner || {
                     id: user.uid,
                     name: user.displayName || 'Anonymous',
                     avatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
                 },
-                images: images,
-                // Mock data for fields not in form
-                rating: Math.random() * 2 + 3, // 3.0 to 5.0
-                reviewCount: Math.floor(Math.random() * 100),
+                rating: property?.rating || Math.random() * 2 + 3,
+                reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
             };
+
+            if (isEditMode && property.id) {
+                const propertyRef = doc(firestore, 'properties', property.id);
+                setDocumentNonBlocking(propertyRef, propertyData, { merge: true });
+                 toast({
+                    title: "Property Updated!",
+                    description: `${data.name} has been updated successfully.`,
+                });
+            } else {
+                const propertiesCollection = collection(firestore, 'properties');
+                await addDocumentNonBlocking(propertiesCollection, propertyData);
+                toast({
+                    title: "Property Added!",
+                    description: `${data.name} has been listed successfully.`,
+                });
+            }
             
-            await addDocumentNonBlocking(propertiesCollection, newProperty);
-            
-            toast({
-                title: "Property Added!",
-                description: `${data.name} has been listed successfully.`,
-            });
             router.push('/dashboard/properties');
 
         } catch (error) {
-            console.error("Error adding property:", error);
+            console.error("Error saving property:", error);
             toast({ title: "Error", description: "Failed to save property.", variant: "destructive" });
         } finally {
             setIsSaving(false);
@@ -141,7 +187,7 @@ export function PropertyForm() {
                             name="propertyType"
                             control={control}
                             render={({ field }) => (
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value}>
                                     <SelectTrigger><SelectValue placeholder="Select type..." /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="House">House</SelectItem>
@@ -176,7 +222,7 @@ export function PropertyForm() {
                             name="stayDuration"
                             control={control}
                             render={({ field }) => (
-                                <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex gap-4 pt-2">
+                                <RadioGroup onValueChange={field.onChange} value={field.value} className="flex gap-4 pt-2">
                                     <div className="flex items-center space-x-2"><RadioGroupItem value="short" id="short" /><Label htmlFor="short">Short Stay</Label></div>
                                     <div className="flex items-center space-x-2"><RadioGroupItem value="long" id="long" /><Label htmlFor="long">Long Stay</Label></div>
                                 </RadioGroup>
@@ -212,7 +258,7 @@ export function PropertyForm() {
                     <div className="md:col-span-2 text-right">
                         <Button type="submit" disabled={isSaving}>
                             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Save Property
+                            {isEditMode ? 'Update Property' : 'Save Property'}
                         </Button>
                     </div>
                 </CardContent>
