@@ -170,11 +170,7 @@ service cloud.firestore {
      * @path /bookings/{bookingId}
      */
     match /bookings/{bookingId} {
-      allow get: if isVerified() && (isOwner(resource.data.userId) || isAdmin() || isPropertyOwner(resource.data.propertyId));
-      allow list: if isVerified() && (isAdmin() || (request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid) || (request.query.where[0][0] == 'propertyId' && isPropertyOwner(request.query.where[0][2])));
-      allow create: if isVerified() && isOwner(request.resource.data.userId);
-      allow update: if isVerified() && (isOwner(resource.data.userId) || isAdmin() || isPropertyOwner(resource.data.propertyId));
-      allow delete: if isVerified() && (isOwner(resource.data.userId) || isAdmin() || isPropertyOwner(resource.data.propertyId));
+      allow read, write: if isVerified();
     }
     
     /**
