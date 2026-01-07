@@ -14,20 +14,8 @@ import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import type { UserProfile as User, Property, Booking } from '@/lib/types';
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMemo } from "react";
 
-const bookingsChartConfig: ChartConfig = {
-  bookings: {
-    label: "Bookings",
-    color: "hsl(var(--primary))",
-  },
-};
-
-const revenueChartConfig: ChartConfig = {
-  revenue: {
-    label: "Revenue",
-    color: "hsl(var(--accent))",
-  },
-};
 
 const usersChartConfig: ChartConfig = {
     users: {
@@ -41,44 +29,19 @@ export default function AdminDashboardPage() {
 
   const usersCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
   const propertiesCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'properties') : null, [firestore]);
-  const bookingsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'bookings') : null, [firestore]);
-
+  
   const recentUsersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users'), orderBy('createdAt', 'desc'), limit(5)) : null, [firestore]);
   const recentPropertiesQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'properties'), orderBy('reviewCount', 'desc'), limit(3)) : null, [firestore]);
-  const recentBookingsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'bookings'), orderBy('createdAt', 'desc'), limit(5)) : null, [firestore]);
   
   const { data: users, isLoading: usersLoading } = useCollection<User>(usersCollectionRef);
   const { data: properties, isLoading: propertiesLoading } = useCollection<Property>(propertiesCollectionRef);
-  const { data: bookings, isLoading: bookingsLoading } = useCollection<Booking>(bookingsCollectionRef);
 
   const { data: recentUsers, isLoading: recentUsersLoading } = useCollection<User>(recentUsersQuery);
   const { data: recentProperties, isLoading: recentPropertiesLoading } = useCollection<Property>(recentPropertiesQuery);
-  const { data: recentBookings, isLoading: recentBookingsLoading } = useCollection<Booking>(recentBookingsQuery);
 
-  const isLoading = usersLoading || propertiesLoading || bookingsLoading || recentUsersLoading || recentPropertiesLoading || recentBookingsLoading;
-
-  const totalRevenue = useMemoFirebase(() => {
-      if (!bookings) return 0;
-      return bookings.reduce((acc, booking) => acc + booking.totalPrice, 0);
-  }, [bookings]);
+  const isLoading = usersLoading || propertiesLoading || recentUsersLoading || recentPropertiesLoading;
   
-   const bookingsChartData = useMemoFirebase(() => {
-    if (!bookings) return [];
-    const monthlyData: {[key: string]: { bookings: number; revenue: number }} = {};
-    bookings.forEach(booking => {
-        if(booking.createdAt?.toDate) {
-            const month = format(booking.createdAt.toDate(), 'MMMM');
-            if (!monthlyData[month]) {
-                monthlyData[month] = { bookings: 0, revenue: 0 };
-            }
-            monthlyData[month].bookings += 1;
-            monthlyData[month].revenue += booking.totalPrice;
-        }
-    });
-    return Object.keys(monthlyData).map(month => ({ month, bookings: monthlyData[month].bookings, revenue: monthlyData[month].revenue }));
-  }, [bookings]);
-  
-  const usersChartData = useMemoFirebase(() => {
+  const usersChartData = useMemo(() => {
     if (!users) return [];
     const dailyUsers: {[key: string]: number} = {};
      users.slice(-7).forEach(user => {
@@ -101,16 +64,6 @@ export default function AdminDashboardPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {bookingsLoading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">${totalRevenue.toLocaleString()}</div>}
-            <p className="text-xs text-muted-foreground">From all bookings</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
             <UsersIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -129,47 +82,9 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">All listed properties</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-            <BookOpenCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {bookingsLoading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{bookings?.length || 0}</div>}
-            <p className="text-xs text-muted-foreground">Completed and upcoming</p>
-          </CardContent>
-        </Card>
       </div>
 
-       <div className="grid gap-8 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Revenue This Year</CardTitle>
-            <CardDescription>A summary of revenue per month.</CardDescription>
-          </CardHeader>
-          <CardContent>
-             <ChartContainer config={revenueChartConfig} className="h-[250px] w-full">
-              {bookingsLoading ? <Skeleton className="w-full h-full" /> : (
-                <BarChart accessibilityLayer data={bookingsChartData}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                    dataKey="month"
-                    tickLine={false}
-                    tickMargin={10}
-                    axisLine={false}
-                    tickFormatter={(value) => value.slice(0, 3)}
-                    />
-                    <YAxis tickFormatter={(value) => `$${value / 1000}k`} />
-                    <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent indicator="dashed" />}
-                    />
-                    <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
-                </BarChart>
-              )}
-            </ChartContainer>
-          </CardContent>
-        </Card>
+       <div className="grid gap-8 lg:grid-cols-1">
          <Card>
           <CardHeader>
             <CardTitle>New Users</CardTitle>
@@ -283,49 +198,6 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
       </div>
-      
-       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-                <CardTitle>Recent Bookings</CardTitle>
-                <CardDescription>An overview of recent booking activity.</CardDescription>
-            </div>
-            <Button variant="outline" size="sm" asChild><Link href="/admin/bookings">View All</Link></Button>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Property</TableHead>
-                <TableHead>User ID</TableHead>
-                <TableHead>Dates</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentBookingsLoading ? Array.from({length: 5}).map((_, i) => (
-                <TableRow key={i}>
-                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-40" /></TableCell>
-                    <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
-                </TableRow>
-              )) : recentBookings?.map((booking) => (
-                <TableRow key={booking.id}>
-                  <TableCell className="font-medium">{booking.propertyName}</TableCell>
-                  <TableCell className="text-xs font-mono">{booking.userId}</TableCell>
-                  <TableCell>{booking.checkInDate?.toDate ? `${format(booking.checkInDate.toDate(), 'MMM dd')} - ${format(booking.checkOutDate.toDate(), 'MMM dd, yyyy')}`: 'N/A'}</TableCell>
-                  <TableCell>
-                    <Badge variant={booking.checkOutDate?.toDate() < new Date() ? 'secondary' : 'default'}>
-                      {booking.checkOutDate?.toDate() < new Date() ? 'Completed' : 'Upcoming'}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
     </div>
   );
 }
