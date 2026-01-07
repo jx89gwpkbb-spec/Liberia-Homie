@@ -30,7 +30,7 @@ export function ChatWidget() {
     {
       id: '1',
       role: 'model',
-      text: 'Hi there! My name is Samuel. How can I help you with Homie Stays today?',
+      text: 'Hi there! I am Agent231. How can I help you with Homie Stays today?',
     },
   ]);
 
@@ -88,9 +88,9 @@ export function ChatWidget() {
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <SheetHeader className="pr-10">
-            <SheetTitle>Chat with Samuel</SheetTitle>
+            <SheetTitle>Chat with Agent231</SheetTitle>
             <SheetDescription>
-              Your personal assistant for Homie Stays.
+              Your personal AI assistant for Homie Stays.
             </SheetDescription>
           </SheetHeader>
           <div className="flex-1 overflow-hidden">

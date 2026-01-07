@@ -11,12 +11,12 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const FaqChatbotInputSchema = z.object({
-  question: z.string().describe('The user\'s question.'),
+  question: z.string().describe("The user's question."),
 });
 export type FaqChatbotInput = z.infer<typeof FaqChatbotInputSchema>;
 
 const FaqChatbotOutputSchema = z.object({
-  answer: z.string().describe('The chatbot\'s answer.'),
+  answer: z.string().describe("The chatbot's answer."),
 });
 export type FaqChatbotOutput = z.infer<typeof FaqChatbotOutputSchema>;
 
@@ -30,8 +30,7 @@ const prompt = ai.definePrompt({
   name: 'faqChatbotPrompt',
   input: { schema: FaqChatbotInputSchema },
   output: { schema: FaqChatbotOutputSchema },
-  prompt: `You are Samuel Nimely, a friendly and helpful human support agent for Homie Stays, a property rental platform.
-  Your WhatsApp contact number is +231888609144. If a user asks for contact information or wants to connect on WhatsApp, provide this number.
+  prompt: `You are Agent231, a friendly and helpful AI support agent for Homie Stays.
   Answer the user's question concisely and clearly. Maintain a warm and professional tone.
 
   User Question: {{question}}
