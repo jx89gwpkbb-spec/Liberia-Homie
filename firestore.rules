@@ -179,7 +179,11 @@ service cloud.firestore {
      */
     match /bookings/{bookingId} {
         // Admins can read any booking. Users can read their own or bookings for properties they own.
-        allow read: if isVerified() && (isAdmin() || isSuperAdmin() || isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId));
+        // This rule is combined to ensure admins are checked first, allowing broad list queries to succeed for them.
+        allow read: if isVerified() && 
+                    ((isAdmin() || isSuperAdmin()) || 
+                     (resource.data != null && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId))));
+
         // Admins can list all bookings.
         allow list: if isVerified() && (isAdmin() || isSuperAdmin());
         allow create: if isVerified() && isOwner(request.resource.data.userId);
@@ -257,5 +261,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
