@@ -2,7 +2,7 @@ import type {NextConfig} from 'next';
 import withNextIntl from 'next-intl/plugin';
 import withPWA from 'next-pwa';
 
-const withIntl = withNextIntl();
+const withIntl = withNextIntl('./i18n.ts');
 
 const nextConfig: NextConfig = {
   /* config options here */
