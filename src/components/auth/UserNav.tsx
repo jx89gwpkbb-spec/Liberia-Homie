@@ -12,11 +12,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
-import { useUser, useAuth, useFirestore } from '@/firebase';
+import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { doc, getDoc } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
+import { doc } from 'firebase/firestore';
 import { Shield } from 'lucide-react';
 
 export function UserNav() {
@@ -24,23 +23,19 @@ export function UserNav() {
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    const checkAdmin = async () => {
-      if (user && firestore) {
-        const adminRoleRef = doc(firestore, 'roles_admin', user.uid);
-        const docSnap = await getDoc(adminRoleRef);
-        setIsAdmin(docSnap.exists());
-      } else {
-        setIsAdmin(false);
-      }
-    };
-    checkAdmin();
+  
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return doc(firestore, 'roles_admin', user.uid);
   }, [user, firestore]);
+  
+  const { data: adminRole } = useDoc(adminRoleRef);
+  const isAdmin = !!adminRole;
 
   const handleLogout = () => {
-    signOut(auth);
+    if (auth) {
+        signOut(auth);
+    }
     router.push('/');
   };
 
