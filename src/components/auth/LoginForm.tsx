@@ -12,6 +12,7 @@ import { useAuth, initiateEmailSignIn } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { sendEmailVerification } from 'firebase/auth';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -38,12 +39,24 @@ export function LoginForm() {
     if (!auth) return;
     setIsLoading(true);
     try {
-      await initiateEmailSignIn(auth, data.email, data.password);
-      toast({
-        title: 'Login Successful',
-        description: "You're now logged in.",
-      });
-      router.push('/dashboard');
+      const userCredential = await initiateEmailSignIn(auth, data.email, data.password);
+      const user = userCredential.user;
+
+      if (!user.emailVerified) {
+        toast({
+            title: 'Verification Required',
+            description: "Please verify your email before logging in. We've sent you another verification link.",
+            variant: 'destructive',
+        });
+        await sendEmailVerification(user);
+      } else {
+         toast({
+            title: 'Login Successful',
+            description: "You're now logged in.",
+        });
+        router.push('/dashboard');
+      }
+
     } catch (error: any) {
       console.error(error);
       toast({
