@@ -1,21 +1,21 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarIcon, Minus, Plus, Loader2 } from "lucide-react";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import { cn } from "@/lib/utils";
-import type { Property } from "@/lib/types";
+import type { Property, Booking } from "@/lib/types";
 import { DateRange } from "react-day-picker";
 import { DateSuggestionClient } from "./DateSuggestionClient";
-import { useUser, useFirestore, addDocumentNonBlocking } from "@/firebase";
+import { useUser, useFirestore, addDocumentNonBlocking, useCollection, useMemoFirebase } from "@/firebase";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { collection, serverTimestamp } from "firebase/firestore";
+import { collection, serverTimestamp, query, where } from "firebase/firestore";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +35,26 @@ export function BookingForm({ property }: { property: Property }) {
   const [date, setDate] = useState<DateRange | undefined>();
   const [guests, setGuests] = useState(1);
   const [isBooking, setIsBooking] = useState(false);
+
+  const bookingsQuery = useMemoFirebase(() => {
+    if (!firestore || !property) return null;
+    return query(collection(firestore, 'bookings'), where('propertyId', '==', property.id));
+  }, [firestore, property]);
+
+  const { data: bookings } = useCollection<Booking>(bookingsQuery);
+
+  const bookedDates = useMemo(() => {
+    if (!bookings) return [];
+    const dates: Date[] = [];
+    bookings.forEach(booking => {
+      const start = booking.checkInDate.toDate();
+      const end = booking.checkOutDate.toDate();
+      for (let d = start; d < end; d.setDate(d.getDate() + 1)) {
+        dates.push(new Date(d));
+      }
+    });
+    return dates;
+  }, [bookings]);
 
   const price = property.pricePerNight;
   const nights = date?.to && date?.from ? Math.round((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)) : 0;
@@ -139,7 +159,7 @@ export function BookingForm({ property }: { property: Property }) {
                 selected={date}
                 onSelect={setDate}
                 numberOfMonths={1}
-                disabled={{ before: new Date() }}
+                disabled={[{ before: new Date() }, ...bookedDates]}
               />
             </PopoverContent>
           </Popover>
