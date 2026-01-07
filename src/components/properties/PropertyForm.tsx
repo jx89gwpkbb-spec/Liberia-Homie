@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
@@ -228,6 +229,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 },
                 rating: property?.rating || Math.round((Math.random() * 2 + 3) * 10) / 10,
                 reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
+                viewCount: property?.viewCount || Math.floor(Math.random() * 2000),
                 gps: gpsCoords,
                 status: property?.status || 'pending',
             };

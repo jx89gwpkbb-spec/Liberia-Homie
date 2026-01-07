@@ -1,3 +1,4 @@
+
 'use client';
 import { useUser, useFirestore, useCollection, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
 import { collection, query, where, doc } from 'firebase/firestore';
@@ -8,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-import { MoreHorizontal, PlusCircle, Trash2, CheckCircle, Clock, XCircle } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Trash2, CheckCircle, Clock, XCircle, Eye } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -79,7 +80,7 @@ export default function DashboardPropertiesPage() {
       <Card>
         <CardHeader>
           <CardTitle>Property Listings</CardTitle>
-          <CardDescription>A list of all your properties.</CardDescription>
+          <CardDescription>A list of all your properties and their performance.</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -89,6 +90,7 @@ export default function DashboardPropertiesPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Price/Night</TableHead>
                 <TableHead>Bookings</TableHead>
+                <TableHead>Views</TableHead>
                 <TableHead><span className="sr-only">Actions</span></TableHead>
               </TableRow>
             </TableHeader>
@@ -108,6 +110,7 @@ export default function DashboardPropertiesPage() {
                     <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                     <TableCell><Skeleton className="h-8 w-8" /></TableCell>
                   </TableRow>
                 ))
@@ -133,6 +136,12 @@ export default function DashboardPropertiesPage() {
                     </TableCell>
                     <TableCell>${property.pricePerNight}</TableCell>
                     <TableCell>{property.reviewCount}</TableCell>
+                    <TableCell>
+                        <div className="flex items-center gap-1.5">
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                            {property.viewCount || 0}
+                        </div>
+                    </TableCell>
                     <TableCell>
                        <AlertDialog>
                         <DropdownMenu>
@@ -184,7 +193,7 @@ export default function DashboardPropertiesPage() {
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
+                  <TableCell colSpan={6} className="h-24 text-center">
                     You have not added any properties yet.
                   </TableCell>
                 </TableRow>

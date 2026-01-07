@@ -1,3 +1,4 @@
+
 export type Property = {
   id: string;
   name: string;
@@ -11,6 +12,7 @@ export type Property = {
   amenities: string[];
   rating: number;
   reviewCount: number;
+  viewCount?: number;
   images: string[];
   owner: {
     id: string;
