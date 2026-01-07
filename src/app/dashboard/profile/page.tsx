@@ -7,6 +7,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -21,6 +22,7 @@ import type { UserProfile } from '@/lib/types';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -28,11 +30,22 @@ const profileSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
+const passwordSchema = z.object({
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+});
+
+type PasswordFormData = z.infer<typeof passwordSchema>;
+
 export default function MyProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
 
   const userProfileRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -42,17 +55,21 @@ export default function MyProfilePage() {
   const { data: userProfile, isLoading: isProfileLoading } =
     useDoc<UserProfile>(userProfileRef);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<ProfileFormData>({
+  const profileForm = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     values: {
       name: userProfile?.name || '',
     },
   });
+  
+  const passwordForm = useForm<PasswordFormData>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+    }
+  });
+
 
   const getInitials = (name: string) => {
     if (!name) return '';
@@ -62,7 +79,7 @@ export default function MyProfilePage() {
       .join('');
   };
   
-  const onSubmit = async (data: ProfileFormData) => {
+  const onProfileSubmit = async (data: ProfileFormData) => {
     if (!userProfileRef) return;
     setIsSaving(true);
     try {
@@ -82,6 +99,36 @@ export default function MyProfilePage() {
         setIsSaving(false);
     }
   }
+  
+   const onPasswordSubmit = async (data: PasswordFormData) => {
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) {
+        toast({ title: 'Not authenticated', description: 'Please log in again.', variant: 'destructive'});
+        return;
+    }
+
+    setIsSavingPassword(true);
+    try {
+        await updatePassword(currentUser, data.password);
+        toast({
+            title: 'Password Updated',
+            description: 'Your password has been changed successfully.',
+        });
+        passwordForm.reset();
+    } catch (error: any) {
+        console.error('Password update failed', error);
+        toast({
+            title: 'Update Failed',
+            description: 'Could not update your password. For security, you may need to log out and log back in before changing your password.',
+            variant: 'destructive',
+        });
+    } finally {
+        setIsSavingPassword(false);
+    }
+  };
+
 
   if (isUserLoading || isProfileLoading) {
     return (
@@ -112,7 +159,7 @@ export default function MyProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold font-headline">My Profile</h1>
         <p className="text-muted-foreground">
@@ -120,7 +167,7 @@ export default function MyProfilePage() {
         </p>
       </div>
       <Card>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={profileForm.handleSubmit(onProfileSubmit)}>
           <CardHeader>
              <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20">
@@ -130,17 +177,17 @@ export default function MyProfilePage() {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle>{userProfile?.name}</CardTitle>
-                <CardDescription>{userProfile?.email}</CardDescription>
+                <CardTitle>Personal Information</CardTitle>
+                <CardDescription>Update your name and view your email.</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
-              <Input id="name" {...register('name')} />
-              {errors.name && (
-                <p className="text-sm text-destructive">{errors.name.message}</p>
+              <Input id="name" {...profileForm.register('name')} />
+              {profileForm.formState.errors.name && (
+                <p className="text-sm text-destructive">{profileForm.formState.errors.name.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -148,13 +195,44 @@ export default function MyProfilePage() {
                 <Input id="email" type="email" value={userProfile?.email || ''} disabled />
                  <p className="text-xs text-muted-foreground">Email address cannot be changed.</p>
             </div>
-             <div className="flex justify-end">
+          </CardContent>
+           <CardFooter className="flex justify-end">
                 <Button type="submit" disabled={isSaving}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save Changes
                 </Button>
+            </CardFooter>
+        </form>
+      </Card>
+      
+       <Card>
+        <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}>
+          <CardHeader>
+            <CardTitle>Change Password</CardTitle>
+            <CardDescription>Enter a new password for your account.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">New Password</Label>
+              <Input id="password" type="password" {...passwordForm.register('password')} />
+              {passwordForm.formState.errors.password && (
+                <p className="text-sm text-destructive">{passwordForm.formState.errors.password.message}</p>
+              )}
+            </div>
+             <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Input id="confirmPassword" type="password" {...passwordForm.register('confirmPassword')} />
+              {passwordForm.formState.errors.confirmPassword && (
+                <p className="text-sm text-destructive">{passwordForm.formState.errors.confirmPassword.message}</p>
+              )}
             </div>
           </CardContent>
+           <CardFooter className="flex justify-end">
+                <Button type="submit" variant="secondary" disabled={isSavingPassword}>
+                    {isSavingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Update Password
+                </Button>
+            </CardFooter>
         </form>
       </Card>
     </div>
