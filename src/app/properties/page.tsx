@@ -6,33 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Search, Map } from "lucide-react";
 import { Suspense } from 'react';
 import Link from "next/link";
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { initializeFirebase } from "@/firebase";
-
-// This is a server component, so we can fetch data directly.
-// Note: This is a simplified example. For production, you'd use the Firebase client SDK
-// in a client component or fetch via a server-side route handler that uses the Admin SDK.
-async function getApprovedProperties() {
-    const { firestore } = initializeFirebase();
-    const propertiesRef = collection(firestore, 'properties');
-    const q = query(propertiesRef, where("status", "==", "approved"));
-    
-    try {
-        const querySnapshot = await getDocs(q);
-        const properties = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        // The data is not serializable for the client component if it contains Timestamps.
-        // Let's use our static data for now until we have a proper API route.
-        // In a real app, you would serialize this data properly.
-        return allProperties.filter(p => p.status === 'approved');
-    } catch (error) {
-        console.error("Could not fetch approved properties, using static data as fallback:", error);
-        return allProperties.filter(p => p.status === 'approved');
-    }
-}
 
 
-async function PropertiesList({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
-  const properties = await getApprovedProperties();
+function PropertiesList({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+  const properties = allProperties.filter(p => p.status === 'approved');
 
   const location = typeof searchParams.location === 'string' ? searchParams.location : '';
   const price = searchParams.price ? parseInt(searchParams.price as string) : 2000;
