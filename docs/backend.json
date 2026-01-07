@@ -132,13 +132,19 @@
           "type": "string",
           "description": "Date and time the user profile was created.",
           "format": "date-time"
+        },
+        "role": {
+          "type": "string",
+          "description": "The user's role in the application.",
+          "enum": ["renter", "vendor"]
         }
       },
       "required": [
         "id",
         "name",
         "email",
-        "createdAt"
+        "createdAt",
+        "role"
       ]
     },
     "Booking": {

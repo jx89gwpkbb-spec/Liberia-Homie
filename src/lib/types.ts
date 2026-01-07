@@ -27,6 +27,7 @@ export type User = {
   email: string;
   avatar: string;
   createdAt?: any;
+  role?: 'renter' | 'vendor';
 };
 
 export type Review = {
