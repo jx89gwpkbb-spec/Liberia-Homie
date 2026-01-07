@@ -5,7 +5,7 @@ import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-import { getMessaging } from 'firebase/messaging';
+import { getMessaging, isSupported } from 'firebase/messaging';
 
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
@@ -36,19 +36,29 @@ export function initializeFirebase() {
 }
 
 export function getSdks(firebaseApp: FirebaseApp) {
-  // Conditionally initialize messaging only on the client side and in a secure context
-  const messaging =
-    typeof window !== 'undefined' && typeof navigator !== 'undefined' && 'serviceWorker' in navigator
-      ? getMessaging(firebaseApp)
-      : undefined;
   return {
     firebaseApp,
     auth: getAuth(firebaseApp),
     firestore: getFirestore(firebaseApp),
     storage: getStorage(firebaseApp),
-    messaging: messaging,
+    // Messaging is now initialized conditionally and asynchronously
+    // via getMessagingInstance()
   };
 }
+
+/**
+ * Gets the Firebase Messaging instance, but only if the browser supports it.
+ * @param firebaseApp The Firebase App instance.
+ * @returns A promise that resolves to the Messaging instance or null if not supported.
+ */
+export async function getMessagingInstance(firebaseApp: FirebaseApp) {
+  const supported = await isSupported();
+  if (supported) {
+    return getMessaging(firebaseApp);
+  }
+  return null;
+}
+
 
 export * from './provider';
 export * from './client-provider';
@@ -58,5 +68,3 @@ export * from './non-blocking-updates';
 export * from './non-blocking-login';
 export * from './errors';
 export * from './error-emitter';
-
-    
