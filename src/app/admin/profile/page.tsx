@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 export default function AdminProfilePage() {
   const { user, isUserLoading } = useUser();
@@ -21,35 +22,48 @@ export default function AdminProfilePage() {
 
   const { data: adminProfile, isLoading: isProfileLoading } = useDoc(adminProfileRef);
 
-  const handleCreateProfile = async () => {
-    if (!user || !firestore || !adminProfileRef) return;
-    setIsCreatingProfile(true);
-    try {
-      const adminProfileData = {
-        id: user.uid,
-        firstName: user.displayName?.split(' ')[0] || 'Admin',
-        lastName: user.displayName?.split(' ')[1] || 'User',
-        email: user.email || 'No email',
-        phoneNumber: user.phoneNumber || 'No phone number',
-        creationDate: serverTimestamp(),
-        lastLogin: serverTimestamp(),
-        role: 'superadmin',
-        permissions: ['manage_properties', 'manage_users', 'view_analytics', 'full_system_management'],
-      };
+  useEffect(() => {
+    const createProfileIfNeeded = async () => {
+      if (isUserLoading || isProfileLoading || !user || !firestore || adminProfile) {
+        return;
+      }
       
-      const roleRef = doc(firestore, 'roles_admin', user.uid);
-      
-      await setDoc(adminProfileRef, adminProfileData, { merge: true });
-      await setDoc(roleRef, { admin: true });
+      // If we are here, it means user is loaded, profile is loaded, but profile is null.
+      // So, we create it automatically.
+      setIsCreatingProfile(true);
+      try {
+        const adminProfileRef = doc(firestore, 'admin_profiles', user.uid);
+        const roleRef = doc(firestore, 'roles_admin', user.uid);
 
-    } catch (error) {
-      console.error('Error creating admin profile:', error);
-    } finally {
-       setIsCreatingProfile(false);
-    }
-  };
+        const adminProfileData = {
+          id: user.uid,
+          firstName: user.displayName?.split(' ')[0] || 'Admin',
+          lastName: user.displayName?.split(' ')[1] || 'User',
+          email: user.email || 'No email',
+          phoneNumber: user.phoneNumber || 'No phone number',
+          creationDate: serverTimestamp(),
+          lastLogin: serverTimestamp(),
+          role: 'superadmin',
+          permissions: ['manage_properties', 'manage_users', 'view_analytics', 'full_system_management'],
+        };
+        
+        // Perform both writes
+        await setDoc(adminProfileRef, adminProfileData, { merge: true });
+        await setDoc(roleRef, { admin: true });
+
+        // The useDoc hook will automatically update with the new profile data.
+      } catch (error) {
+        console.error('Error creating admin profile:', error);
+      } finally {
+         setIsCreatingProfile(false);
+      }
+    };
+    
+    createProfileIfNeeded();
+
+  }, [adminProfile, isProfileLoading, user, isUserLoading, firestore]);
   
-  const isLoading = isUserLoading || isProfileLoading;
+  const isLoading = isUserLoading || isProfileLoading || isCreatingProfile;
   
   if (isLoading) {
     return (
@@ -87,15 +101,14 @@ export default function AdminProfilePage() {
   }
 
   if (!adminProfile) {
+    // This state should now be very brief as the profile is created automatically.
     return (
-      <div className="p-6 text-center">
-        <h1 className="text-2xl font-bold">Create Your Admin Profile</h1>
-        <p className="text-muted-foreground mb-4">
-          You do not have an admin profile yet. Create one to gain access.
+      <div className="p-6 text-center flex flex-col items-center justify-center min-h-[300px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+        <h1 className="text-2xl font-bold">Setting Up Your Admin Profile...</h1>
+        <p className="text-muted-foreground">
+          Please wait a moment.
         </p>
-        <Button onClick={handleCreateProfile} disabled={isCreatingProfile}>
-          {isCreatingProfile ? 'Creating Profile...' : 'Create Admin Profile'}
-        </Button>
       </div>
     );
   }
