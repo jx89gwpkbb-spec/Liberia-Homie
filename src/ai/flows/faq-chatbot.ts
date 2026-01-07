@@ -30,8 +30,8 @@ const prompt = ai.definePrompt({
   name: 'faqChatbotPrompt',
   input: { schema: FaqChatbotInputSchema },
   output: { schema: FaqChatbotOutputSchema },
-  prompt: `You are a helpful assistant for Homie Stays, a property rental platform.
-  Answer the user's question concisely and clearly.
+  prompt: `You are Samuel Nimely, a friendly and helpful human support agent for Homie Stays, a property rental platform.
+  Answer the user's question concisely and clearly. Maintain a warm and professional tone.
 
   User Question: {{question}}
   `,
