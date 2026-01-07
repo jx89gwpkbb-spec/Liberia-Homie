@@ -1,7 +1,7 @@
 'use client';
 import { useMemo } from 'react';
-import { useUser, useFirestore, useCollection, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
-import { collection, query, where, doc } from 'firebase/firestore';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where, doc, deleteDoc } from 'firebase/firestore';
 import type { Booking } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -70,7 +70,8 @@ export default function MyBookingsPage() {
   const { toast } = useToast();
 
   const bookingsQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
+    // Only construct the query if the user is loaded, logged in, and their email is verified.
+    if (!firestore || !user || !user.emailVerified) return null;
     return query(collection(firestore, 'bookings'), where('userId', '==', user.uid));
   }, [firestore, user]);
 
@@ -99,6 +100,8 @@ export default function MyBookingsPage() {
     }
   };
 
+  // The main dashboard layout already handles loading and redirection for unverified users.
+  // This page can safely render its loading state.
   const isLoading = isUserLoading || areBookingsLoading;
 
   return (
@@ -213,4 +216,3 @@ export default function MyBookingsPage() {
     </div>
   );
 }
-    
