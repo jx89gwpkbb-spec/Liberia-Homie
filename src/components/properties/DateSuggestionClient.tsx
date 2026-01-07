@@ -66,15 +66,15 @@ export function DateSuggestionClient({ property, onDateSelect }: DateSuggestionC
                     className={cn(buttonVariants({ variant: 'outline' }), 'w-full no-underline hover:no-underline')}
                 >
                     {isLoading ? (
-                        <>
+                        <div className="flex items-center">
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Suggesting Dates...
-                        </>
+                        </div>
                     ) : (
-                        <>
+                        <div className="flex items-center">
                             <Wand2 className="mr-2 h-4 w-4" />
                             Get AI Date Suggestions
-                        </>
+                        </div>
                     )}
                 </AccordionTrigger>
                 <AccordionContent>
