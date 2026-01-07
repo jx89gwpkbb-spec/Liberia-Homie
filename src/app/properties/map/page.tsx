@@ -11,7 +11,7 @@ export default function PropertiesMapPage() {
   return (
     <div className="container mx-auto py-8">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold font-headline">Explore Properties on Map</h1>
+        <h1 className="text-3xl font-bold font-headline">Explore Properties in Liberia</h1>
         <p className="text-muted-foreground">
           Find your perfect stay by location.
         </p>
@@ -21,8 +21,7 @@ export default function PropertiesMapPage() {
         <Info className="h-4 w-4" />
         <AlertTitle>Developer Preview</AlertTitle>
         <AlertDescription>
-          This is a static placeholder for the interactive map view. A full map
-          integration is coming soon.
+          This is a static map of Liberia. An interactive map with property pins is coming soon.
         </AlertDescription>
       </Alert>
 
@@ -42,8 +41,8 @@ export default function PropertiesMapPage() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
         <div className="absolute bottom-4 left-4 z-10 text-white">
-          <h2 className="text-2xl font-bold">Map View</h2>
-          <p>Pins for properties will be shown here.</p>
+          <h2 className="text-2xl font-bold">Map of Liberia</h2>
+          <p>Property pins will be shown on an interactive map soon.</p>
         </div>
       </div>
     </div>

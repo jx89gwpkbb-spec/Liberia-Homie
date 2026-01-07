@@ -3,7 +3,7 @@
     {
       "id": "hero-1",
       "description": "A modern living room with a beautiful view",
-      "imageUrl": "https://images.unsplash.com/photo-1680209667207-cae0f6cd8fa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bW9kZXJuJTIwbGl2aW5nLXJvb218ZW58MHx8fHwxNzY3NzEwNzE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1680209667207-cae0f6cd8fa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bW9kZXJuJTIwbGl2aW5nLXJvb218ZW58MHx8fHwxNzY3NzEwNzE4fDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "modern living-room"
     },
     {
@@ -104,14 +104,14 @@
     },
     {
       "id": "map-placeholder",
-      "description": "A placeholder map view of a city with pins",
-      "imageUrl": "https://images.unsplash.com/photo-1594132822362-911b36912def?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxtYXAlMjBwbGFjZWhvbGRlcnxlbnwwfHx8fDE3NjgxODg3OTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "map placeholder"
+      "description": "A map of Liberia",
+      "imageUrl": "https://images.unsplash.com/photo-1622030997143-c6031b212f8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxMaWJlcmlhJTIwbWFwfGVufDB8fHx8MTc2ODYwMzAwNHww&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "Liberia map"
     },
     {
       "id": "virtual-tour-placeholder",
       "description": "A 360-degree icon representing a virtual tour",
-      "imageUrl": "https://images.unsplash.com/photo-1530203283902-296243a9169f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHwzNjAlMjB0b3VyfGVufDB8fHx8MTc2Nzc0NjExNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1530203283902-296243a9169f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHwzNjAlMjB0b3VyfGVufDB8fHx8MTc2Nzc0NjExNHww&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "360 tour"
     }
   ]
