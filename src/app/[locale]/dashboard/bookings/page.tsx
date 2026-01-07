@@ -1,7 +1,7 @@
 'use client';
 import { useMemo } from 'react';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, doc, deleteDoc, writeBatch } from 'firebase/firestore';
 import type { Booking } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -72,25 +72,25 @@ export default function MyBookingsPage() {
   const bookingsQuery = useMemoFirebase(() => {
     if (!firestore || !user || !user.emailVerified) return null;
     // Fetch bookings from the user-specific subcollection
-    return collection(firestore, `users/${user.uid}/bookings`);
+    return query(collection(firestore, `users/${user.uid}/bookings`));
   }, [firestore, user]);
 
   const { data: bookings, isLoading: areBookingsLoading } = useCollection<Booking>(bookingsQuery);
 
   const handleCancelBooking = async (bookingId: string) => {
-    if (!user || !bookingId) return;
+    if (!user || !bookingId || !firestore) return;
 
     try {
+        // The agent handles deleting the booking from the global /bookings collection
         await homieStaysAgent({
             question: `Cancel booking ${bookingId}`,
             userId: user.uid,
         });
 
-        // Also delete the booking record from the user's subcollection
-        if(firestore) {
-            const userBookingRef = doc(firestore, `users/${user.uid}/bookings`, bookingId);
-            await deleteDoc(userBookingRef);
-        }
+        // We only need to delete the user's copy of the booking record
+        const userBookingRef = doc(firestore, `users/${user.uid}/bookings`, bookingId);
+        await deleteDoc(userBookingRef);
+        
 
         toast({
             title: "Booking Cancelled",

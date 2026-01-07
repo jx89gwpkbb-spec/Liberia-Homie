@@ -16,7 +16,7 @@
  * - /users/{userId}/favorites/{propertyId}: Stores a user's favorite properties.
  * - /users/{userId}/documents/{documentId}: Stores a user's uploaded documents.
  * - /users/{userId}/savedSearches/{searchId}: Stores a user's saved search filters.
- * - /bookings/{bookingId}: Contains complete booking details, accessible only by admins and relevant users.
+ * - /bookings/{bookingId}: Contains complete booking details, accessible only by admins. Regular users cannot access this path.
  * - /properties/{propertyId}: Contains property details.
  * - /visits/{visitId}: Contains visit request details.
  * - /announcements/{announcementId}: Contains system-wide announcements.
@@ -29,7 +29,7 @@
  *   collection (though initial creation is relaxed for the first admin).
  * - Self-Service Profile Management: Admins and Users are responsible for creating and
  *   maintaining their own profile data.
- * - Booking Ownership: Users can only manage bookings within their own user document path.
+ * - Booking Ownership: Users can only manage bookings within their own user document path. The global collection is admin-only.
  * - Favorite Ownership: Users can only manage their own list of favorites.
  * - Document Ownership: Users can only manage their own documents.
  * - Saved Search Ownership: Users can only manage their own saved searches.
@@ -184,18 +184,13 @@ service cloud.firestore {
     }
 
     /**
-     * @description Manages the global bookings collection.
+     * @description Manages the global bookings collection. This collection is for admin use only.
      * @path /bookings/{bookingId}
      */
     match /bookings/{bookingId} {
-      // Admins and SuperAdmins have unconditional read/list access.
-      allow read, list: if isAdmin() || isSuperAdmin();
-      
-      // Only verified users can create bookings.
-      allow create: if isVerified();
-
-      // Users can update/delete their own bookings. Admins can update/delete any.
-      allow update, delete: if isVerified() && ( (isAdmin() || isSuperAdmin()) || (resource.data != null && isOwner(resource.data.userId)) );
+      // Admins and SuperAdmins have unconditional full access.
+      // Regular users have no access to this global collection.
+      allow read, write, list: if isAdmin() || isSuperAdmin();
     }
     
     /**
@@ -204,7 +199,7 @@ service cloud.firestore {
      */
     match /properties/{propertyId} {
       // Admins and owners can read properties regardless of status. Public users can only see approved properties.
-      allow read: if (isAdmin() || isSuperAdmin()) || (isVerified() && isOwner(resource.data.owner.id)) || resource.data.status == 'approved';
+      allow get: if (isAdmin() || isSuperAdmin()) || (isVerified() && resource.data != null && isOwner(resource.data.owner.id)) || (resource.data != null && resource.data.status == 'approved');
       
       // Admins can list all properties. Public users can only list approved properties (via query).
       allow list: if isVerified() && (isAdmin() || isSuperAdmin());
@@ -214,13 +209,13 @@ service cloud.firestore {
       allow create: if isVerified() && isOwner(request.resource.data.owner.id) && request.resource.data.status == 'pending';
       
       // Owners can update their own properties, but cannot change the status.
-      allow update: if isVerified() && isOwner(resource.data.owner.id) && request.resource.data.status == resource.data.status;
+      allow update: if isVerified() && resource.data != null && isOwner(resource.data.owner.id) && request.resource.data.status == resource.data.status;
       
       // Admins can update any field, but only the Super Admin can change the status.
-      allow update: if isAdmin() && (request.resource.data.status == resource.data.status || isSuperAdmin());
+      allow update: if isAdmin() && resource.data != null && (request.resource.data.status == resource.data.status || isSuperAdmin());
       
       // Owners or Admins can delete.
-      allow delete: if (isVerified() && isOwner(resource.data.owner.id)) || isAdmin() || isSuperAdmin();
+      allow delete: if (isVerified() && resource.data != null && isOwner(resource.data.owner.id)) || isAdmin() || isSuperAdmin();
     }
     
     /**

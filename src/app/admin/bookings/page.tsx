@@ -15,8 +15,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function AdminBookingsPage() {
   const firestore = useFirestore();
 
-  // Securely query for the last 50 bookings, ordered by creation date.
-  // This is a more scalable and secure pattern than a full collection scan.
+  // Securely query for the last 50 bookings from the global collection.
+  // This is now safe because only admins can read/list from this path.
   const bookingsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'bookings'), orderBy('createdAt', 'desc'), limit(50));
