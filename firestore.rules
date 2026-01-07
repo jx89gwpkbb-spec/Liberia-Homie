@@ -178,8 +178,9 @@ service cloud.firestore {
      * @path /bookings/{bookingId}
      */
     match /bookings/{bookingId} {
+        // Admins can read any booking. Users can read their own or bookings for properties they own.
         allow read: if isVerified() && (isAdmin() || isSuperAdmin() || isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId));
-        // Admins can list all bookings. Other users must query by their own UID.
+        // Admins can list all bookings.
         allow list: if isVerified() && (isAdmin() || isSuperAdmin());
         allow create: if isVerified() && isOwner(request.resource.data.userId);
         allow update, delete: if isVerified() && (isOwner(resource.data.userId) || isPropertyOwner(resource.data.propertyId) || isAdmin() || isSuperAdmin());
@@ -190,17 +191,11 @@ service cloud.firestore {
      * @path /properties/{propertyId}
      */
     match /properties/{propertyId} {
-      // Public users can only see approved properties.
-      allow read: if resource.data.status == 'approved' || isAdmin() || isSuperAdmin();
+      // Admins and owners can read properties regardless of status. Public users can only see approved properties.
+      allow read: if (isAdmin() || isSuperAdmin()) || (isVerified() && isOwner(resource.data.owner.id)) || resource.data.status == 'approved';
       
-      // Admins and owners can read properties regardless of status.
-      allow read: if isAdmin() || isSuperAdmin() || (isVerified() && isOwner(resource.data.owner.id));
-
-      // Public users can only list approved properties. Admins can list all.
-      allow list: if isAdmin() || isSuperAdmin();
-      
-      // Verified users can list properties they own.
-      allow list: if isVerified() && request.query.where.size() > 0 && request.query.where[0][2] == request.auth.uid;
+      // Admins can list all properties. Public users can only list approved properties (via query).
+      allow list: if isVerified() && (isAdmin() || isSuperAdmin());
       
 
       // Users can create properties, but they must be 'pending'.
@@ -262,5 +257,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
