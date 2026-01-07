@@ -44,16 +44,15 @@ type PropertyFormProps = {
 
 async function uploadImages(userId: string, propertyId: string, files: File[]): Promise<string[]> {
     const storage = getStorage();
-    const urls: string[] = [];
-
-    for (const file of files) {
+    
+    const uploadPromises = files.map(async (file) => {
         const filePath = `properties/${userId}/${propertyId}/${file.name}`;
         const storageRef = ref(storage, filePath);
         await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(storageRef);
-        urls.push(url);
-    }
-    return urls;
+        return getDownloadURL(storageRef);
+    });
+
+    return Promise.all(uploadPromises);
 }
 
 export function PropertyForm({ property }: PropertyFormProps) {
