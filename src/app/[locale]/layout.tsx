@@ -5,6 +5,17 @@ import { Footer } from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/toaster';
 import { ChatWidget } from '@/components/chatbot/ChatWidget';
 import { NotificationManager } from '@/components/notifications/NotificationManager';
+import { FirebaseClientProvider } from '@/firebase/client-provider';
+import type { Metadata } from 'next';
+import '../globals.css';
+
+export const metadata: Metadata = {
+  title: 'Homie Stays',
+  description: 'Find your next home, for a short or long stay.',
+  manifest: '/manifest.json',
+  themeColor: '#5D28D2',
+};
+
 
 export default async function LocaleLayout({
   children,
@@ -19,14 +30,14 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <div className="flex min-h-screen flex-col">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-      </div>
-      <ChatWidget />
-      <Toaster />
-      <NotificationManager />
+        <div className="flex min-h-screen flex-col">
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </div>
+        <ChatWidget />
+        <Toaster />
+        <NotificationManager />
     </NextIntlClientProvider>
   );
 }
