@@ -385,6 +385,24 @@
         "publishedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["title", "content", "status", "targetAudience", "createdAt"]
+    },
+    "SupportTicket": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SupportTicket",
+      "description": "Represents a user-submitted support ticket.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["New", "In Progress", "Resolved", "Closed"] },
+        "priority": { "type": "string", "enum": ["Low", "Medium", "High", "Urgent"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "subject", "message", "status", "priority", "createdAt"]
     }
   },
   "auth": {
@@ -593,6 +611,17 @@
               "name": "announcementId",
               "description": "The unique identifier for the announcement."
             }
+          ]
+        }
+      },
+      {
+        "path": "/tickets/{ticketId}",
+        "definition": {
+          "entityName": "SupportTicket",
+          "schema": { "$ref": "#/backend/entities/SupportTicket" },
+          "description": "Stores user-submitted support tickets. Users can create, and admins can read/write.",
+          "params": [
+            { "name": "ticketId", "description": "The unique identifier for the ticket." }
           ]
         }
       }

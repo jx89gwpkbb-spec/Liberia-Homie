@@ -140,7 +140,19 @@ export type Announcement = {
   targetAudience: 'all' | 'renters' | 'vendors';
   createdAt: any;
   publishedAt?: any;
-}
+};
+
+export type SupportTicket = {
+  id?: string;
+  userId?: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: 'New' | 'In Progress' | 'Resolved' | 'Closed';
+  priority: 'Low' | 'Medium' | 'High' | 'Urgent';
+  createdAt: any;
+};
     
 
     

@@ -231,6 +231,15 @@ service cloud.firestore {
     match /announcements/{announcementId} {
       allow read, write: if isAdmin();
     }
+
+    /**
+     * @description Manages support tickets.
+     * @path /tickets/{ticketId}
+     */
+    match /tickets/{ticketId} {
+      allow create: if isSignedIn();
+      allow read, write: if isAdmin();
+    }
   }
 }
 

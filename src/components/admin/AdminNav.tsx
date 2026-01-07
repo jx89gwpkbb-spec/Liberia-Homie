@@ -1,7 +1,7 @@
 "use client"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Users, BookOpenCheck, UserCircle, Store, Shield, Settings, Megaphone } from 'lucide-react';
+import { LayoutDashboard, Package, Users, BookOpenCheck, UserCircle, Store, Shield, Settings, Megaphone, LifeBuoy } from 'lucide-react';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 
 const navItems = [
@@ -12,6 +12,7 @@ const navItems = [
   { href: '/admin/properties', label: 'Properties', icon: Package },
   { href: '/admin/bookings', label: 'Bookings', icon: BookOpenCheck },
   { href: '/admin/notifications', label: 'Notifications', icon: Megaphone },
+  { href: '/admin/support', label: 'Support', icon: LifeBuoy },
   { href: '/admin/profile', label: 'My Profile', icon: UserCircle },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];

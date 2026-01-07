@@ -1,3 +1,4 @@
+'use client';
 
 import {
   Accordion,
@@ -5,9 +6,52 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Mail, Phone } from "lucide-react";
+import { Mail, Phone, LifeBuoy, Loader2, Send } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useUser, useFirestore, addDocumentNonBlocking } from "@/firebase";
+import { collection, serverTimestamp } from "firebase/firestore";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
+
+const contactFormSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email address'),
+  subject: z.string().min(1, 'Subject is required'),
+  message: z.string().min(1, 'Message is required'),
+});
+
+type ContactFormData = z.infer<typeof contactFormSchema>;
 
 export default function HelpPage() {
+  const { user } = useUser();
+  const firestore = useFirestore();
+  const { toast } = useToast();
+
+  const form = useForm<ContactFormData>({
+    resolver: zodResolver(contactFormSchema),
+    defaultValues: { name: '', email: '', subject: '', message: '' },
+  });
+
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        name: user.displayName || '',
+        email: user.email || '',
+        subject: '',
+        message: '',
+      });
+    }
+  }, [user, form]);
+
+  const { formState: { isSubmitting } } = form;
+
   const faqs = [
     {
       question: "How do I book a property?",
@@ -31,6 +75,36 @@ export default function HelpPage() {
     }
   ];
 
+  const onSubmit = async (data: ContactFormData) => {
+    if (!firestore) {
+      toast({ title: 'Error', description: 'Could not connect to our services.', variant: 'destructive'});
+      return;
+    }
+
+    try {
+        const ticketsCollection = collection(firestore, 'tickets');
+        const newTicket = {
+            ...data,
+            userId: user?.uid || null,
+            status: 'New',
+            priority: 'Medium',
+            createdAt: serverTimestamp(),
+        };
+        
+        await addDocumentNonBlocking(ticketsCollection, newTicket);
+
+        toast({
+            title: "Message Sent!",
+            description: "Thanks for reaching out. A support ticket has been created and our team will get back to you shortly."
+        });
+        form.reset();
+        
+    } catch (error) {
+        console.error("Failed to submit ticket:", error);
+        toast({ title: "Submission Failed", description: "Something went wrong. Please try again.", variant: 'destructive'});
+    }
+  };
+
   return (
     <div className="container mx-auto py-12">
       <div className="max-w-4xl mx-auto">
@@ -40,46 +114,68 @@ export default function HelpPage() {
                 Find answers to your questions or get in touch with our support team.
             </p>
         </div>
-        
-        <div className="mb-12">
-            <h2 className="text-2xl font-semibold mb-6">Frequently Asked Questions</h2>
-            <Accordion type="single" collapsible className="w-full">
-              {faqs.map((faq, index) => (
-                 <AccordionItem key={index} value={`item-${index}`}>
-                    <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
-                    <AccordionContent>
-                        {faq.answer}
-                    </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-        </div>
 
-        <div>
-            <h2 className="text-2xl font-semibold mb-6 text-center">Contact Support</h2>
-            <p className="text-muted-foreground text-center mb-8">
-                If you can't find the answer you're looking for, please don't hesitate to reach out to us.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
-                <div className="flex flex-col items-center text-center p-6 border rounded-lg">
-                    <Mail className="h-10 w-10 text-primary mb-4" />
-                    <h3 className="text-xl font-semibold">Email Us</h3>
-                    <p className="text-muted-foreground mt-2">Send us an email and we'll get back to you as soon as possible.</p>
-                    <a href="mailto:support@homiestays.com" className="mt-4 text-primary font-semibold hover:underline">
-                        support@homiestays.com
-                    </a>
-                </div>
-                 <div className="flex flex-col items-center text-center p-6 border rounded-lg">
-                    <Phone className="h-10 w-10 text-primary mb-4" />
-                    <h3 className="text-xl font-semibold">Call Us</h3>
-                    <p className="text-muted-foreground mt-2">Our support team is available from 9 AM to 5 PM, Mon-Fri.</p>
-                    <a href="tel:+1-234-567-890" className="mt-4 text-primary font-semibold hover:underline">
-                        +1 (234) 567-890
-                    </a>
-                </div>
+        <div className="grid md:grid-cols-2 gap-12">
+            <div className="mb-12 md:mb-0">
+                <h2 className="text-2xl font-semibold mb-6">Frequently Asked Questions</h2>
+                <Accordion type="single" collapsible className="w-full">
+                  {faqs.map((faq, index) => (
+                     <AccordionItem key={index} value={`item-${index}`}>
+                        <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
+                        <AccordionContent>
+                            {faq.answer}
+                        </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+            </div>
+
+            <div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><LifeBuoy /> Contact Support</CardTitle>
+                    <CardDescription>
+                      If you can't find an answer, submit a support ticket below.
+                    </CardDescription>
+                  </CardHeader>
+                  <form onSubmit={form.handleSubmit(onSubmit)}>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Name</Label>
+                            <Input id="name" {...form.register('name')} />
+                             {form.formState.errors.name && <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>}
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input id="email" type="email" {...form.register('email')} />
+                            {form.formState.errors.email && <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>}
+                        </div>
+                      </div>
+                       <div className="space-y-2">
+                          <Label htmlFor="subject">Subject</Label>
+                          <Input id="subject" {...form.register('subject')} />
+                           {form.formState.errors.subject && <p className="text-sm text-destructive">{form.formState.errors.subject.message}</p>}
+                      </div>
+                       <div className="space-y-2">
+                          <Label htmlFor="message">Message</Label>
+                          <Textarea id="message" rows={5} {...form.register('message')} />
+                           {form.formState.errors.message && <p className="text-sm text-destructive">{form.formState.errors.message.message}</p>}
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                       <Button type="submit" className="w-full" disabled={isSubmitting}>
+                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                         Submit Ticket
+                      </Button>
+                    </CardFooter>
+                  </form>
+                </Card>
             </div>
         </div>
       </div>
     </div>
   );
 }
+
+    
