@@ -43,20 +43,6 @@
           "type": "string",
           "enum": ["pending", "approved", "rejected"],
           "description": "The approval status of the property listing."
-        },
-        "seasonalRates": {
-          "type": "array",
-          "description": "Seasonal pricing rules for the property.",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": { "type": "string", "description": "Name of the season (e.g., 'Peak Season', 'Holidays')." },
-              "startDate": { "type": "string", "format": "date" },
-              "endDate": { "type": "string", "format": "date" },
-              "pricePerNight": { "type": "number" }
-            },
-            "required": ["name", "startDate", "endDate", "pricePerNight"]
-          }
         }
       },
       "required": [
@@ -429,32 +415,9 @@
         "userId": { "type": "string" },
         "rating": { "type": "number", "minimum": 1, "maximum": 5 },
         "comment": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "detailedRatings": {
-          "type": "object",
-          "properties": {
-            "cleanliness": { "type": "number", "minimum": 1, "maximum": 5 },
-            "communication": { "type": "number", "minimum": 1, "maximum": 5 },
-            "checkIn": { "type": "number", "minimum": 1, "maximum": 5 },
-            "accuracy": { "type": "number", "minimum": 1, "maximum": 5 },
-            "location": { "type": "number", "minimum": 1, "maximum": 5 },
-            "value": { "type": "number", "minimum": 1, "maximum": 5 }
-          }
-        }
+        "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "propertyId", "userId", "rating", "comment", "createdAt"]
-    },
-    "Trip": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Trip",
-      "description": "Represents a user's trip, combining booking and property information.",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "booking": { "$ref": "#/entities/Booking" },
-        "property": { "$ref": "#/entities/Property" }
-      },
-      "required": ["id", "booking", "property"]
     }
   },
   "auth": {
@@ -675,30 +638,6 @@
           "params": [
             { "name": "ticketId", "description": "The unique identifier for the ticket." }
           ]
-        }
-      },
-      {
-        "path": "/properties/{propertyId}/reviews/{reviewId}",
-        "definition": {
-            "entityName": "Review",
-            "schema": { "$ref": "#/entities/Review" },
-            "description": "Stores reviews for a property.",
-            "params": [
-                { "name": "propertyId", "description": "The ID of the property being reviewed." },
-                { "name": "reviewId", "description": "The unique identifier for the review." }
-            ]
-        }
-      },
-      {
-        "path": "/users/{userId}/trips/{tripId}",
-        "definition": {
-            "entityName": "Trip",
-            "schema": { "$ref": "#/entities/Trip" },
-            "description": "Stores aggregated trip information for a user.",
-            "params": [
-                { "name": "userId", "description": "The ID of the user." },
-                { "name": "tripId", "description": "The unique identifier for the trip, often the booking ID." }
-            ]
         }
       }
     ],

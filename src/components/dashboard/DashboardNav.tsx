@@ -1,11 +1,11 @@
 "use client"
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, PlusCircle, BookOpenCheck, Heart, FileText, UserCircle, Briefcase, CalendarCheck, Bell, Megaphone, LifeBuoy, Plane } from 'lucide-react';
+import { LayoutDashboard, Package, PlusCircle, BookOpenCheck, Heart, FileText, UserCircle, Briefcase, CalendarCheck, Bell, Megaphone, LifeBuoy } from 'lucide-react';
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 
 const userNavItems = [
-  { href: '/dashboard', label: 'My Trips', icon: Plane },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/bookings', label: 'My Bookings', icon: BookOpenCheck },
   { href: '/dashboard/visits', label: 'My Visits', icon: CalendarCheck },
   { href: '/dashboard/favorites', label: 'My Favorites', icon: Heart },

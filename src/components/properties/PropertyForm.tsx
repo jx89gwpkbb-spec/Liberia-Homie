@@ -16,18 +16,12 @@ import { useUser, useFirestore, addDocumentNonBlocking, setDocumentNonBlocking }
 import { collection, doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { Loader2, Upload, X, MapPin, DollarSign, Trash2, CalendarIcon } from "lucide-react";
+import { Loader2, Upload, X, MapPin } from "lucide-react";
 import { useState, useEffect } from "react";
-import type { Property, SeasonalRate } from "@/lib/types";
+import type { Property } from "@/lib/types";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { DateRange } from "react-day-picker";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 
 const propertySchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -75,10 +69,6 @@ export function PropertyForm({ property }: PropertyFormProps) {
     const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
     const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-    
-    const [seasonalRates, setSeasonalRates] = useState<SeasonalRate[]>([]);
-    const [isRateDialogOpen, setIsRateDialogOpen] = useState(false);
-    const [currentRate, setCurrentRate] = useState<{ name: string; date?: DateRange; price: string }>({ name: '', price: '' });
 
     const [gpsCoords, setGpsCoords] = useState<{ lat: number, lng: number } | null>(null);
     const [isFetchingLocation, setIsFetchingLocation] = useState(false);
@@ -106,7 +96,6 @@ export function PropertyForm({ property }: PropertyFormProps) {
             setExistingImageUrls(imageUrls);
             setPreviewUrls(imageUrls);
             if (property.gps) setGpsCoords(property.gps);
-            if (property.seasonalRates) setSeasonalRates(property.seasonalRates);
         }
     }, [property, isEditMode, reset]);
 
@@ -163,32 +152,6 @@ export function PropertyForm({ property }: PropertyFormProps) {
         );
     };
 
-    const handleSaveRate = () => {
-        if (!currentRate.name || !currentRate.date?.from || !currentRate.date?.to || !currentRate.price) {
-            toast({ title: "Missing Fields", description: "Please fill all fields for the seasonal rate.", variant: "destructive" });
-            return;
-        }
-        const price = parseFloat(currentRate.price);
-        if (isNaN(price)) {
-            toast({ title: "Invalid Price", description: "Please enter a valid number for the price.", variant: "destructive" });
-            return;
-        }
-
-        const newRate: SeasonalRate = {
-            name: currentRate.name,
-            startDate: format(currentRate.date.from, 'yyyy-MM-dd'),
-            endDate: format(currentRate.date.to, 'yyyy-MM-dd'),
-            pricePerNight: price,
-        };
-        setSeasonalRates(prev => [...prev, newRate]);
-        setCurrentRate({ name: '', price: '' });
-        setIsRateDialogOpen(false);
-    };
-    
-    const removeRate = (index: number) => {
-        setSeasonalRates(prev => prev.filter((_, i) => i !== index));
-    };
-
     const onSubmit = async (data: PropertyFormData) => {
         if (!user || !firestore) return;
         if (previewUrls.length === 0) {
@@ -221,7 +184,6 @@ export function PropertyForm({ property }: PropertyFormProps) {
                 reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
                 viewCount: property?.viewCount || Math.floor(Math.random() * 2000),
                 gps: gpsCoords, status: property?.status || 'pending',
-                seasonalRates: seasonalRates
             };
             const propertyRef = doc(firestore, 'properties', propertyId);
             if (isEditMode) {
@@ -262,7 +224,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                         {errors.location && <p className="text-destructive text-sm">{errors.location.message}</p>}
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="price">Default Price per Night ($)</Label>
+                        <Label htmlFor="price">Price per Night ($)</Label>
                         <Input id="price" type="text" {...register("price")} />
                         {errors.price && <p className="text-destructive text-sm">{errors.price.message}</p>}
                     </div>
@@ -330,61 +292,6 @@ export function PropertyForm({ property }: PropertyFormProps) {
                         <Input id="keyFeatures" {...register("keyFeatures")} placeholder="e.g., Private Pool, Ocean View, Gym"/>
                         {errors.keyFeatures && <p className="text-destructive text-sm">{errors.keyFeatures.message}</p>}
                     </div>
-
-                    <div className="md:col-span-3 space-y-4">
-                        <Label>Seasonal Pricing</Label>
-                        <div className="space-y-2">
-                            {seasonalRates.map((rate, index) => (
-                                <div key={index} className="flex items-center justify-between p-2 rounded-md border bg-muted/50">
-                                    <div className="flex items-center gap-4">
-                                        <div className="font-semibold">{rate.name}</div>
-                                        <div className="text-sm text-muted-foreground">{format(new Date(rate.startDate), 'MMM dd')} - {format(new Date(rate.endDate), 'MMM dd')}</div>
-                                        <div className="text-sm font-semibold">${rate.pricePerNight} / night</div>
-                                    </div>
-                                    <Button type="button" variant="ghost" size="icon" onClick={() => removeRate(index)}>
-                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                    </Button>
-                                </div>
-                            ))}
-                        </div>
-                        <Dialog open={isRateDialogOpen} onOpenChange={setIsRateDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button type="button" variant="outline"><DollarSign className="mr-2 h-4 w-4" /> Add Seasonal Rate</Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Add Seasonal Rate</DialogTitle>
-                                    <DialogDescription>Define a special price for a specific date range.</DialogDescription>
-                                </DialogHeader>
-                                <div className="grid gap-4 py-4">
-                                    <div className="space-y-2">
-                                        <Label>Rate Name</Label>
-                                        <Input value={currentRate.name} onChange={e => setCurrentRate(prev => ({ ...prev, name: e.target.value }))} placeholder="e.g. Holiday Season" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Date Range</Label>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !currentRate.date && "text-muted-foreground")}>
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {currentRate.date?.from ? (currentRate.date.to ? `${format(currentRate.date.from, "LLL dd")} - ${format(currentRate.date.to, "LLL dd")}` : format(currentRate.date.from, "LLL dd")) : <span>Pick a date range</span>}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0"><Calendar mode="range" selected={currentRate.date} onSelect={date => setCurrentRate(prev => ({ ...prev, date }))} /></PopoverContent>
-                                        </Popover>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Price per Night</Label>
-                                        <Input type="number" value={currentRate.price} onChange={e => setCurrentRate(prev => ({ ...prev, price: e.target.value }))} placeholder="e.g. 1200" />
-                                    </div>
-                                </div>
-                                <DialogFooter>
-                                    <Button onClick={handleSaveRate}>Save Rate</Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                    </div>
-
                     <div className="md:col-span-3 space-y-2">
                         <Label>Images (up to 5)</Label>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">

@@ -1,8 +1,6 @@
 import { reviews } from "@/lib/data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import type { DetailedRating } from "@/lib/types";
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -17,57 +15,28 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-const ratingCategories: { key: keyof DetailedRating, label: string }[] = [
-    { key: 'cleanliness', label: 'Cleanliness' },
-    { key: 'accuracy', label: 'Accuracy' },
-    { key: 'checkIn', label: 'Check-in' },
-    { key: 'communication', label: 'Communication' },
-    { key: 'location', label: 'Location' },
-    { key: 'value', label: 'Value' },
-];
-
 export function ReviewSection({ propertyId }: { propertyId: string }) {
   const propertyReviews = reviews.filter((r) => r.propertyId === propertyId);
 
   if (propertyReviews.length === 0) {
-    return null;
+    return (
+      <div className="py-8">
+        <h3 className="text-xl font-semibold mb-4">No reviews yet</h3>
+        <p className="text-muted-foreground">Be the first to review this property!</p>
+      </div>
+    );
   }
-  
-  const averageRatings = propertyReviews.reduce((acc, review) => {
-    if (review.detailedRatings) {
-        Object.entries(review.detailedRatings).forEach(([key, value]) => {
-            acc[key as keyof DetailedRating] = (acc[key as keyof DetailedRating] || 0) + value;
-        });
-    }
-    return acc;
-  }, {} as Partial<Record<keyof DetailedRating, number>>);
 
-  Object.keys(averageRatings).forEach(key => {
-      averageRatings[key as keyof DetailedRating]! /= propertyReviews.length;
-  });
-  
-  const overallAverage = Object.values(averageRatings).reduce((sum, val) => sum + val, 0) / Object.keys(averageRatings).length;
-
+  const averageRating =
+    propertyReviews.reduce((acc, r) => acc + r.rating, 0) /
+    propertyReviews.length;
 
   return (
     <div className="py-8">
       <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
         <Star className="h-5 w-5 text-primary fill-current" />
-        {overallAverage.toFixed(1)} · {propertyReviews.length} reviews
+        {averageRating.toFixed(1)} · {propertyReviews.length} reviews
       </h3>
-      
-      <div className="grid grid-cols-2 gap-x-8 gap-y-4 my-8">
-        {ratingCategories.map(({ key, label }) => (
-            <div key={key} className="space-y-2">
-                <div className="flex justify-between items-center text-sm">
-                    <p>{label}</p>
-                    <p>{averageRatings[key]?.toFixed(1) || 'N/A'}</p>
-                </div>
-                <Progress value={(averageRatings[key] || 0) * 20} className="h-1.5" />
-            </div>
-        ))}
-      </div>
-
       <div className="space-y-8">
         {propertyReviews.map((review) => (
           <div key={review.id} className="flex flex-col sm:flex-row gap-4">
@@ -78,11 +47,9 @@ export function ReviewSection({ propertyId }: { propertyId: string }) {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <p className="font-semibold">{review.user.name}</p>
+                <p className="text-xs text-muted-foreground">{new Date(review.createdAt).toLocaleDateString()}</p>
               </div>
-               <div className="flex items-center gap-2 mt-1">
-                 <StarRating rating={review.rating} />
-                 <p className="text-xs text-muted-foreground ml-2">{new Date(review.createdAt).toLocaleDateString()}</p>
-               </div>
+              <StarRating rating={review.rating} />
               <p className="mt-2 text-muted-foreground text-sm">{review.comment}</p>
             </div>
           </div>

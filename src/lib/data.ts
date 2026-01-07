@@ -10,7 +10,6 @@ export const users: User[] = [
   { id: 'user-2', name: 'Bob Williams', email: 'bob.w@example.com', avatar: findImage('user-2') },
   { id: 'user-3', name: 'Charlie Brown', email: 'charlie.b@example.com', avatar: findImage('user-3') },
   { id: 'user-4', name: 'Diana Miller', email: 'diana.m@example.com', avatar: findImage('user-4') },
-  { id: 'user-5', name: 'Samuel Nimely', email: 'samuelknimelyjr@gmail.com', avatar: findImage('user-2') },
 ];
 
 export const properties: Property[] = [
@@ -142,14 +141,6 @@ export const reviews: Review[] = [
         propertyId: 'prop-1',
         user: users[1],
         rating: 5,
-        detailedRatings: {
-            cleanliness: 5,
-            communication: 5,
-            checkIn: 5,
-            accuracy: 5,
-            location: 5,
-            value: 5,
-        },
         comment: "Absolutely stunning villa! The views were even better than the pictures. Everything was clean and the host was very responsive. Highly recommend!",
         createdAt: "2023-10-20T14:48:00.000Z",
     },
@@ -158,14 +149,6 @@ export const reviews: Review[] = [
         propertyId: 'prop-1',
         user: users[2],
         rating: 4,
-        detailedRatings: {
-            cleanliness: 4,
-            communication: 5,
-            checkIn: 5,
-            accuracy: 4,
-            location: 5,
-            value: 4,
-        },
         comment: "Great location and beautiful house. We had a minor issue with the pool heater but the owner fixed it quickly. Overall, a fantastic stay.",
         createdAt: "2023-09-15T10:30:00.000Z",
     },
@@ -174,14 +157,6 @@ export const reviews: Review[] = [
         propertyId: 'prop-2',
         user: users[3],
         rating: 5,
-        detailedRatings: {
-            cleanliness: 5,
-            communication: 5,
-            checkIn: 5,
-            accuracy: 5,
-            location: 5,
-            value: 5,
-        },
         comment: "The apartment was perfect for our city trip. It's small but has everything you need and the location is unbeatable. We would definitely stay here again.",
         createdAt: "2023-11-05T18:00:00.000Z",
     }
@@ -190,7 +165,7 @@ export const reviews: Review[] = [
 export const bookings: Booking[] = [
     {
         id: 'book-1',
-        userId: users[3].id,
+        userId: 'user-4',
         propertyId: 'prop-1',
         checkInDate: new Date('2024-08-01'),
         checkOutDate: new Date('2024-08-10'),
@@ -203,7 +178,7 @@ export const bookings: Booking[] = [
     },
     {
         id: 'book-2',
-        userId: users[3].id,
+        userId: 'user-4',
         propertyId: 'prop-3',
         checkInDate: new Date('2024-09-15'),
         checkOutDate: new Date('2024-09-20'),
@@ -234,5 +209,6 @@ export const amenities: string[] = [
     'City View',
     'Ocean View',
 ];
+
 
 

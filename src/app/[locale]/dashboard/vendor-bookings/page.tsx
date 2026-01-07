@@ -27,12 +27,7 @@ export default function VendorBookingsPage() {
 
   useEffect(() => {
     const fetchBookings = async () => {
-      if (arePropertiesLoading || !firestore) {
-        return;
-      }
-      
-      // This is the critical fix: we must wait until vendorProperties is loaded and not null.
-      if (!vendorProperties) {
+      if (!vendorProperties || arePropertiesLoading || !firestore) {
         setIsLoading(false);
         return;
       }
