@@ -1,5 +1,11 @@
 
 
+export type Extra = {
+    name: string;
+    price: number;
+    type: 'per_stay' | 'per_person' | 'per_night';
+}
+
 export type Property = {
   id: string;
   name: string;
@@ -13,6 +19,7 @@ export type Property = {
   bathrooms: number;
   maxGuests: number;
   amenities: string[];
+  extras?: Extra[];
   rating: number;
   reviewCount: number;
   viewCount?: number;
@@ -88,6 +95,7 @@ export type Booking = {
   propertyName: string;
   propertyImage: string;
   propertyLocation: string;
+  extras?: Extra[];
   user?: {
     name: string;
     avatar: string;
@@ -169,4 +177,5 @@ export type SupportTicket = {
     
 
     
+
 

@@ -26,6 +26,10 @@ export const properties: Property[] = [
     bathrooms: 4,
     maxGuests: 8,
     amenities: ['Private Pool', 'WiFi', 'Kitchen', 'Air Conditioning', 'Free Parking', 'Ocean View', 'Gym', 'Hot Tub'],
+    extras: [
+        { name: 'Airport Pickup', price: 75, type: 'per_stay' },
+        { name: 'Private Chef', price: 300, type: 'per_night' },
+    ],
     rating: 4.9,
     reviewCount: 78,
     viewCount: 1250,
@@ -47,6 +51,10 @@ export const properties: Property[] = [
     bathrooms: 1,
     maxGuests: 2,
     amenities: ['WiFi', 'Kitchen', 'Air Conditioning', 'Elevator'],
+    extras: [
+        { name: 'Daily Breakfast', price: 20, type: 'per_person' },
+        { name: 'Cleaning Fee', price: 50, type: 'per_stay'},
+    ],
     rating: 4.7,
     reviewCount: 124,
     viewCount: 2345,
@@ -111,6 +119,9 @@ export const properties: Property[] = [
     bathrooms: 1,
     maxGuests: 2,
     amenities: ['Beach Access', 'WiFi', 'Kitchen', 'Air Conditioning', 'Patio'],
+    extras: [
+        { name: 'Romantic Package', price: 150, type: 'per_stay' }
+    ],
     rating: 4.9,
     reviewCount: 91,
     viewCount: 1890,
@@ -211,7 +222,7 @@ export const bookings: Booking[] = [
         guests: 2,
         createdAt: new Date(),
         propertyName: 'Spacious Suburban Family Home',
-        propertyImage: 'https://images.unsplash.com/photo-1625603736199-775425d2890a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdWJ1cmJhbiUyMGhvdXNlfGVufDB8fHx8MTc2NzY2Nzg1Mnww&ixlib-rb-4.1.0&q=80&w=1080',
+        propertyImage: 'https://images.unsplash.com/photo-1625603736199-775425d2890a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdWJ1cmJhbiUyMGhvdXNlfGVufDB8fHx8MTc2NzY2Nzg1Mnww&ixlib=rb-4.1.0&q=80&w=1080',
         propertyLocation: 'Ganta, Liberia',
     }
 ];
