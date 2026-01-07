@@ -69,6 +69,10 @@ export type Booking = {
   propertyName: string;
   propertyImage: string;
   propertyLocation: string;
+  user?: {
+    name: string;
+    avatar: string;
+  }
 };
 
 export type Favorite = {
