@@ -117,8 +117,8 @@ export default function SignupPage() {
     setDocumentNonBlocking(userProfileRef, userProfileData, { merge: true });
 
     toast({
-      title: 'Account Created',
-      description: "You've successfully signed up! Please check your email to verify your account before logging in.",
+      title: 'Account Created!',
+      description: "You've successfully signed up. Please check your email to verify your account before logging in.",
     });
     router.push('/verify-email');
     setIsLoading(false);
