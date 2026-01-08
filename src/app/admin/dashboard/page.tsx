@@ -58,6 +58,7 @@ export default function AdminDashboardPage() {
     if (!users) return [];
     const dailyUsers: {[key: string]: number} = {};
      users.slice(-7).forEach(user => {
+        // Ensure createdAt exists and has the toDate method before calling it
         if (user.createdAt && typeof user.createdAt.toDate === 'function') {
             const date = format(user.createdAt.toDate(), 'yyyy-MM-dd');
             dailyUsers[date] = (dailyUsers[date] || 0) + 1;
