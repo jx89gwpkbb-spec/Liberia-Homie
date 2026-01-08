@@ -462,7 +462,7 @@
         "definition": {
           "entityName": "Property",
           "schema": {
-            "$ref": "#/backend/entities/Property"
+            "$ref": "#/entities/Property"
           },
           "description": "Stores property listings. Can be written by property owners and read by anyone. Admins have full access.",
           "params": [
@@ -478,7 +478,7 @@
         "definition": {
           "entityName": "AdminProfile",
           "schema": {
-            "$ref": "#/backend/entities/AdminProfile"
+            "$ref": "#/entities/AdminProfile"
           },
           "description": "Stores admin profile information. The `adminId` path parameter must match the authenticated user's UID. This path enables simple, secure read/write access controlled by the user's authentication status.",
           "params": [
@@ -512,7 +512,7 @@
         "definition": {
           "entityName": "admin_role",
           "schema": {
-            "$ref": "#/backend/entities/AdminProfile"
+            "$ref": "#/entities/AdminProfile"
           },
           "description": "Indicates that a user is an admin.  This enables global admin role checks in security rules using `exists()` without reading profile data.",
           "params": [
@@ -528,7 +528,7 @@
         "definition": {
           "entityName": "UserProfile",
           "schema": {
-            "$ref": "#/backend/entities/UserProfile"
+            "$ref": "#/entities/UserProfile"
           },
           "description": "Stores public user profile information. The `userId` must match the authenticated user's UID for writes, but can be read by admins.",
           "params": [
@@ -544,7 +544,7 @@
         "definition": {
           "entityName": "Booking",
           "schema": {
-            "$ref": "#/backend/entities/Booking"
+            "$ref": "#/entities/Booking"
           },
           "description": "Stores booking information. Users can create bookings and read their own. Admins can read all bookings.",
           "params": [
@@ -560,7 +560,7 @@
         "definition": {
           "entityName": "Favorite",
           "schema": {
-            "$ref": "#/backend/entities/Favorite"
+            "$ref": "#/entities/Favorite"
           },
           "description": "Stores a user's favorited properties. Users can only read and write to their own favorites.",
           "params": [
@@ -580,7 +580,7 @@
         "definition": {
           "entityName": "Document",
           "schema": {
-            "$ref": "#/backend/entities/Document"
+            "$ref": "#/entities/Document"
           },
           "description": "Stores documents uploaded by a user. Users can only manage their own documents.",
           "params": [
@@ -600,7 +600,7 @@
         "definition": {
           "entityName": "SavedSearch",
           "schema": {
-            "$ref": "#/backend/entities/SavedSearch"
+            "$ref": "#/entities/SavedSearch"
           },
           "description": "Stores a user's saved search filters. Users can only read and write to their own saved searches.",
           "params": [
@@ -620,7 +620,7 @@
         "definition": {
           "entityName": "Visit",
           "schema": {
-            "$ref": "#/backend/entities/Visit"
+            "$ref": "#/entities/Visit"
           },
           "description": "Stores visit requests. Users can create and read their own. Property owners can read requests for their properties. Admins have full access.",
           "params": [
@@ -636,7 +636,7 @@
         "definition": {
           "entityName": "Setting",
           "schema": {
-            "$ref": "#/backend/entities/Setting"
+            "$ref": "#/entities/Setting"
           },
           "description": "Stores global application settings. Only admins can read and write.",
           "params": []
@@ -647,7 +647,7 @@
         "definition": {
           "entityName": "Announcement",
           "schema": {
-            "$ref": "#/backend/entities/Announcement"
+            "$ref": "#/entities/Announcement"
           },
           "description": "Stores system-wide announcements. Only admins can read and write.",
           "params": [
@@ -662,7 +662,7 @@
         "path": "/tickets/{ticketId}",
         "definition": {
           "entityName": "SupportTicket",
-          "schema": { "$ref": "#/backend/entities/SupportTicket" },
+          "schema": { "$ref": "#/entities/SupportTicket" },
           "description": "Stores user-submitted support tickets. Users can create, and admins can read/write.",
           "params": [
             { "name": "ticketId", "description": "The unique identifier for the ticket." }
