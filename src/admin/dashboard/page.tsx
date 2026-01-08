@@ -34,7 +34,7 @@ export default function AdminDashboardPage() {
 
   const usersCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
   const propertiesCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'properties') : null, [firestore]);
-  const bookingsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'bookings') : null, [firestore]);
+  const bookingsCollectionRef = useMemoFirebase(() => firestore ? query(collection(firestore, 'bookings'), orderBy('createdAt', 'desc'), limit(50)) : null, [firestore]);
   
   const recentUsersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users'), orderBy('createdAt', 'desc'), limit(5)) : null, [firestore]);
   const recentPropertiesQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'properties'), where('status', '==', 'approved'), orderBy('reviewCount', 'desc'), limit(3)) : null, [firestore]);
@@ -58,7 +58,7 @@ export default function AdminDashboardPage() {
     if (!users) return [];
     const dailyUsers: {[key: string]: number} = {};
      users.slice(-7).forEach(user => {
-        if (user.createdAt?.toDate) {
+        if (user.createdAt && typeof user.createdAt.toDate === 'function') {
             const date = format(user.createdAt.toDate(), 'yyyy-MM-dd');
             dailyUsers[date] = (dailyUsers[date] || 0) + 1;
         }
