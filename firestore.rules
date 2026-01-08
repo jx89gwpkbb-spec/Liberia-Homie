@@ -115,7 +115,7 @@ service cloud.firestore {
        * @path /users/{userId}/documents/{documentId}
        */
       match /documents/{documentId} {
-        allow read, write: if isVerified() && isOwner(userId);
+        allow read, write, delete: if isVerified() && isOwner(userId);
       }
       
       /**
