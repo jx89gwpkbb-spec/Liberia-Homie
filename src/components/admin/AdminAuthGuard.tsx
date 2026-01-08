@@ -3,15 +3,17 @@
 import { useUser, useFirestore } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { Loader2, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
     const { user, isUserLoading } = useUser();
     const firestore = useFirestore();
     const router = useRouter();
-    const [authStatus, setAuthStatus] = useState<'loading' | 'admin' | 'denied'>('loading');
+    const { toast } = useToast();
+    const [authStatus, setAuthStatus] = useState<'loading' | 'admin' | 'denied' | 'initializing'>('loading');
 
     useEffect(() => {
         const checkAdminStatus = async () => {
@@ -22,34 +24,72 @@ export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
                 return;
             }
 
-            // Super admin email check is the primary gate.
+            // Super admin email is the primary gate.
             if (user.email === 'samuelknimelyjr@gmail.com') {
-                setAuthStatus('admin');
+                const roleRef = doc(firestore, 'roles_admin', user.uid);
+                const adminProfileRef = doc(firestore, 'admin_profiles', user.uid);
+
+                const [roleSnap, profileSnap] = await Promise.all([getDoc(roleRef), getDoc(adminProfileRef)]);
+
+                if (roleSnap.exists() && profileSnap.exists()) {
+                    setAuthStatus('admin');
+                } else {
+                    // Profile or role doesn't exist, so create it.
+                    setAuthStatus('initializing');
+                    try {
+                        toast({
+                            title: "Setting Up Admin Profile",
+                            description: "Please wait while we initialize your admin account.",
+                        });
+
+                        const batch = writeBatch(firestore);
+                        const adminProfileData = {
+                            id: user.uid,
+                            firstName: user.displayName?.split(' ')[0] || 'Samuel',
+                            lastName: user.displayName?.split(' ')[1] || 'Nimely',
+                            email: user.email,
+                            phoneNumber: user.phoneNumber || 'N/A',
+                            creationDate: serverTimestamp(),
+                            lastLogin: serverTimestamp(),
+                            role: 'superadmin',
+                            permissions: ['manage_properties', 'manage_users', 'view_analytics', 'full_system_management'],
+                        };
+                        
+                        batch.set(adminProfileRef, adminProfileData, { merge: true });
+                        batch.set(roleRef, { admin: true });
+
+                        await batch.commit();
+
+                        toast({ title: "Admin Profile Created", description: "Your admin account is ready."});
+                        setAuthStatus('admin');
+
+                    } catch (error) {
+                        console.error('Error creating admin profile:', error);
+                        toast({ title: "Profile Creation Failed", description: "Could not initialize your admin account.", variant: "destructive" });
+                        setAuthStatus('denied');
+                    }
+                }
                 return;
             }
             
             // For other potential admins, check the role document.
-            try {
-                const roleRef = doc(firestore, 'roles_admin', user.uid);
-                const docSnap = await getDoc(roleRef);
-                if (docSnap.exists()) {
-                    setAuthStatus('admin');
-                } else {
-                    setAuthStatus('denied');
-                }
-            } catch (error) {
-                console.error("Error checking admin role:", error);
+            const otherRoleRef = doc(firestore, 'roles_admin', user.uid);
+            const otherDocSnap = await getDoc(otherRoleRef);
+            if (otherDocSnap.exists()) {
+                setAuthStatus('admin');
+            } else {
                 setAuthStatus('denied');
             }
         };
 
         checkAdminStatus();
-    }, [user, isUserLoading, firestore, router]);
+    }, [user, isUserLoading, firestore, router, toast]);
 
-    if (authStatus === 'loading' || isUserLoading) {
+    if (authStatus === 'loading' || authStatus === 'initializing' || isUserLoading) {
         return (
             <div className="flex h-screen items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                {authStatus === 'initializing' && <p className="ml-4">Initializing admin account...</p>}
             </div>
         );
     }

@@ -14,8 +14,6 @@ export default function AdminProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
-  const { toast } = useToast();
-  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
 
   const adminProfileRef = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -24,62 +22,7 @@ export default function AdminProfilePage() {
 
   const { data: adminProfile, isLoading: isProfileLoading } = useDoc(adminProfileRef);
 
-  useEffect(() => {
-    const createProfileIfNeeded = async () => {
-      if (isUserLoading || isProfileLoading || !user || !firestore || adminProfile) {
-        return;
-      }
-      
-      if (user.email !== 'samuelknimelyjr@gmail.com') {
-        return;
-      }
-
-      setIsCreatingProfile(true);
-      toast({
-        title: "Setting Up Admin Profile",
-        description: "Please wait while we initialize your admin account.",
-      });
-
-      try {
-        const batch = writeBatch(firestore);
-
-        const adminProfileRef = doc(firestore, 'admin_profiles', user.uid);
-        const roleRef = doc(firestore, 'roles_admin', user.uid);
-
-        const adminProfileData = {
-          id: user.uid,
-          firstName: user.displayName?.split(' ')[0] || 'Samuel',
-          lastName: user.displayName?.split(' ')[1] || 'Nimely',
-          email: user.email || 'samuelknimelyjr@gmail.com',
-          phoneNumber: user.phoneNumber || 'N/A',
-          creationDate: serverTimestamp(),
-          lastLogin: serverTimestamp(),
-          role: 'superadmin',
-          permissions: ['manage_properties', 'manage_users', 'view_analytics', 'full_system_management'],
-        };
-        
-        batch.set(adminProfileRef, adminProfileData, { merge: true });
-        batch.set(roleRef, { admin: true });
-
-        await batch.commit();
-
-        toast({ title: "Admin Profile Created", description: "Your admin account is ready. Refreshing..."});
-        // The useDoc hook will update, triggering a re-render. A reload can ensure everything is synced.
-        router.refresh();
-
-      } catch (error) {
-        console.error('Error creating admin profile:', error);
-         toast({ title: "Profile Creation Failed", description: "Could not initialize your admin account.", variant: "destructive" });
-      } finally {
-         setIsCreatingProfile(false);
-      }
-    };
-    
-    createProfileIfNeeded();
-
-  }, [adminProfile, isProfileLoading, user, isUserLoading, firestore, toast, router]);
-  
-  const isLoading = isUserLoading || isProfileLoading || isCreatingProfile;
+  const isLoading = isUserLoading || isProfileLoading;
   
   if (isLoading) {
     return (
@@ -117,19 +60,19 @@ export default function AdminProfilePage() {
   }
 
   if (!adminProfile) {
-    // This state should now be very brief as the profile is created automatically.
     return (
       <div className="p-6 text-center flex flex-col items-center justify-center min-h-[300px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-        <h1 className="text-2xl font-bold">Setting Up Your Admin Profile...</h1>
+        <h1 className="text-2xl font-bold">Admin Profile Not Found</h1>
         <p className="text-muted-foreground">
-          Please wait a moment.
+          Your admin profile could not be loaded. This might be a permission issue.
         </p>
       </div>
     );
   }
   
   const getInitials = (name: string) => {
+    if (!name) return 'A';
     return name.split(' ').map((n) => n[0]).join('');
   }
 
@@ -139,7 +82,7 @@ export default function AdminProfilePage() {
         <CardHeader className="flex flex-row items-center gap-4">
           <Avatar className="h-20 w-20">
             <AvatarImage src={`https://picsum.photos/seed/${user?.uid}/80/80`} />
-            <AvatarFallback>{getInitials(adminProfile.firstName || adminProfile.email || 'A')}</AvatarFallback>
+            <AvatarFallback>{getInitials(adminProfile.firstName || adminProfile.email || '')}</AvatarFallback>
           </Avatar>
           <div>
             <CardTitle className="text-3xl">{adminProfile.firstName} {adminProfile.lastName}</CardTitle>
