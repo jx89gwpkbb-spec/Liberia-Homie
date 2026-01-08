@@ -155,7 +155,7 @@ service cloud.firestore {
       allow create: if isVerified() && isOwner(request.resource.data.userId);
       allow read: if isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId)) || isAdmin();
       // Admins can list bookings (e.g., for dashboards) but queries must be limited.
-      allow list: if isAdmin();
+      allow list: if isAdmin() && request.query.limit <= 50;
       allow update: if (isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId))) || isAdmin();
       allow delete: if isAdmin() || (isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId)));
     }
