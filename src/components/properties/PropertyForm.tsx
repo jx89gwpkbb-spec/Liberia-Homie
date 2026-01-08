@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { DescriptionGenerator } from "./DescriptionGenerator";
-import { useUser, useFirestore } from "@/firebase";
+import { useUser, useFirestore, setDocumentNonBlocking } from "@/firebase";
 import { collection, doc, setDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
@@ -198,22 +198,34 @@ export function PropertyForm({ property }: PropertyFormProps) {
     
                 const propertyRef = doc(firestore, 'properties', propertyId);
                 
-                await setDoc(propertyRef, propertyData, { merge: isEditMode });
-                
-                toast({ 
-                    title: isEditMode ? "Property Updated!" : "Property Submitted!",
-                    description: `${data.name} has been ${isEditMode ? 'updated' : 'submitted for review'}.` 
-                });
-                router.push('/dashboard/properties');
+                // Use setDoc with proper error handling
+                setDoc(propertyRef, propertyData, { merge: isEditMode })
+                    .then(() => {
+                        toast({ 
+                            title: isEditMode ? "Property Updated!" : "Property Submitted!",
+                            description: `${data.name} has been ${isEditMode ? 'updated' : 'submitted for review'}.` 
+                        });
+                        router.push('/dashboard/properties');
+                    })
+                    .catch((error: any) => {
+                        console.error("Firestore operation failed", error);
+                        toast({ 
+                            title: "Submission Failed", 
+                            description: error.message || "Could not save the property. Check security rules and console.", 
+                            variant: "destructive" 
+                        });
+                    })
+                    .finally(() => {
+                        setIsSaving(false);
+                    });
 
-            } catch (error: any) {
-                console.error("Firestore operation failed", error);
+            } catch (error: any) { // This outer catch is for synchronous errors before setDoc
+                console.error("Form submission failed before Firestore operation", error);
                 toast({ 
                     title: "Submission Failed", 
-                    description: error.message || "Could not save the property. Please check your connection and security rules.", 
+                    description: error.message || "An unexpected error occurred.", 
                     variant: "destructive" 
                 });
-            } finally {
                 setIsSaving(false);
             }
         };
