@@ -21,7 +21,7 @@
     {
       "id": "prop2-1",
       "description": "Cozy apartment in the city",
-      "imageUrl": "https://images.unsplash.com/photo-1751469020033-7ee3844f2170?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjaXR5JTIwYXBhcnRtZW50fGVufDB8fHx8MTc2NzY2NjgxM3ww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1751469020033-7ee3844f2170?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjaXR5JTIwYXBhcnRtZW50fGVufDB8fHx8MTc2NzY2NjgxM3ww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "city apartment"
     },
     {
@@ -39,7 +39,7 @@
     {
       "id": "prop3-2",
       "description": "Kitchen of a suburban house",
-      "imageUrl": "https://images.unsplash.com/photo-1592839656073-833413ae8874?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8aG91c2UlMjBraXRjaGVufGVufDB8fHx8MTc2NzcxMjQ4Mnww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1592839656073-833413ae8874?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8aG91c2UlMjBraXRjaGVufGVufDB8fHx8MTc2NzcxMjQ4Mnww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "house kitchen"
     },
     {
@@ -57,7 +57,7 @@
     {
       "id": "prop5-1",
       "description": "Beachfront bungalow",
-      "imageUrl": "https://images.unsplash.com/photo-1565065590167-59f260459e86?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxiZWFjaCUyMGJ1bmdhbG93fGVufDB8fHx8MTc2NzY4MjA1MHww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1565065590167-59f260459e86?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxiZWFjaCUyMGJ1bmdhbG93fGVufDB8fHx8MTc2NzY4MjA1MHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "beach bungalow"
     },
     {
@@ -117,7 +117,7 @@
     {
       "id": "founder-samuel",
       "description": "A portrait of Samuel Nimely, founder of Homie Liberia",
-      "imageUrl": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxwb3J0cmFpdCUyMG9mJTIwYSUyMGJsYWNrJTIwbWFufGVufDB8fHx8MTc2ODc1ODg5N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://storage.googleapis.com/stabl-media/668fab534162ae51e427a199/6696d5a1b5d15c7e0c8b671a.png",
       "imageHint": "person portrait"
     }
   ]
