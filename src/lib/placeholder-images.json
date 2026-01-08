@@ -79,6 +79,174 @@
       "imageHint": "cottage garden"
     },
     {
+      "id": "prop7-1",
+      "description": "City center studio",
+      "imageUrl": "https://images.unsplash.com/photo-1673384131443-0e2c3cb3f934?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjaXR5JTIwc3R1ZGlvfGVufDB8fHx8MTc2NzkwODE1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city studio"
+    },
+    {
+      "id": "prop7-2",
+      "description": "Kitchenette in city studio",
+      "imageUrl": "https://images.unsplash.com/photo-1702014859908-d48b9b844240?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzdHVkaW8lMjBraXRjaGVufGVufDB8fHx8MTc2Nzg4MTgwMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "studio kitchen"
+    },
+    {
+      "id": "prop8-1",
+      "description": "Riverside cabin",
+      "imageUrl": "https://images.unsplash.com/photo-1636381039554-c29e14707498?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyaXZlciUyMGNhYmlufGVufDB8fHx8MTc2NzkwODE1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "river cabin"
+    },
+    {
+      "id": "prop8-2",
+      "description": "View from riverside cabin",
+      "imageUrl": "https://images.unsplash.com/photo-1564487197140-e0b56856fdaf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxyaXZlciUyMHZpZXd8ZW58MHx8fHwxNzY3ODY3ODk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "river view"
+    },
+    {
+      "id": "prop9-1",
+      "description": "Garden flat exterior",
+      "imageUrl": "https://images.unsplash.com/photo-1757207001406-d37796d85e5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxnYXJkZW4lMjBhcGFydG1lbnR8ZW58MHx8fHwxNzY3OTA4MTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "garden apartment"
+    },
+    {
+      "id": "prop9-2",
+      "description": "Private garden of flat",
+      "imageUrl": "https://images.unsplash.com/photo-1754191608593-c0aecf8a4f26?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxwcml2YXRlJTIwZ2FyZGVufGVufDB8fHx8MTc2NzkwODE1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "private garden"
+    },
+    {
+      "id": "prop10-1",
+      "description": "Forest lodge exterior",
+      "imageUrl": "https://images.unsplash.com/photo-1689465331799-e7db20438ea1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxmb3Jlc3QlMjBsb2RnZXxlbnwwfHx8fDE3Njc5MDgxNTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "forest lodge"
+    },
+    {
+      "id": "prop10-2",
+      "description": "Living area of forest lodge",
+      "imageUrl": "https://images.unsplash.com/photo-1755200353224-80b7d8e535a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxsb2RnZSUyMGludGVyaW9yfGVufDB8fHx8MTc2NzkwODE1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "lodge interior"
+    },
+    {
+      "id": "prop11-1",
+      "description": "Modern townhouse exterior",
+      "imageUrl": "https://images.unsplash.com/photo-1560184897-67f4a3f9a7fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxtb2Rlcm4lMjB0b3duaG91c2V8ZW58MHx8fHwxNzY3OTA4MTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern townhouse"
+    },
+    {
+      "id": "prop11-2",
+      "description": "Interior of modern townhouse",
+      "imageUrl": "https://images.unsplash.com/photo-1667828369408-f4fd17408c9f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx0b3duaG91c2UlMjBpbnRlcmlvcnxlbnwwfHx8fDE3Njc5MDgxNTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "townhouse interior"
+    },
+    {
+      "id": "prop12-1",
+      "description": "Plantation villa with pool",
+      "imageUrl": "https://images.unsplash.com/photo-1613977257365-aaae5a9817ff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx2aWxsYSUyMHBvb2x8ZW58MHx8fHwxNzY3OTA4MTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "villa pool"
+    },
+    {
+      "id": "prop12-2",
+      "description": "Grand entrance of plantation villa",
+      "imageUrl": "https://images.unsplash.com/photo-1657139218027-ecb26cb32f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx2aWxsYSUyMGVudHJhbmNlfGVufDB8fHx8MTc2NzkwODE1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "villa entrance"
+    },
+    {
+      "id": "prop13-1",
+      "description": "Surf shack on the beach",
+      "imageUrl": "https://images.unsplash.com/photo-1629738857741-1cf94bfe28b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdXJmJTIwc2hhY2t8ZW58MHx8fHwxNzY3OTA4MTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "surf shack"
+    },
+    {
+      "id": "prop13-2",
+      "description": "View of the waves from the shack",
+      "imageUrl": "https://images.unsplash.com/photo-1514747975201-4715db583da9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxvY2VhbiUyMHdhdmVzfGVufDB8fHx8MTc2Nzg0NDgzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ocean waves"
+    },
+    {
+      "id": "prop14-1",
+      "description": "Mountain cabin exterior",
+      "imageUrl": "https://images.unsplash.com/photo-1551648746-d158bcd704e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtb3VudGFpbiUyMGNhYmlufGVufDB8fHx8MTc2Nzg4OTE3Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mountain cabin"
+    },
+    {
+      "id": "prop14-2",
+      "description": "View from mountain cabin",
+      "imageUrl": "https://images.unsplash.com/photo-1516366353199-ed694fec414f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxtb3VudGFpbiUyMHZpZXd8ZW58MHx8fHwxNzY3ODY2Mzg3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "mountain view"
+    },
+    {
+      "id": "prop15-1",
+      "description": "Family bungalow exterior",
+      "imageUrl": "https://images.unsplash.com/photo-1597317319454-a8c1a9bbf3c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxmYW1pbHklMjBidW5nYWxvd3xlbnwwfHx8fDE3Njc5MDgxNTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "family bungalow"
+    },
+    {
+      "id": "prop15-2",
+      "description": "Living room of family bungalow",
+      "imageUrl": "https://images.unsplash.com/photo-1765555509849-f07b3e6cc217?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxidW5nYWxvdyUyMGxpdmluZ3xlbnwwfHx8fDE3Njc4MTg2MDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bungalow living"
+    },
+    {
+      "id": "prop16-1",
+      "description": "Seaside apartment building",
+      "imageUrl": "https://images.unsplash.com/photo-1748534265170-aefcfb135a15?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzZWFzaWRlJTIwYXBhcnRtZW50fGVufDB8fHx8MTc2NzkwODE1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "seaside apartment"
+    },
+    {
+      "id": "prop16-2",
+      "description": "Balcony view from seaside apartment",
+      "imageUrl": "https://images.unsplash.com/photo-1482912308370-955c8b0c3b27?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxvY2VhbiUyMGJhbGNvbnl8ZW58MHx8fHwxNzY3OTA4MTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ocean balcony"
+    },
+    {
+      "id": "prop17-1",
+      "description": "Country home exterior",
+      "imageUrl": "https://images.unsplash.com/photo-1568486993567-d8cd75df22ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y291bnRyeSUyMGhvbWV8ZW58MHx8fHwxNzY3OTA4MTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "country home"
+    },
+    {
+      "id": "prop17-2",
+      "description": "Large garden of country home",
+      "imageUrl": "https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxob21lJTIwZ2FyZGVufGVufDB8fHx8MTc2NzkwODE1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "home garden"
+    },
+    {
+      "id": "prop18-1",
+      "description": "Riverfront condo building",
+      "imageUrl": "https://images.unsplash.com/photo-1740484408594-3053c5b23762?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxyaXZlcmZyb250JTIwY29uZG98ZW58MHx8fHwxNzY3OTA4MTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "riverfront condo"
+    },
+    {
+      "id": "prop18-2",
+      "description": "View of the river from the condo",
+      "imageUrl": "https://images.unsplash.com/photo-1532193699930-edd8d3fa5b6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxyaXZlciUyMHZpZXd8ZW58MHx8fHwxNzY3ODY3ODk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "river view"
+    },
+    {
+      "id": "prop19-1",
+      "description": "Hotel suite interior",
+      "imageUrl": "https://images.unsplash.com/photo-1563418536437-ab3af605e51f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxob3RlbCUyMHN1aXRlfGVufDB8fHx8MTc2Nzg3NTAwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "hotel suite"
+    },
+    {
+      "id": "prop19-2",
+      "description": "Lobby of the airport hotel",
+      "imageUrl": "https://images.unsplash.com/photo-1587702068694-a909ef4aa346?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxob3RlbCUyMGxvYmJ5fGVufDB8fHx8MTc2NzgwMTEwM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "hotel lobby"
+    },
+    {
+      "id": "prop20-1",
+      "description": "Stylish city loft",
+      "imageUrl": "https://images.unsplash.com/photo-1515554470305-6b7d7692a821?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjaXR5JTIwbG9mdHxlbnwwfHx8fDE3Njc4MjAwMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city loft"
+    },
+    {
+      "id": "prop20-2",
+      "description": "Interior of a city loft",
+      "imageUrl": "https://images.unsplash.com/photo-1619989753008-0191bbaf23a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxsb2Z0JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzY3OTA4MTU4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "loft interior"
+    },
+    {
       "id": "user-1",
       "description": "User avatar 1",
       "imageUrl": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njc2MzU5OTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
