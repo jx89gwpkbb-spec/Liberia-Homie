@@ -4,15 +4,19 @@ import { getMessages } from 'next-intl/server';
 import { Toaster } from '@/components/ui/toaster';
 import { NotificationManager } from '@/components/notifications/NotificationManager';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Homie Liberia',
   description: 'Find your next home, for a short or long stay in Liberia.',
   manifest: '/manifest.json',
+};
+
+export const viewport: Viewport = {
   themeColor: '#5D28D2',
 };
+
 
 export default async function RootLayout({
   children,
