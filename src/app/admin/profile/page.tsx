@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,12 +26,10 @@ export default function AdminProfilePage() {
 
   useEffect(() => {
     const createProfileIfNeeded = async () => {
-      // Wait for user and Firestore to be available, and only proceed if there is no profile.
       if (isUserLoading || isProfileLoading || !user || !firestore || adminProfile) {
         return;
       }
       
-      // Secondary check: only the superadmin email can auto-create a profile.
       if (user.email !== 'samuelknimelyjr@gmail.com') {
         return;
       }
@@ -43,27 +41,31 @@ export default function AdminProfilePage() {
       });
 
       try {
+        const batch = writeBatch(firestore);
+
         const adminProfileRef = doc(firestore, 'admin_profiles', user.uid);
         const roleRef = doc(firestore, 'roles_admin', user.uid);
 
         const adminProfileData = {
           id: user.uid,
-          firstName: user.displayName?.split(' ')[0] || 'Admin',
-          lastName: user.displayName?.split(' ')[1] || 'User',
-          email: user.email || 'No email',
-          phoneNumber: user.phoneNumber || 'No phone number',
+          firstName: user.displayName?.split(' ')[0] || 'Samuel',
+          lastName: user.displayName?.split(' ')[1] || 'Nimely',
+          email: user.email || 'samuelknimelyjr@gmail.com',
+          phoneNumber: user.phoneNumber || 'N/A',
           creationDate: serverTimestamp(),
           lastLogin: serverTimestamp(),
           role: 'superadmin',
           permissions: ['manage_properties', 'manage_users', 'view_analytics', 'full_system_management'],
         };
         
-        // Perform both writes atomically using a batch in a real app, but for simplicity here we do them sequentially.
-        await setDoc(adminProfileRef, adminProfileData, { merge: true });
-        await setDoc(roleRef, { admin: true });
+        batch.set(adminProfileRef, adminProfileData, { merge: true });
+        batch.set(roleRef, { admin: true });
 
-        // The useDoc hook will automatically update with the new profile data after this.
-        toast({ title: "Admin Profile Created", description: "Your admin account is ready."});
+        await batch.commit();
+
+        toast({ title: "Admin Profile Created", description: "Your admin account is ready. Refreshing..."});
+        // The useDoc hook will update, triggering a re-render. A reload can ensure everything is synced.
+        router.refresh();
 
       } catch (error) {
         console.error('Error creating admin profile:', error);
@@ -75,7 +77,7 @@ export default function AdminProfilePage() {
     
     createProfileIfNeeded();
 
-  }, [adminProfile, isProfileLoading, user, isUserLoading, firestore, toast]);
+  }, [adminProfile, isProfileLoading, user, isUserLoading, firestore, toast, router]);
   
   const isLoading = isUserLoading || isProfileLoading || isCreatingProfile;
   
