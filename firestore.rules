@@ -154,7 +154,7 @@ service cloud.firestore {
     match /bookings/{bookingId} {
       allow create: if isVerified() && isOwner(request.resource.data.userId);
       allow read: if isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId)) || isAdmin();
-      allow list: if isAdmin() || (isVerified() && request.query.where.vendorId == request.auth.uid);
+      allow list: if isAdmin() || (isVerified() && request.query.where.size() > 0 && request.query.where.vendorId == request.auth.uid);
       allow update: if (isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId))) || isAdmin();
       allow delete: if isAdmin() || (isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId)));
     }
