@@ -36,7 +36,7 @@ export default function Home() {
           </p>
           
           <div className="mt-8 w-full max-w-4xl rounded-full border border-gray-600 bg-white/20 p-2 shadow-lg backdrop-blur-sm">
-            <form action="/properties" className="grid grid-cols-1 items-center gap-4 md:grid-cols-12" suppressHydrationWarning>
+            <form action="/properties" className="grid grid-cols-1 items-center gap-4 md:grid-cols-12" suppressHydrationWarning={true}>
               <div className="relative md:col-span-5">
                 <MapPin className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <Input name="location" placeholder={t('locationPlaceholder')} className="h-12 rounded-full border-0 bg-transparent pl-12 text-white placeholder:text-gray-300 focus:ring-0" />
