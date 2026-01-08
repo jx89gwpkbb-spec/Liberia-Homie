@@ -165,6 +165,7 @@ service cloud.firestore {
      */
     match /properties/{propertyId} {
       allow get: if (resource.data != null && resource.data.status == 'approved') || (isSignedIn() && (isAdmin() || isOwner(resource.data.owner.id)));
+      allow list: if true;
       allow create: if isVerified() && isOwner(request.resource.data.owner.id) && request.resource.data.status == 'pending';
       allow update: if (isVerified() && resource.data != null && isOwner(resource.data.owner.id)) || isAdmin();
       allow delete: if (isVerified() && resource.data != null && isOwner(resource.data.owner.id)) || isAdmin();
