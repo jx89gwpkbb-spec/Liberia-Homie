@@ -27,7 +27,7 @@ export function Header() {
               {t('about')}
             </Link>
             <Link href="/help" className="text-muted-foreground transition-colors hover:text-primary">
-              {t('contact')}
+              {t('help')}
             </Link>
           </nav>
           <div className="flex items-center gap-2">

@@ -2,7 +2,7 @@
   "Header": {
     "properties": "Propiedades",
     "about": "Sobre Nosotros",
-    "contact": "Ayuda",
+    "help": "Ayuda",
     "login": "Iniciar Sesión",
     "signup": "Registrarse"
   },

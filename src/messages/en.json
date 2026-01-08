@@ -2,7 +2,7 @@
   "Header": {
     "properties": "Properties",
     "about": "About",
-    "contact": "Help",
+    "help": "Help",
     "login": "Log in",
     "signup": "Sign up"
   },
