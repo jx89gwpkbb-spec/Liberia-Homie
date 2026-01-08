@@ -34,7 +34,7 @@ export default function AdminDashboardPage() {
 
   const usersCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
   const propertiesCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'properties') : null, [firestore]);
-  const bookingsCollectionRef = useMemoFirebase(() => firestore ? query(collection(firestore, 'bookings'), orderBy('createdAt', 'desc'), limit(50)) : null, [firestore]);
+  const bookingsCollectionRef = useMemoFirebase(() => firestore ? query(collection(firestore, 'bookings')) : null, [firestore]);
   
   const recentUsersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users'), orderBy('createdAt', 'desc'), limit(5)) : null, [firestore]);
   const recentPropertiesQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'properties'), where('status', '==', 'approved'), orderBy('reviewCount', 'desc'), limit(3)) : null, [firestore]);
@@ -42,10 +42,16 @@ export default function AdminDashboardPage() {
 
   const { data: users, isLoading: usersLoading } = useCollection<User>(usersCollectionRef);
   const { data: properties, isLoading: propertiesLoading } = useCollection<Property>(propertiesCollectionRef);
-  const { data: bookings, isLoading: bookingsLoading } = useCollection<Booking>(bookingsCollectionRef);
+  const { data: bookingsData, isLoading: bookingsLoading } = useCollection<Booking>(bookingsCollectionRef);
   const { data: recentUsers, isLoading: recentUsersLoading } = useCollection<User>(recentUsersQuery);
   const { data: recentProperties, isLoading: recentPropertiesLoading } = useCollection<Property>(recentPropertiesQuery);
   const { data: pendingProperties, isLoading: pendingPropertiesLoading } = useCollection<Property>(pendingPropertiesQuery);
+
+  const bookings = useMemo(() => {
+    if (!bookingsData) return [];
+    // Sort client-side
+    return [...bookingsData].sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate()).slice(0, 50);
+  }, [bookingsData]);
 
   const totalRevenue = useMemo(() => {
     if (!bookings) return 0;
