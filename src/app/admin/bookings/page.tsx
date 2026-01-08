@@ -8,7 +8,7 @@ import { MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, limit } from 'firebase/firestore';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
 import type { Booking } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -18,7 +18,7 @@ export default function AdminBookingsPage() {
   // Securely query for the last 50 bookings from the global collection.
   const bookingsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'bookings'), limit(50));
+    return query(collection(firestore, 'bookings'), orderBy('createdAt', 'desc'), limit(50));
   }, [firestore]);
 
   const { data: bookings, isLoading } = useCollection<Booking>(bookingsQuery);
@@ -67,8 +67,8 @@ export default function AdminBookingsPage() {
                     <TableCell>{booking.checkInDate?.toDate ? `${format(booking.checkInDate.toDate(), 'MMM dd, yyyy')} - ${format(booking.checkOutDate.toDate(), 'MMM dd, yyyy')}` : 'N/A'}</TableCell>
                     <TableCell>${booking.totalPrice.toLocaleString()}</TableCell>
                     <TableCell>
-                      <Badge variant={booking.checkOutDate?.toDate() < new Date() ? 'secondary' : 'default'}>
-                        {booking.checkOutDate?.toDate() < new Date() ? 'Completed' : 'Upcoming'}
+                      <Badge variant={new Date(booking.checkOutDate) < new Date() ? 'secondary' : 'default'}>
+                        {new Date(booking.checkOutDate) < new Date() ? 'Completed' : 'Upcoming'}
                       </Badge>
                     </TableCell>
                     <TableCell>

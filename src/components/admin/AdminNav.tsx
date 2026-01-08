@@ -20,13 +20,12 @@ const navItems = [
 export function AdminNav() {
   const pathname = usePathname();
   // Remove locale from pathname for comparison
-  const basePath = pathname.split('/').slice(2).join('/');
+  const basePath = '/admin' + pathname.split('/admin')[1];
   
   return (
     <SidebarMenu>
       {navItems.map((item) => {
-        const itemPath = item.href.startsWith('/') ? item.href.substring(1) : item.href;
-        const isActive = basePath === itemPath;
+        const isActive = basePath === item.href;
         return (
           <SidebarMenuItem key={item.label}>
             <Link href={item.href} passHref>
