@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { sendEmailVerification } from 'firebase/auth';
+import { sendEmailVerification, getIdToken } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, MailCheck } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -26,29 +26,36 @@ export default function VerifyEmailPage() {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
+    // If the user is already verified when they land on the page, redirect immediately.
+    if (user && user.emailVerified) {
+      router.push('/dashboard');
+      return;
+    }
+    
+    // If we have a user but they are not verified, start checking.
+    if(user && !user.emailVerified) {
+      setIsChecking(false);
+    }
+
     const interval = setInterval(async () => {
       if (user) {
+        // Crucial step: reload the user's profile from Firebase Auth
         await user.reload();
+        // After reload, the user object will have the latest state, including emailVerified.
         if (user.emailVerified) {
           clearInterval(interval);
           toast({
             title: "Email Verified!",
             description: "You can now access the full application.",
           });
+          // Force a token refresh to ensure Firestore rules see the new claims.
+          await getIdToken(user, true); 
           router.push('/dashboard');
         }
       }
-    }, 3000);
-
-    if (isUserLoading) return;
+    }, 3000); // Check every 3 seconds
     
-    if (user && user.emailVerified) {
-      clearInterval(interval);
-      router.push('/dashboard');
-    } else {
-      setIsChecking(false);
-    }
-    
+    // Cleanup on component unmount
     return () => clearInterval(interval);
   }, [user, isUserLoading, router, toast]);
 
@@ -127,5 +134,3 @@ export default function VerifyEmailPage() {
     </div>
   );
 }
-
-    
