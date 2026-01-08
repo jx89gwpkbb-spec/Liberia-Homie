@@ -34,7 +34,7 @@ export default function AdminDashboardPage() {
 
   const usersCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
   const propertiesCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'properties') : null, [firestore]);
-  const bookingsCollectionRef = useMemoFirebase(() => firestore ? query(collection(firestore, 'bookings'), orderBy('createdAt', 'desc'), limit(50)) : null, [firestore]);
+  const bookingsCollectionRef = useMemoFirebase(() => firestore ? query(collection(firestore, 'bookings'), limit(50)) : null, [firestore]);
   
   const recentUsersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users'), orderBy('createdAt', 'desc'), limit(5)) : null, [firestore]);
   const recentPropertiesQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'properties'), where('status', '==', 'approved'), orderBy('reviewCount', 'desc'), limit(3)) : null, [firestore]);
@@ -49,7 +49,8 @@ export default function AdminDashboardPage() {
 
   const totalRevenue = useMemo(() => {
     if (!bookings) return 0;
-    return bookings.reduce((acc, booking) => acc + booking.totalPrice, 0);
+    // Ensure booking.totalPrice is a number before adding it to the accumulator
+    return bookings.reduce((acc, booking) => acc + (booking.totalPrice || 0), 0);
   }, [bookings]);
 
   const isLoading = usersLoading || propertiesLoading || bookingsLoading || recentUsersLoading || recentPropertiesLoading || pendingPropertiesLoading;
@@ -58,7 +59,6 @@ export default function AdminDashboardPage() {
     if (!users) return [];
     const dailyUsers: {[key: string]: number} = {};
      users.slice(-7).forEach(user => {
-        // Ensure createdAt exists and has the toDate method before calling it
         if (user.createdAt && typeof user.createdAt.toDate === 'function') {
             const date = format(user.createdAt.toDate(), 'yyyy-MM-dd');
             dailyUsers[date] = (dailyUsers[date] || 0) + 1;
@@ -113,7 +113,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             {bookingsLoading ? <Skeleton className="h-8 w-16" /> : <div className="text-2xl font-bold">{bookings?.length || 0}</div>}
-            <p className="text-xs text-muted-foreground">All time bookings</p>
+            <p className="text-xs text-muted-foreground">Recent 50 bookings</p>
           </CardContent>
         </Card>
         <Card>
@@ -123,7 +123,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             {bookingsLoading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">${totalRevenue.toLocaleString()}</div>}
-            <p className="text-xs text-muted-foreground">All time revenue</p>
+            <p className="text-xs text-muted-foreground">From recent 50 bookings</p>
           </CardContent>
         </Card>
       </div>
