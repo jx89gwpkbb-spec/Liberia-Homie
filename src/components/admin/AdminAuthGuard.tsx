@@ -23,25 +23,22 @@ export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
             }
 
             // Super admin email check is the primary gate.
-            const isSuperAdminEmail = user.email === 'samuelknimelyjr@gmail.com';
-            if (!isSuperAdminEmail) {
-                setAuthStatus('denied');
-                return;
-            }
-
-            // For super admin, verify their role document exists.
-            const roleRef = doc(firestore, 'roles_admin', user.uid);
-            try {
-                const docSnap = await getDoc(roleRef);
-                if (docSnap.exists()) {
-                    setAuthStatus('admin');
-                } else {
-                    // The profile page will handle creation. For now, deny access until it's created.
-                    // This prevents race conditions or errors if they land on a different admin page first.
-                    router.push('/admin/profile'); 
+            if (user.email === 'samuelknimelyjr@gmail.com') {
+                 const roleRef = doc(firestore, 'roles_admin', user.uid);
+                try {
+                    const docSnap = await getDoc(roleRef);
+                    if (docSnap.exists()) {
+                        setAuthStatus('admin');
+                    } else {
+                        // The profile page will handle creation. For now, deny access until it's created.
+                        // This prevents race conditions or errors if they land on a different admin page first.
+                        router.push('/admin/profile'); 
+                    }
+                } catch (error) {
+                    console.error("Error checking admin role:", error);
+                    setAuthStatus('denied');
                 }
-            } catch (error) {
-                console.error("Error checking admin role:", error);
+            } else {
                 setAuthStatus('denied');
             }
         };
