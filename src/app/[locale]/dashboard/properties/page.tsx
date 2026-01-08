@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { cn } from '@/lib/utils';
 
 
 export default function DashboardPropertiesPage() {
@@ -128,7 +129,7 @@ export default function DashboardPropertiesPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={currentStatus.variant as any} className={currentStatus.className}>
+                      <Badge variant={currentStatus.variant as any} className={cn(currentStatus.className)}>
                         <currentStatus.icon className="mr-1.5 h-3 w-3" />
                         {currentStatus.label}
                       </Badge>

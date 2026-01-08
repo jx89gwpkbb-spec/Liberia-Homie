@@ -8,10 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { MoreHorizontal, CheckCircle, XCircle, Clock } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export default function AdminPropertiesPage() {
   const firestore = useFirestore();
@@ -23,13 +24,13 @@ export default function AdminPropertiesPage() {
 
   const { data: properties, isLoading } = useCollection<Property>(propertiesCollectionRef);
   
-  const handleStatusChange = (propertyId: string, status: 'approved' | 'rejected') => {
+  const handleStatusChange = (propertyId: string, status: 'approved' | 'rejected' | 'pending') => {
     if (!firestore) return;
     const propertyRef = doc(firestore, 'properties', propertyId);
     setDocumentNonBlocking(propertyRef, { status: status }, { merge: true });
     toast({
-        title: `Property ${status}`,
-        description: `The property has been successfully ${status}.`,
+        title: `Property status updated`,
+        description: `The property has been set to ${status}.`,
     })
   };
 
@@ -37,12 +38,14 @@ export default function AdminPropertiesPage() {
       approved: {
           variant: "default",
           icon: CheckCircle,
-          label: "Approved"
+          label: "Approved",
+          className: "bg-green-500 hover:bg-green-600 text-white",
       },
       pending: {
           variant: "secondary",
           icon: Clock,
-          label: "Pending"
+          label: "Pending",
+          className: "bg-yellow-500 hover:bg-yellow-600 text-white",
       },
       rejected: {
           variant: "destructive",
@@ -109,7 +112,7 @@ export default function AdminPropertiesPage() {
                         </TableCell>
                         <TableCell>{property.owner.name}</TableCell>
                         <TableCell>
-                          <Badge variant={currentStatus.variant as any}>
+                          <Badge variant={currentStatus.variant as any} className={cn(currentStatus.className)}>
                               <currentStatus.icon className="mr-1.5 h-3 w-3" />
                               {currentStatus.label}
                           </Badge>
@@ -132,13 +135,24 @@ export default function AdminPropertiesPage() {
                                 </DropdownMenuItem>
                                )}
                                {property.status !== 'rejected' && (
-                                <DropdownMenuItem onClick={() => handleStatusChange(property.id, 'rejected')} className={cn(property.status === 'pending' && "text-amber-600")}>
+                                <DropdownMenuItem onClick={() => handleStatusChange(property.id, 'rejected')} className="text-destructive">
                                     <XCircle className="mr-2 h-4 w-4" />
                                     Reject
                                 </DropdownMenuItem>
                                )}
-                              <DropdownMenuItem>Edit Property</DropdownMenuItem>
-                              <DropdownMenuItem>View Listing</DropdownMenuItem>
+                               {property.status !== 'pending' && (
+                                <DropdownMenuItem onClick={() => handleStatusChange(property.id, 'pending')}>
+                                    <Clock className="mr-2 h-4 w-4" />
+                                    Set as Pending
+                                </DropdownMenuItem>
+                               )}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem asChild>
+                                <Link href={`/dashboard/properties/edit/${property.id}`}>Edit</Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link href={`/properties/${property.id}`} target="_blank">View Listing</Link>
+                              </DropdownMenuItem>
                               <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

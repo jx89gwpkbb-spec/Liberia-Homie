@@ -167,7 +167,6 @@ export function PropertyForm({ property }: PropertyFormProps) {
             try {
                 const finalImageUrls = [...existingImageUrls, ...uploadedUrls];
                 
-                // Construct the owner object, which is needed for the security rule
                 const ownerInfo = isEditMode ? property.owner : {
                     id: user.uid,
                     name: user.displayName || 'Anonymous',
@@ -193,12 +192,11 @@ export function PropertyForm({ property }: PropertyFormProps) {
                     reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
                     viewCount: property?.viewCount || 0,
                     gps: gpsCoords,
-                    status: property?.status || 'pending',
+                    status: isEditMode ? property.status : 'pending', // Keep status if editing, else pending
                 };
     
                 const propertyRef = doc(firestore, 'properties', propertyId);
                 
-                // Use setDoc with proper error handling
                 setDoc(propertyRef, propertyData, { merge: isEditMode })
                     .then(() => {
                         toast({ 
@@ -219,7 +217,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
                         setIsSaving(false);
                     });
 
-            } catch (error: any) { // This outer catch is for synchronous errors before setDoc
+            } catch (error: any) { 
                 console.error("Form submission failed before Firestore operation", error);
                 toast({ 
                     title: "Submission Failed", 
