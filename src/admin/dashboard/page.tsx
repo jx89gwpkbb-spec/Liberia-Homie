@@ -34,7 +34,7 @@ export default function AdminDashboardPage() {
 
   const usersCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
   const propertiesCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'properties') : null, [firestore]);
-  // Reverted the problematic query on the 'bookings' collection
+  // Reverted the problematic query on the 'bookings' collection to prevent app crash
   const bookingsCollectionRef = useMemoFirebase(() => firestore ? query(collection(firestore, 'bookings'), limit(0)) : null, [firestore]);
   
   const recentUsersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users'), orderBy('createdAt', 'desc'), limit(5)) : null, [firestore]);
