@@ -1,46 +1,46 @@
 'use client';
 
 import {
-  Building,
-  Users,
-  Calendar,
-  Lock,
-  Smartphone,
-  ChevronRight,
-  LifeBuoy,
-} from 'lucide-react';
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Mail, Phone, LifeBuoy } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
-const features = [
+const faqs = [
   {
-    icon: Building,
-    title: 'Housing & Rentals',
-    description: 'Find or list apartments, homes, and shared spaces.',
+    question: 'How do I book a property?',
+    answer:
+      'To book a property, simply navigate to the property\'s page, select your desired dates on the calendar, specify the number of guests, and click "Reserve". You will be guided through a confirmation process.',
   },
   {
-    icon: Users,
-    title: 'Local Services',
-    description:
-      'Connect with professionals offering repairs, tutoring, transport, and more.',
+    question: 'Can I cancel a booking?',
+    answer:
+      'Yes, you can cancel a booking. Cancellation policies may vary by property. You can view your bookings and the option to cancel from your dashboard under "My Bookings". Please review the cancellation terms before confirming.',
   },
   {
-    icon: Calendar,
-    title: 'Community Events',
-    description:
-      'Stay updated on cultural, educational, and social activities near you.',
+    question: 'How do I list my own property?',
+    answer:
+      'If you\'ve signed up as a vendor, you can add a new property from your dashboard. Click on "My Properties" and then "Add New". You will be prompted to fill out all the necessary details about your property, including photos, amenities, and pricing.',
   },
   {
-    icon: Lock,
-    title: 'Secure Access',
-    description:
-      'Built with Firebase authentication and Firestore rules to protect your data.',
+    question: 'Is my payment information secure?',
+    answer:
+      'Homie Liberia uses industry-standard security practices. All transactions are handled through a secure payment gateway, and we do not store your credit card information on our servers.',
   },
   {
-    icon: Smartphone,
-    title: 'Easy to Use',
-    description: 'Simple interface designed for mobile-first users in Liberia.',
+    question: 'How do I contact a property owner?',
+    answer:
+      'Once your booking is confirmed, you will be able to communicate with the property owner through our secure messaging system to coordinate check-in and other details.',
   },
 ];
 
@@ -50,61 +50,68 @@ export default function HelpPage() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold font-headline text-primary">
-            Welcome to Homie Liberia
+            Help & Support
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Your trusted digital companion for everyday living in Liberia. We
-            connect people, services, and opportunities to help you find what
-            you need, when you need it.
+            Have questions? We’re here to help. Find answers to common
+            questions below or contact our support team.
           </p>
         </div>
 
-        <Card className="mb-12 shadow-lg">
-           <CardHeader>
-                <CardTitle className="flex items-center gap-2"><LifeBuoy /> Our Mission</CardTitle>
-                <CardDescription>
-                Homie Liberia is a community-driven platform designed to connect people, services, and opportunities across Liberia. Whether you’re looking for housing, local services, or community events, Homie Liberia makes it easy to discover and share what matters most in your area.
-                </CardDescription>
-            </CardHeader>
+        <Card className="mb-12">
+          <CardHeader>
+            <CardTitle>Frequently Asked Questions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Accordion type="single" collapsible className="w-full">
+              {faqs.map((faq, index) => (
+                <AccordionItem key={index} value={`item-${index}`}>
+                  <AccordionTrigger>{faq.question}</AccordionTrigger>
+                  <AccordionContent>{faq.answer}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </CardContent>
         </Card>
 
-        <div>
-          <h2 className="text-3xl font-semibold text-center mb-8">
-            Key Features
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-start gap-4">
-                <div className="flex-shrink-0">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <feature.icon className="h-6 w-6" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">{feature.title}</h3>
-                  <p className="mt-1 text-muted-foreground">
-                    {feature.description}
-                  </p>
-                </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <LifeBuoy /> Contact Support
+            </CardTitle>
+            <CardDescription>
+              If you can't find the answer you're looking for, please don't
+              hesitate to reach out to us.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Mail className="h-5 w-5 text-primary" />
+              <div>
+                <h3 className="font-semibold">Email</h3>
+                <a
+                  href="mailto:support@homieliberia.com"
+                  className="text-muted-foreground hover:text-primary"
+                >
+                  support@homieliberia.com
+                </a>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="text-center mt-16">
-          <h2 className="text-2xl font-semibold">Ready to get started?</h2>
-          <p className="text-muted-foreground mt-2">
-            Explore listings or create one of your own.
-          </p>
-          <div className="mt-6 flex justify-center gap-4">
-            <Button asChild size="lg">
-              <Link href="/properties">Explore Properties</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link href="/signup">Join the Community</Link>
-            </Button>
-          </div>
-        </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Phone className="h-5 w-5 text-primary" />
+              <div>
+                <h3 className="font-semibold">Phone</h3>
+                <p className="text-muted-foreground">(+231) 770-321-127</p>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground pt-4">
+              For account-specific issues, please submit a ticket through your{' '}
+              <Link href="/dashboard/support" className="underline hover:text-primary">
+                support dashboard
+              </Link>.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

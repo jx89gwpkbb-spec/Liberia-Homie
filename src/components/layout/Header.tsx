@@ -23,10 +23,10 @@ export function Header() {
              <Link href="/properties" className="text-muted-foreground transition-colors hover:text-primary">
               {t('properties')}
             </Link>
-            <Link href="/#about" className="text-muted-foreground transition-colors hover:text-primary">
+            <Link href="/about" className="text-muted-foreground transition-colors hover:text-primary">
               {t('about')}
             </Link>
-            <Link href="/#contact" className="text-muted-foreground transition-colors hover:text-primary">
+            <Link href="/help" className="text-muted-foreground transition-colors hover:text-primary">
               {t('contact')}
             </Link>
           </nav>

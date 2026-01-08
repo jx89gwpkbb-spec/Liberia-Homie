@@ -45,25 +45,25 @@
     {
       "id": "prop4-1",
       "description": "Luxury penthouse with city view",
-      "imageUrl": "https://images.unsplash.com/photo-1565623833408-d77e39b88af6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxsdXh1cnklMjBwZW50aG91c2V8ZW58MHx8fHwxNzY3NjQ5OTcwfDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1565623833408-d77e39b88af6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxsdXh1cnklMjBwZW50aG91c2V8ZW58MHx8fHwxNzY3NjQ5OTcwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "luxury penthouse"
     },
     {
       "id": "prop4-2",
       "description": "Rooftop terrace of a luxury penthouse",
-      "imageUrl": "https://images.unsplash.com/photo-1664190052514-6b4271caf147?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyb29mdG9wJTIwdGVycmFjZXxlbnwwfHx8fDE3Njc3NDAzODl8MA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1664190052514-6b4271caf147?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyb29mdG9wJTIwdGVycmFjZXxlbnwwfHx8fDE3Njc3NDAzODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "rooftop terrace"
     },
     {
       "id": "prop5-1",
       "description": "Beachfront bungalow",
-      "imageUrl": "https://images.unsplash.com/photo-1565065590167-59f260459e86?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxiZWFjaCUyMGJ1bmdhbG93fGVufDB8fHx8MTc2NzY4MjA1MHww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1565065590167-59f260459e86?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxiZWFjaCUyMGJ1bmdhbG93fGVufDB8fHx8MTc2NzY4MjA1MHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "beach bungalow"
     },
     {
       "id": "prop5-2",
       "description": "View from a beachfront bungalow",
-      "imageUrl": "https://images.unsplash.com/photo-1611222566360-ef1f0a8c6451?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxiZWFjaCUyMHZpZXd8ZW58MHx8fHwxNzY3NjU3NDIzfDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1611222566360-ef1f0a8c6451?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxiZWFjaCUyMHZpZXd8ZW58MHx8fHwxNzY3NjU3NDIzfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "beach view"
     },
     {
@@ -75,13 +75,13 @@
     {
       "id": "prop6-2",
       "description": "Garden of a country cottage",
-      "imageUrl": "https://images.unsplash.com/photo-1565883969738-05b2e01c47b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjb3R0YWdlJTIwZ2FyZGVufGVufDB8fHx8MTc2Nzc0MDM4OXww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1565883969738-05b2e01c47b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjb3R0YWdlJTIwZ2FyZGVufGVufDB8fHx8MTc2Nzc0MDM4OXww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "cottage garden"
     },
     {
       "id": "user-1",
       "description": "User avatar 1",
-      "imageUrl": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njc2MzU5OTV8MA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njc2MzU5OTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "person portrait"
     },
     {
@@ -93,26 +93,32 @@
     {
       "id": "user-3",
       "description": "User avatar 3",
-      "imageUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njc2MzU5OTV8MA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njc2MzU5OTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "person portrait"
     },
     {
       "id": "user-4",
       "description": "User avatar 4",
-      "imageUrl": "https://images.unsplash.com/photo-1590086782792-42dd2350140d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njc2MzU5OTV8MA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1590086782792-42dd2350140d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3Njc2MzU5OTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "person portrait"
     },
     {
       "id": "map-placeholder",
       "description": "A map of Liberia",
-      "imageUrl": "https://images.unsplash.com/photo-1622030997143-c6031b212f8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxMaWJlcmlhJTIwbWFwfGVufDB8fHx8MTc2ODYwMzAwNHww&ixlib-rb-4.0.3&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1622030997143-c6031b212f8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxMaWJlcmlhJTIwbWFwfGVufDB8fHx8MTc2ODYwMzAwNHww&ixlib=rb-4.0.3&q=80&w=1080",
       "imageHint": "Liberia map"
     },
     {
       "id": "virtual-tour-placeholder",
       "description": "A 360-degree icon representing a virtual tour",
-      "imageUrl": "https://images.unsplash.com/photo-1530203283902-296243a9169f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHwzNjAlMjB0b3VyfGVufDB8fHx8MTc2Nzc0NjExNHww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1530203283902-296243a9169f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHwzNjAlMjB0b3VyfGVufDB8fHx8MTc2Nzc0NjExNHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "360 tour"
+    },
+    {
+      "id": "founder-samuel",
+      "description": "A portrait of Samuel Nimely, founder of Homie Liberia",
+      "imageUrl": "https://images.unsplash.com/photo-1620932934088-fbdb2920e5d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwb3J0cmFpdCUyMG9mJTIwYSUyMGJsYWNrJTIwbWFufGVufDB8fHx8MTc2ODc1Nzg1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
     }
   ]
 }
