@@ -14,7 +14,7 @@
  * - /users/{userId}/favorites/{propertyId}: Stores a user's favorite properties.
  * - /users/{userId}/documents/{documentId}: Stores a user's uploaded documents.
  * - /users/{userId}/savedSearches/{searchId}: Stores a user's saved search filters.
- * - /bookings/{bookingId}: Contains complete booking details, accessible only by admins.
+ * - /bookings/{bookingId}: Contains complete booking details, accessible only by admins or the relevant vendor.
  * - /properties/{propertyId}: Contains property details.
  * - /visits/{visitId}: Contains visit request details.
  * - /announcements/{announcementId}: Contains system-wide announcements.
@@ -148,11 +148,15 @@ service cloud.firestore {
     }
     
     /**
-     * @description Manages the global bookings collection. This collection is for admin use only.
+     * @description Manages the global bookings collection. This collection is for admin use, but vendors can list their own bookings.
      * @path /bookings/{bookingId}
      */
     match /bookings/{bookingId} {
-      allow read, list, write, delete: if isAdmin();
+      allow create: if isVerified() && isOwner(request.resource.data.userId);
+      allow read: if isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId)) || isAdmin();
+      allow list: if isVerified() && (isAdmin() || (request.query.where.size() > 0 && request.query.where[0][0] == 'vendorId' && request.query.where[0][2] == request.auth.uid));
+      allow update: if (isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId))) || isAdmin();
+      allow delete: if isAdmin() || (isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId)));
     }
     
     /**
