@@ -16,7 +16,6 @@ export default function AdminBookingsPage() {
   const firestore = useFirestore();
 
   // Securely query for the last 50 bookings from the global collection.
-  // This is now safe because only admins can read/list from this path.
   const bookingsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'bookings'), limit(50));
