@@ -75,9 +75,7 @@ export default function PropertiesPage({
     <div className="container mx-auto py-8">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
         <aside className="lg:col-span-1">
-          <Suspense>
-            <FilterSidebar />
-          </Suspense>
+          <FilterSidebar />
         </aside>
         <Suspense fallback={<p>Loading properties...</p>}>
            <PropertiesList searchParams={searchParams} />
