@@ -10,6 +10,9 @@ import {
   Heart,
   Linkedin,
   Mail,
+  Instagram,
+  Facebook,
+  Github,
 } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -134,11 +137,35 @@ export default function AboutPage() {
                             <p className="text-muted-foreground">
                                 Beyond technology, he is also skilled in content creation and media, using creativity to communicate and connect with people. His vision is to combine technical expertise with storytelling to make Homie Liberia not just an app, but a community.
                             </p>
-                            <div className="flex items-center gap-4 pt-4">
+                            <div className="flex items-center flex-wrap gap-4 pt-4">
                                 <Button asChild variant="outline">
                                     <Link href="mailto:samuelknimelyjr@gmail.com" target="_blank">
                                         <Mail className="mr-2 h-4 w-4" />
-                                        Contact
+                                        Email
+                                    </Link>
+                                </Button>
+                                 <Button asChild variant="outline">
+                                    <Link href="https://www.linkedin.com/in/samuel-nimely-4057222a4" target="_blank">
+                                        <Linkedin className="mr-2 h-4 w-4" />
+                                        LinkedIn
+                                    </Link>
+                                </Button>
+                                <Button asChild variant="outline">
+                                    <Link href="https://github.com/jx89gwpkbb-spec" target="_blank">
+                                        <Github className="mr-2 h-4 w-4" />
+                                        GitHub
+                                    </Link>
+                                </Button>
+                                 <Button asChild variant="outline">
+                                    <Link href="https://www.instagram.com/onelsmusknimely" target="_blank">
+                                        <Instagram className="mr-2 h-4 w-4" />
+                                        Instagram
+                                    </Link>
+                                </Button>
+                                 <Button asChild variant="outline">
+                                    <Link href="https://www.facebook.com/onelsmusnimelyjr?mibextid=wwXIfr&mibextid=wwXIfr" target="_blank">
+                                        <Facebook className="mr-2 h-4 w-4" />
+                                        Facebook
                                     </Link>
                                 </Button>
                             </div>
