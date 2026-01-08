@@ -50,7 +50,8 @@ export default function AdminDashboardPage() {
 
   const totalRevenue = useMemo(() => {
     if (!bookings) return 0;
-    return bookings.reduce((acc, booking) => acc + booking.totalPrice, 0);
+    // Ensure booking.totalPrice is a number before adding it to the accumulator
+    return bookings.reduce((acc, booking) => acc + (booking.totalPrice || 0), 0);
   }, [bookings]);
 
   const isLoading = usersLoading || propertiesLoading || bookingsLoading || recentUsersLoading || recentPropertiesLoading || pendingPropertiesLoading;
