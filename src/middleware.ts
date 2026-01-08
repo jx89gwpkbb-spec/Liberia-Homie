@@ -13,6 +13,7 @@ export default createMiddleware({
     // special `shared` key.
     '/': '/',
     '/dashboard': '/dashboard',
+    '/admin': '/admin',
  
     // If locales use different paths, specify them separately
     '/about': {
