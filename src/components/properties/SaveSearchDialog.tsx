@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { useUser, useFirestore, addDocumentNonBlocking } from '@/firebase';
-import { collection, serverTimestamp } from 'firebase/firestore';
+import { useUser, useFirestore } from '@/firebase';
+import { collection, serverTimestamp, addDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -31,7 +31,7 @@ export function SaveSearchDialog({ searchParams }: SaveSearchDialogProps) {
     const [searchName, setSearchName] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!user || !firestore) {
             toast({ title: "Please log in to save searches.", variant: "destructive" });
             return;
@@ -55,22 +55,26 @@ export function SaveSearchDialog({ searchParams }: SaveSearchDialogProps) {
             }
         });
 
-        const savedSearchesCollection = collection(firestore, `users/${user.uid}/savedSearches`);
-        const newSearch = {
-            name: searchName,
-            createdAt: serverTimestamp(),
-            filters,
-        };
+        try {
+            const savedSearchesCollection = collection(firestore, `users/${user.uid}/savedSearches`);
+            await addDoc(savedSearchesCollection, {
+                name: searchName,
+                createdAt: serverTimestamp(),
+                filters,
+            });
 
-        addDocumentNonBlocking(savedSearchesCollection, newSearch);
-
-        toast({
-            title: "Search Saved!",
-            description: `Your search "${searchName}" has been saved.`,
-        });
-        setIsOpen(false);
-        setSearchName('');
-        setIsSaving(false);
+            toast({
+                title: "Search Saved!",
+                description: `Your search "${searchName}" has been saved.`,
+            });
+            setIsOpen(false);
+            setSearchName('');
+        } catch (error) {
+             console.error("Failed to save search:", error);
+             toast({ title: "Save Failed", description: "Something went wrong.", variant: "destructive" });
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
