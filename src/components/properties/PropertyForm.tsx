@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { DescriptionGenerator } from "./DescriptionGenerator";
-import { useUser, useFirestore, setDocumentNonBlocking } from "@/firebase";
+import { useUser, useFirestore } from "@/firebase";
 import { collection, doc, setDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
@@ -150,7 +150,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
         );
     };
 
-    const onSubmit = (data: PropertyFormData) => {
+    const onSubmit = async (data: PropertyFormData) => {
         if (!user || !firestore) {
             toast({ title: "Authentication Error", description: "Please log in to submit a property.", variant: "destructive" });
             return;
@@ -163,81 +163,60 @@ export function PropertyForm({ property }: PropertyFormProps) {
         
         const propertyId = property?.id || doc(collection(firestore, 'properties')).id;
         
-        const processSubmit = async (uploadedUrls: string[]) => {
-            try {
-                const finalImageUrls = [...existingImageUrls, ...uploadedUrls];
-                
-                const ownerInfo = isEditMode ? property.owner : {
-                    id: user.uid,
-                    name: user.displayName || 'Anonymous',
-                    avatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
-                };
-                
-                const propertyData = {
-                    id: propertyId,
-                    name: data.name,
-                    location: data.location,
-                    pricePerNight: parseFloat(data.price),
-                    bedrooms: parseInt(data.bedrooms, 10),
-                    bathrooms: parseInt(data.bathrooms, 10),
-                    maxGuests: parseInt(data.maxGuests, 10),
-                    longStay: data.stayDuration === 'long',
-                    amenities: data.keyFeatures.split(',').map(s => s.trim()),
-                    description: data.description,
-                    propertyType: data.propertyType,
-                    images: finalImageUrls,
-                    petFriendly: data.petFriendly,
-                    owner: ownerInfo,
-                    rating: property?.rating || Math.round((Math.random() * 2 + 3) * 10) / 10,
-                    reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
-                    viewCount: property?.viewCount || 0,
-                    gps: gpsCoords,
-                    status: isEditMode ? property.status : 'pending', // Keep status if editing, else pending
-                };
-    
-                const propertyRef = doc(firestore, 'properties', propertyId);
-                
-                setDoc(propertyRef, propertyData, { merge: isEditMode })
-                    .then(() => {
-                        toast({ 
-                            title: isEditMode ? "Property Updated!" : "Property Submitted!",
-                            description: `${data.name} has been ${isEditMode ? 'updated' : 'submitted for review'}.` 
-                        });
-                        router.push('/dashboard/properties');
-                    })
-                    .catch((error: any) => {
-                        console.error("Firestore operation failed", error);
-                        toast({ 
-                            title: "Submission Failed", 
-                            description: error.message || "Could not save the property. Check security rules and console.", 
-                            variant: "destructive" 
-                        });
-                    })
-                    .finally(() => {
-                        setIsSaving(false);
-                    });
-
-            } catch (error: any) { 
-                console.error("Form submission failed before Firestore operation", error);
-                toast({ 
-                    title: "Submission Failed", 
-                    description: error.message || "An unexpected error occurred.", 
-                    variant: "destructive" 
-                });
-                setIsSaving(false);
+        try {
+            let uploadedUrls: string[] = [];
+            if (newImageFiles.length > 0) {
+                uploadedUrls = await uploadImages(user.uid, propertyId, newImageFiles);
             }
-        };
 
-        if (newImageFiles.length > 0) {
-            uploadImages(user.uid, propertyId, newImageFiles)
-                .then(processSubmit)
-                .catch(err => {
-                    console.error("Image upload failed", err);
-                    toast({ title: "Image Upload Failed", description: "Could not upload images. Please try again.", variant: "destructive" });
-                    setIsSaving(false);
-                });
-        } else {
-            processSubmit([]);
+            const finalImageUrls = [...existingImageUrls, ...uploadedUrls];
+            
+            const ownerInfo = isEditMode && property.owner ? property.owner : {
+                id: user.uid,
+                name: user.displayName || 'Anonymous',
+                avatar: user.photoURL || `https://picsum.photos/seed/${user.uid}/40/40`,
+            };
+            
+            const propertyData = {
+                id: propertyId,
+                name: data.name,
+                location: data.location,
+                pricePerNight: parseFloat(data.price),
+                bedrooms: parseInt(data.bedrooms, 10),
+                bathrooms: parseInt(data.bathrooms, 10),
+                maxGuests: parseInt(data.maxGuests, 10),
+                longStay: data.stayDuration === 'long',
+                amenities: data.keyFeatures.split(',').map(s => s.trim()),
+                description: data.description,
+                propertyType: data.propertyType,
+                images: finalImageUrls,
+                petFriendly: data.petFriendly,
+                owner: ownerInfo,
+                rating: property?.rating || Math.round((Math.random() * 2 + 3) * 10) / 10,
+                reviewCount: property?.reviewCount || Math.floor(Math.random() * 100),
+                viewCount: property?.viewCount || 0,
+                gps: gpsCoords,
+                status: isEditMode ? property.status : 'pending',
+            };
+
+            const propertyRef = doc(firestore, 'properties', propertyId);
+            await setDoc(propertyRef, propertyData, { merge: true });
+
+            toast({ 
+                title: isEditMode ? "Property Updated!" : "Property Submitted!",
+                description: `${data.name} has been ${isEditMode ? 'updated' : 'submitted for review'}.` 
+            });
+            router.push('/dashboard/properties');
+
+        } catch (error: any) { 
+            console.error("Form submission failed", error);
+            toast({ 
+                title: "Submission Failed", 
+                description: error.message || "An unexpected error occurred.", 
+                variant: "destructive" 
+            });
+        } finally {
+            setIsSaving(false);
         }
     };
     
