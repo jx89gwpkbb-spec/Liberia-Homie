@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useUser, useFirestore, useCollection, useMemoFirebase, setDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase';
+import { useUser, useFirestore, useCollection, useMemoFirebase, deleteDocumentNonBlocking } from '@/firebase';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { collection, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import type { Document } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -77,7 +77,7 @@ export default function MyDocumentsPage() {
         uploadedAt: serverTimestamp(),
       };
       
-      setDocumentNonBlocking(docRef, newDocument, { merge: false });
+      await setDoc(docRef, newDocument, { merge: false });
 
       toast({ title: "Upload Successful", description: "Your document has been uploaded." });
       setFile(null);
