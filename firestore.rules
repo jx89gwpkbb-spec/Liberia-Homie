@@ -163,8 +163,8 @@ service cloud.firestore {
     match /bookings/{bookingId} {
       allow create: if isVerified() && isOwner(request.resource.data.userId);
       allow read: if isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId)) || isAdmin();
-      // Admins can list bookings. Vendors can list bookings for their properties.
-      allow list: if (isAdmin() && request.query.limit <= 50) || (isVerified() && request.query.where.size() > 0 && request.query.where[0][0] == 'vendorId' && request.query.where[0][2] == request.auth.uid);
+      // Admins can list bookings with a limit or when filtered by property. Vendors can list bookings for their properties.
+      allow list: if (isAdmin() && (request.query.limit <= 50 || (request.query.where.size() > 0 && request.query.where[0][0] == 'propertyId'))) || (isVerified() && request.query.where.size() > 0 && request.query.where[0][0] == 'vendorId' && request.query.where[0][2] == request.auth.uid);
       allow update: if (isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId))) || isAdmin();
       allow delete: if isAdmin() || (isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId)));
     }
