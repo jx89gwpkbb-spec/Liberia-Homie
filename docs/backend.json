@@ -183,6 +183,40 @@
         "role"
       ]
     },
+    "VendorProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "VendorProfile",
+      "type": "object",
+      "description": "Represents a vendor's business profile, containing public business information.",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user this profile belongs to."
+        },
+        "businessName": {
+          "type": "string",
+          "description": "The public-facing name of the vendor's business."
+        },
+        "businessEmail": {
+          "type": "string",
+          "description": "The public contact email for the business.",
+          "format": "email"
+        },
+        "businessPhone": {
+          "type": "string",
+          "description": "The public contact phone number for the business."
+        },
+        "isVerified": {
+          "type": "boolean",
+          "description": "Whether the vendor has been verified by admins."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["userId", "businessName", "businessEmail"]
+    },
     "Booking": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Booking",
@@ -531,6 +565,22 @@
             "$ref": "#/entities/UserProfile"
           },
           "description": "Stores public user profile information. The `userId` must match the authenticated user's UID for writes, but can be read by admins.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user, matching the Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/vendors/{userId}",
+        "definition": {
+          "entityName": "VendorProfile",
+          "schema": {
+            "$ref": "#/entities/VendorProfile"
+          },
+          "description": "Stores vendor-specific business profiles. Users can only write to their own profile.",
           "params": [
             {
               "name": "userId",

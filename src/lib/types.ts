@@ -70,6 +70,16 @@ export type AdminProfile = {
   permissions: string[];
 };
 
+export type VendorProfile = {
+  id?: string;
+  userId: string;
+  businessName: string;
+  businessEmail: string;
+  businessPhone?: string;
+  isVerified?: boolean;
+  updatedAt?: any;
+}
+
 export type Review = {
   id: string;
   propertyId: string;
@@ -180,6 +190,7 @@ export type SupportTicket = {
     
 
     
+
 
 
 

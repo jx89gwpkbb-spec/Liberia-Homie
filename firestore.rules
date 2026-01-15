@@ -10,6 +10,7 @@
  *   administrator, where `{adminId}` is their Firebase Auth UID.
  * - /roles_admin/{uid}: An empty document indicating a user has admin rights. Used for efficient rule checks.
  * - /users/{userId}: Contains public profile data for a specific user.
+ * - /vendors/{userId}: Contains public business profile data for a specific vendor.
  * - /users/{userId}/bookings/{bookingId}: Lightweight copies of a user's bookings for their own access.
  * - /users/{userId}/favorites/{propertyId}: Stores a user's favorite properties.
  * - /users/{userId}/documents/{documentId}: Stores a user's uploaded documents.
@@ -125,6 +126,15 @@ service cloud.firestore {
       match /savedSearches/{searchId} {
         allow read, write: if isVerified() && isOwner(userId);
       }
+    }
+    
+    /**
+     * @description Manages vendor business profiles.
+     * @path /vendors/{userId}
+     */
+    match /vendors/{userId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow write: if isOwner(userId);
     }
 
     /**
