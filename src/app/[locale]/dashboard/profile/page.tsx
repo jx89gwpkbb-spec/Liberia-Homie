@@ -88,9 +88,10 @@ export default function MyProfilePage() {
   };
   
   const onProfileSubmit = (data: ProfileFormData) => {
-    if (!userProfileRef) return;
+    if (!userProfileRef || !user) return;
     setIsSaving(true);
     setDocumentNonBlocking(userProfileRef, { 
+      id: user.uid, // This is the fix to satisfy the security rule
       name: data.name,
       whatsappNumber: data.whatsappNumber,
       country: data.country,
