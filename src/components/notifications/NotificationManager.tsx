@@ -24,8 +24,7 @@ export function NotificationManager() {
   const upcomingBookingsQuery = useMemoFirebase(() => {
     if (!firestore || !user || !user.emailVerified) return null;
     return query(
-      collection(firestore, 'bookings'),
-      where('userId', '==', user.uid),
+      collection(firestore, `users/${user.uid}/bookings`),
       where('checkOutDate', '>=', new Date())
     );
   }, [firestore, user]);
@@ -75,6 +74,7 @@ export function NotificationManager() {
     const now = new Date();
 
     upcomingBookings.forEach(booking => {
+      if (!booking.id || !booking.checkInDate || !booking.checkOutDate) return;
       const checkInDate = booking.checkInDate.toDate();
       const checkOutDate = booking.checkOutDate.toDate();
 
