@@ -97,10 +97,9 @@ service cloud.firestore {
       /**
        * @description Manages a user's own lightweight booking records.
        * @path /users/{userId}/bookings/{bookingId}
-       * @allow (read, write, delete) A user can only manage their own booking records.
        */
       match /bookings/{bookingId} {
-        allow read, write, delete: if isVerified() && isOwner(userId);
+        allow read, write, delete, list: if isVerified() && isOwner(userId);
       }
 
       /**
@@ -108,7 +107,7 @@ service cloud.firestore {
        * @path /users/{userId}/favorites/{propertyId}
        */
       match /favorites/{propertyId} {
-        allow read, write: if isVerified() && isOwner(userId);
+        allow read, write, list: if isVerified() && isOwner(userId);
       }
       
       /**
@@ -116,7 +115,7 @@ service cloud.firestore {
        * @path /users/{userId}/documents/{documentId}
        */
       match /documents/{documentId} {
-        allow read, write, delete: if isVerified() && isOwner(userId);
+        allow read, write, delete, list: if isVerified() && isOwner(userId);
       }
       
       /**
@@ -124,7 +123,7 @@ service cloud.firestore {
        * @path /users/{userId}/savedSearches/{searchId}
        */
       match /savedSearches/{searchId} {
-        allow read, write: if isVerified() && isOwner(userId);
+        allow read, write, list: if isVerified() && isOwner(userId);
       }
     }
     
@@ -164,8 +163,8 @@ service cloud.firestore {
     match /bookings/{bookingId} {
       allow create: if isVerified() && isOwner(request.resource.data.userId);
       allow read: if isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId)) || isAdmin();
-      // Admins can list bookings (e.g., for dashboards) but queries must be limited.
-      allow list: if isAdmin() && request.query.limit <= 50;
+      // Admins can list bookings. Vendors can list bookings for their properties.
+      allow list: if (isAdmin() && request.query.limit <= 50) || (isVerified() && request.query.where.size() > 0 && request.query.where[0][0] == 'vendorId' && request.query.where[0][2] == request.auth.uid);
       allow update: if (isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId))) || isAdmin();
       allow delete: if isAdmin() || (isVerified() && (isOwner(resource.data.userId) || isOwner(resource.data.vendorId)));
     }
@@ -217,7 +216,9 @@ service cloud.firestore {
      */
     match /tickets/{ticketId} {
       allow create: if isSignedIn();
-      allow read, write, list: if isAdmin();
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow write: if isAdmin();
+      allow list: if isAdmin() || (isSignedIn() && request.query.where.size() > 0 && request.query.where[0][0] == 'userId' && request.query.where[0][2] == request.auth.uid);
     }
   }
 }
