@@ -1,7 +1,13 @@
+'use client';
 
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { ChatWidget } from '@/components/chatbot/ChatWidget';
+import dynamic from 'next/dynamic';
+
+const ChatWidget = dynamic(
+  () => import('@/components/chatbot/ChatWidget').then(mod => mod.ChatWidget),
+  { ssr: false }
+);
 
 export default function LocaleLayout({
   children,
