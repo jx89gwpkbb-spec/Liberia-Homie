@@ -2,7 +2,6 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { Toaster } from '@/components/ui/toaster';
-import { NotificationManager } from '@/components/notifications/NotificationManager';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
@@ -46,7 +45,6 @@ export default async function RootLayout({
           <NextIntlClientProvider locale={locale} messages={messages}>
             {children}
             <Toaster />
-            <NotificationManager />
           </NextIntlClientProvider>
         </FirebaseClientProvider>
       </body>

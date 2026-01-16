@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { NotificationManager } from '@/components/notifications/NotificationManager';
 
 export default function DashboardLayout({
   children,
@@ -43,6 +44,7 @@ export default function DashboardLayout({
   // Only if the user is loaded and verified, we render the full dashboard layout.
   return (
     <SidebarProvider>
+      <NotificationManager />
       <Sidebar>
         <SidebarHeader>
           <Logo />
